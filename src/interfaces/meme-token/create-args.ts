@@ -1,9 +1,12 @@
+import { Address, Hex } from 'viem';
+
 export interface CreateMemeArgs {
+  /** Package type - 0 for 'based', 1 for 'super based', 2 for 'ultra based' */
   package: bigint;
-  initCode: string;
-  salt: string;
+  initCode: Hex;
+  salt: Hex;
   subBoardTitle: string;
-  referrer: string;
+  referrer: Address;
   totalSupply: bigint;
   name: string;
   symbol: string;

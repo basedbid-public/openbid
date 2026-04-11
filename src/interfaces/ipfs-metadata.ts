@@ -1,3 +1,6 @@
+/**
+ * IPFS metadata for meme tokens
+ */
 export interface IpfsMetadata {
   name: string;
   symbol: string;

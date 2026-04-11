@@ -1,4 +1,4 @@
-import { treeifyError, z } from 'zod';
+import { z } from 'zod';
 
 const envSchema = z.object({
   PRIVATE_KEY: z
@@ -10,17 +10,20 @@ const envSchema = z.object({
     .string()
     .min(1, 'CONTRACT_ADDRESS must not be empty')
     .transform((val) => val as `0x${string}`),
-  INIT_CODE: z.string().min(1, 'INIT_CODE must not be empty'),
+  INIT_CODE: z
+    .string()
+    .min(1, 'INIT_CODE must not be empty')
+    .transform((val) => val as `0x${string}`),
 });
 
 export const validateEnvironment = () => {
   const parsed = envSchema.safeParse(process.env);
   if (!parsed.success) {
-    treeifyError(parsed.error);
+    throw new Error(parsed.error.message);
   }
 
   if (!parsed.data) {
-    throw new Error('Invalid environment');
+    throw new Error(JSON.stringify(parsed, null, 2));
   }
 
   return parsed.data;

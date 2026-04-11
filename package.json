@@ -2,7 +2,9 @@
   "name": "openbid",
   "private": true,
   "scripts": {
-    "create-meme": "ts-node src/index.ts"
+    "build": "tsc",
+    "create-meme": "ts-node src/create-meme.ts",
+    "create-meme:sdk": "ts-node src/create-meme-sdk.ts"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^0.1.0",

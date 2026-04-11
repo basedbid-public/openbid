@@ -1,7 +1,6 @@
 import creationFacetAbi from '@constants/abi/CreationFacet.json';
 import 'dotenv/config';
-import { ZeroAddress } from 'ethers';
-import { CreateMemeArgs } from 'interfaces/create-meme-args';
+import { CreateMemeArgs } from 'interfaces';
 import { IpfsMetadata } from 'interfaces/ipfs-metadata';
 import { validateEnvironment } from 'schema/environment';
 import {
@@ -9,6 +8,7 @@ import {
   createWalletClient,
   http,
   parseUnits,
+  zeroAddress,
   type TransactionReceipt,
 } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
@@ -106,8 +106,8 @@ async function createMeme(args: CreateMemeArgs): Promise<TransactionReceipt> {
 // Main execution
 (async () => {
   const ipfs: IpfsMetadata = {
-    name: 'maximus',
-    symbol: 'MAX',
+    name: '5sus',
+    symbol: '5SUS',
     decimals: 18,
     totalSupply: '1000000000000000000000000',
     seed: '1234567890',
@@ -126,7 +126,7 @@ async function createMeme(args: CreateMemeArgs): Promise<TransactionReceipt> {
     'https://ipfs.based.bid/ipfs/bafkreiaxxveuebhyucc53ndf2w7qmvnv45v77kebqnnoubnbgwd4uwgybq';
 
   // Generate a random salt using timestamp + random number
-  const generateSalt = () => {
+  const generateSalt: () => `0x${string}` = () => {
     const timestamp = Math.floor(Date.now() / 1000);
     const random = Math.floor(Math.random() * 1000000);
     const saltNum = BigInt(timestamp * 1000000 + random);
@@ -143,7 +143,7 @@ async function createMeme(args: CreateMemeArgs): Promise<TransactionReceipt> {
     initCode: env.INIT_CODE,
     salt,
     subBoardTitle: ipfs.board,
-    referrer: ZeroAddress,
+    referrer: zeroAddress,
     totalSupply: parseUnits(ipfs.totalSupply, ipfs.decimals),
     name: ipfs.name,
     symbol: ipfs.symbol,
