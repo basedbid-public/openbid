@@ -1,0 +1,1451 @@
+[
+  {
+    "inputs": [],
+    "name": "Create2EmptyBytecode",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "FailedDeployment",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "balance",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "needed",
+        "type": "uint256"
+      }
+    ],
+    "name": "InsufficientBalance",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      }
+    ],
+    "name": "SafeERC20FailedOperation",
+    "type": "error"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "buyer",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "memeToken",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "referrer",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amountIn",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amountOut",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amountOwnerFee",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amountSubBoardFee",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amountMemeTokenOwnerFee",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amountReferralFee",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "volumn",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "virtualReserveETH",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "virtualReserveToken",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "isHardCapReached",
+        "type": "bool"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint8",
+        "name": "decimals",
+        "type": "uint8"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "virtualReserveETHHardcap",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "virtualReserveETHSoftcap",
+        "type": "uint256"
+      }
+    ],
+    "name": "Bought",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "memeToken",
+        "type": "address"
+      },
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "memeOwner",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "volumn",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "virtualReserveETH",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "virtualReserveToken",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "initialVirtualReserveETH",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "initialVirtualReserveToken",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "virtualReserveETHHardcap",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "virtualReserveETHSoftcap",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "subBoard",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "keyForXSale",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint8",
+            "name": "package",
+            "type": "uint8"
+          },
+          {
+            "internalType": "bool",
+            "name": "isXSale",
+            "type": "bool"
+          },
+          {
+            "internalType": "bool",
+            "name": "isListed",
+            "type": "bool"
+          },
+          {
+            "internalType": "bool",
+            "name": "isCancelled",
+            "type": "bool"
+          },
+          {
+            "internalType": "bool",
+            "name": "isTaxToken",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint8",
+            "name": "_padding",
+            "type": "uint8"
+          },
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "baseTokenForPair",
+                "type": "address"
+              },
+              {
+                "internalType": "uint256",
+                "name": "liquidityForHardcap",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "liquidityForSoftcap",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "marketCap",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "maxAllocationPerUser",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "maxAllocationPerWhitelistedUser",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "whitelistMerkleRoot",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint24",
+                "name": "buyReferralFeePer",
+                "type": "uint24"
+              },
+              {
+                "internalType": "uint24",
+                "name": "sellMemeTokenOwnerFeePer",
+                "type": "uint24"
+              },
+              {
+                "internalType": "uint24",
+                "name": "buyMemeTokenOwnerFeePer",
+                "type": "uint24"
+              },
+              {
+                "internalType": "uint24",
+                "name": "finalizeFeePer",
+                "type": "uint24"
+              },
+              {
+                "internalType": "uint24",
+                "name": "delayTradeTime",
+                "type": "uint24"
+              },
+              {
+                "internalType": "uint40",
+                "name": "startTime",
+                "type": "uint40"
+              },
+              {
+                "internalType": "uint40",
+                "name": "endTime",
+                "type": "uint40"
+              },
+              {
+                "internalType": "bool",
+                "name": "isWhitelist",
+                "type": "bool"
+              },
+              {
+                "internalType": "uint48",
+                "name": "_padding",
+                "type": "uint48"
+              },
+              {
+                "components": [
+                  {
+                    "internalType": "address",
+                    "name": "routerOrPositionManager",
+                    "type": "address"
+                  },
+                  {
+                    "internalType": "uint256",
+                    "name": "poolId",
+                    "type": "uint256"
+                  },
+                  {
+                    "internalType": "uint24",
+                    "name": "fee",
+                    "type": "uint24"
+                  },
+                  {
+                    "internalType": "int24",
+                    "name": "tickSpacing",
+                    "type": "int24"
+                  },
+                  {
+                    "internalType": "uint24",
+                    "name": "per",
+                    "type": "uint24"
+                  },
+                  {
+                    "internalType": "bool",
+                    "name": "isLPBurn",
+                    "type": "bool"
+                  },
+                  {
+                    "internalType": "uint8",
+                    "name": "_padding",
+                    "type": "uint8"
+                  }
+                ],
+                "internalType": "struct Dex[]",
+                "name": "dex",
+                "type": "tuple[]"
+              },
+              {
+                "internalType": "string",
+                "name": "metaData",
+                "type": "string"
+              }
+            ],
+            "internalType": "struct InitialMemeTokenData",
+            "name": "initialData",
+            "type": "tuple"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "listingFee",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "listingReferralFee",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint24",
+                "name": "buyFeePer",
+                "type": "uint24"
+              },
+              {
+                "internalType": "uint24",
+                "name": "sellFeePer",
+                "type": "uint24"
+              },
+              {
+                "internalType": "uint24",
+                "name": "finalizeFeePer",
+                "type": "uint24"
+              },
+              {
+                "internalType": "uint24",
+                "name": "flashLaunchFeePer",
+                "type": "uint24"
+              },
+              {
+                "internalType": "uint24",
+                "name": "tradingFeeAfterLaunchPer",
+                "type": "uint24"
+              },
+              {
+                "internalType": "uint8",
+                "name": "_padding",
+                "type": "uint8"
+              }
+            ],
+            "internalType": "struct Fee",
+            "name": "fee",
+            "type": "tuple"
+          },
+          {
+            "internalType": "uint256",
+            "name": "tokenVersion",
+            "type": "uint256"
+          }
+        ],
+        "indexed": false,
+        "internalType": "struct MemeTokenData",
+        "name": "memeTokenData",
+        "type": "tuple"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "initialBuyAmount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "referrer",
+        "type": "address"
+      },
+      {
+        "components": [
+          {
+            "internalType": "bool",
+            "name": "hasV4Hook",
+            "type": "bool"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint16",
+                "name": "liquidityFeeBps",
+                "type": "uint16"
+              },
+              {
+                "internalType": "uint16",
+                "name": "buybackFeeBps",
+                "type": "uint16"
+              },
+              {
+                "internalType": "uint16",
+                "name": "rewardFeeBps",
+                "type": "uint16"
+              },
+              {
+                "internalType": "address[]",
+                "name": "customWallets",
+                "type": "address[]"
+              },
+              {
+                "internalType": "uint16[]",
+                "name": "customWalletBps",
+                "type": "uint16[]"
+              }
+            ],
+            "internalType": "struct IBasedBidHook.HookFeeDistributionConfig",
+            "name": "hookFeeDistributionConfig",
+            "type": "tuple"
+          },
+          {
+            "internalType": "uint256",
+            "name": "feeThreshold",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "rewardToken",
+            "type": "address"
+          },
+          {
+            "components": [
+              {
+                "internalType": "Currency",
+                "name": "currency0",
+                "type": "address"
+              },
+              {
+                "internalType": "Currency",
+                "name": "currency1",
+                "type": "address"
+              },
+              {
+                "internalType": "uint24",
+                "name": "fee",
+                "type": "uint24"
+              },
+              {
+                "internalType": "int24",
+                "name": "tickSpacing",
+                "type": "int24"
+              },
+              {
+                "internalType": "contract IHooks",
+                "name": "hooks",
+                "type": "address"
+              }
+            ],
+            "internalType": "struct PoolKey",
+            "name": "rewardPoolKey",
+            "type": "tuple"
+          },
+          {
+            "internalType": "enum IBasedBidHook.FeeKind",
+            "name": "feeKind",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint24",
+            "name": "staticPoolFeeBpsBuy",
+            "type": "uint24"
+          },
+          {
+            "internalType": "uint24",
+            "name": "staticPoolFeeBpsSell",
+            "type": "uint24"
+          },
+          {
+            "internalType": "uint24",
+            "name": "hookFeeBpsBuy",
+            "type": "uint24"
+          },
+          {
+            "internalType": "uint24",
+            "name": "hookFeeBpsSell",
+            "type": "uint24"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint24",
+                "name": "minBaseFeeBpsBuy",
+                "type": "uint24"
+              },
+              {
+                "internalType": "uint24",
+                "name": "minBaseFeeBpsSell",
+                "type": "uint24"
+              },
+              {
+                "internalType": "uint24",
+                "name": "maxBaseFeeBpsBuy",
+                "type": "uint24"
+              },
+              {
+                "internalType": "uint24",
+                "name": "maxBaseFeeBpsSell",
+                "type": "uint24"
+              },
+              {
+                "internalType": "uint32",
+                "name": "baseFeeFactorBuy",
+                "type": "uint32"
+              },
+              {
+                "internalType": "uint32",
+                "name": "baseFeeFactorSell",
+                "type": "uint32"
+              },
+              {
+                "internalType": "uint24",
+                "name": "defaultBaseFeeBpsBuy",
+                "type": "uint24"
+              },
+              {
+                "internalType": "uint24",
+                "name": "defaultBaseFeeBpsSell",
+                "type": "uint24"
+              },
+              {
+                "internalType": "uint32",
+                "name": "surgeDecayPeriodSeconds",
+                "type": "uint32"
+              },
+              {
+                "internalType": "uint32",
+                "name": "surgeMultiplierPpm",
+                "type": "uint32"
+              },
+              {
+                "internalType": "bool",
+                "name": "perSwapMode",
+                "type": "bool"
+              },
+              {
+                "internalType": "uint32",
+                "name": "capAutoTuneStepPpm",
+                "type": "uint32"
+              },
+              {
+                "internalType": "uint32",
+                "name": "capAutoTuneIntervalSeconds",
+                "type": "uint32"
+              }
+            ],
+            "internalType": "struct IBasedBidHook.DynamicFeeConfig",
+            "name": "dynamicFeeConfig",
+            "type": "tuple"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint16[]",
+                "name": "buyFeesBps",
+                "type": "uint16[]"
+              },
+              {
+                "internalType": "uint16[]",
+                "name": "sellFeesBps",
+                "type": "uint16[]"
+              },
+              {
+                "internalType": "uint256[]",
+                "name": "buyFeeTierAmountLevels",
+                "type": "uint256[]"
+              },
+              {
+                "internalType": "uint256[]",
+                "name": "sellFeeTierAmountLevels",
+                "type": "uint256[]"
+              }
+            ],
+            "internalType": "struct IBasedBidHook.TieredFeeConfig",
+            "name": "tieredFeeConfig",
+            "type": "tuple"
+          },
+          {
+            "internalType": "uint48",
+            "name": "protectPeriod",
+            "type": "uint48"
+          },
+          {
+            "internalType": "uint256",
+            "name": "maxBuyPerOrigin",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "isAntiSandwich",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint32",
+            "name": "cooldownSeconds",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint24",
+            "name": "penaltyFeeBps",
+            "type": "uint24"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint32",
+                "name": "volumeIntervalSeconds",
+                "type": "uint32"
+              },
+              {
+                "internalType": "uint256[]",
+                "name": "volumeLevels",
+                "type": "uint256[]"
+              },
+              {
+                "internalType": "uint16[]",
+                "name": "volumeMultiplierBps",
+                "type": "uint16[]"
+              }
+            ],
+            "internalType": "struct IBasedBidHook.VolumeConfig",
+            "name": "volumeConfig",
+            "type": "tuple"
+          }
+        ],
+        "indexed": false,
+        "internalType": "struct V4HookData[]",
+        "name": "v4HookData",
+        "type": "tuple[]"
+      }
+    ],
+    "name": "LogMemeTokenCreated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "memeToken",
+        "type": "address"
+      },
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "memeOwner",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "volumn",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "virtualReserveETH",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "virtualReserveToken",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "initialVirtualReserveETH",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "initialVirtualReserveToken",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "virtualReserveETHHardcap",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "virtualReserveETHSoftcap",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "subBoard",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "keyForXSale",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint8",
+            "name": "package",
+            "type": "uint8"
+          },
+          {
+            "internalType": "bool",
+            "name": "isXSale",
+            "type": "bool"
+          },
+          {
+            "internalType": "bool",
+            "name": "isListed",
+            "type": "bool"
+          },
+          {
+            "internalType": "bool",
+            "name": "isCancelled",
+            "type": "bool"
+          },
+          {
+            "internalType": "bool",
+            "name": "isTaxToken",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint8",
+            "name": "_padding",
+            "type": "uint8"
+          },
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "baseTokenForPair",
+                "type": "address"
+              },
+              {
+                "internalType": "uint256",
+                "name": "liquidityForHardcap",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "liquidityForSoftcap",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "marketCap",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "maxAllocationPerUser",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "maxAllocationPerWhitelistedUser",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "whitelistMerkleRoot",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint24",
+                "name": "buyReferralFeePer",
+                "type": "uint24"
+              },
+              {
+                "internalType": "uint24",
+                "name": "sellMemeTokenOwnerFeePer",
+                "type": "uint24"
+              },
+              {
+                "internalType": "uint24",
+                "name": "buyMemeTokenOwnerFeePer",
+                "type": "uint24"
+              },
+              {
+                "internalType": "uint24",
+                "name": "finalizeFeePer",
+                "type": "uint24"
+              },
+              {
+                "internalType": "uint24",
+                "name": "delayTradeTime",
+                "type": "uint24"
+              },
+              {
+                "internalType": "uint40",
+                "name": "startTime",
+                "type": "uint40"
+              },
+              {
+                "internalType": "uint40",
+                "name": "endTime",
+                "type": "uint40"
+              },
+              {
+                "internalType": "bool",
+                "name": "isWhitelist",
+                "type": "bool"
+              },
+              {
+                "internalType": "uint48",
+                "name": "_padding",
+                "type": "uint48"
+              },
+              {
+                "components": [
+                  {
+                    "internalType": "address",
+                    "name": "routerOrPositionManager",
+                    "type": "address"
+                  },
+                  {
+                    "internalType": "uint256",
+                    "name": "poolId",
+                    "type": "uint256"
+                  },
+                  {
+                    "internalType": "uint24",
+                    "name": "fee",
+                    "type": "uint24"
+                  },
+                  {
+                    "internalType": "int24",
+                    "name": "tickSpacing",
+                    "type": "int24"
+                  },
+                  {
+                    "internalType": "uint24",
+                    "name": "per",
+                    "type": "uint24"
+                  },
+                  {
+                    "internalType": "bool",
+                    "name": "isLPBurn",
+                    "type": "bool"
+                  },
+                  {
+                    "internalType": "uint8",
+                    "name": "_padding",
+                    "type": "uint8"
+                  }
+                ],
+                "internalType": "struct Dex[]",
+                "name": "dex",
+                "type": "tuple[]"
+              },
+              {
+                "internalType": "string",
+                "name": "metaData",
+                "type": "string"
+              }
+            ],
+            "internalType": "struct InitialMemeTokenData",
+            "name": "initialData",
+            "type": "tuple"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "listingFee",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "listingReferralFee",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint24",
+                "name": "buyFeePer",
+                "type": "uint24"
+              },
+              {
+                "internalType": "uint24",
+                "name": "sellFeePer",
+                "type": "uint24"
+              },
+              {
+                "internalType": "uint24",
+                "name": "finalizeFeePer",
+                "type": "uint24"
+              },
+              {
+                "internalType": "uint24",
+                "name": "flashLaunchFeePer",
+                "type": "uint24"
+              },
+              {
+                "internalType": "uint24",
+                "name": "tradingFeeAfterLaunchPer",
+                "type": "uint24"
+              },
+              {
+                "internalType": "uint8",
+                "name": "_padding",
+                "type": "uint8"
+              }
+            ],
+            "internalType": "struct Fee",
+            "name": "fee",
+            "type": "tuple"
+          },
+          {
+            "internalType": "uint256",
+            "name": "tokenVersion",
+            "type": "uint256"
+          }
+        ],
+        "indexed": false,
+        "internalType": "struct MemeTokenData",
+        "name": "memeTokenData",
+        "type": "tuple"
+      }
+    ],
+    "name": "LogMemeTokenUpdated",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "package",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes",
+        "name": "initCode",
+        "type": "bytes"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "salt",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "string",
+        "name": "subBoardTitle",
+        "type": "string"
+      },
+      {
+        "internalType": "address",
+        "name": "referrer",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "totalSupply",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "name",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "symbol",
+        "type": "string"
+      },
+      {
+        "internalType": "uint8",
+        "name": "decimals",
+        "type": "uint8"
+      },
+      {
+        "internalType": "uint256",
+        "name": "initialBuyAmount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "isXSale",
+        "type": "bool"
+      },
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "baseTokenForPair",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "liquidityForHardcap",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "liquidityForSoftcap",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "marketCap",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "maxAllocationPerUser",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "maxAllocationPerWhitelistedUser",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "whitelistMerkleRoot",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint24",
+            "name": "buyReferralFeePer",
+            "type": "uint24"
+          },
+          {
+            "internalType": "uint24",
+            "name": "sellMemeTokenOwnerFeePer",
+            "type": "uint24"
+          },
+          {
+            "internalType": "uint24",
+            "name": "buyMemeTokenOwnerFeePer",
+            "type": "uint24"
+          },
+          {
+            "internalType": "uint24",
+            "name": "finalizeFeePer",
+            "type": "uint24"
+          },
+          {
+            "internalType": "uint24",
+            "name": "delayTradeTime",
+            "type": "uint24"
+          },
+          {
+            "internalType": "uint40",
+            "name": "startTime",
+            "type": "uint40"
+          },
+          {
+            "internalType": "uint40",
+            "name": "endTime",
+            "type": "uint40"
+          },
+          {
+            "internalType": "bool",
+            "name": "isWhitelist",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint48",
+            "name": "_padding",
+            "type": "uint48"
+          },
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "routerOrPositionManager",
+                "type": "address"
+              },
+              {
+                "internalType": "uint256",
+                "name": "poolId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint24",
+                "name": "fee",
+                "type": "uint24"
+              },
+              {
+                "internalType": "int24",
+                "name": "tickSpacing",
+                "type": "int24"
+              },
+              {
+                "internalType": "uint24",
+                "name": "per",
+                "type": "uint24"
+              },
+              {
+                "internalType": "bool",
+                "name": "isLPBurn",
+                "type": "bool"
+              },
+              {
+                "internalType": "uint8",
+                "name": "_padding",
+                "type": "uint8"
+              }
+            ],
+            "internalType": "struct Dex[]",
+            "name": "dex",
+            "type": "tuple[]"
+          },
+          {
+            "internalType": "string",
+            "name": "metaData",
+            "type": "string"
+          }
+        ],
+        "internalType": "struct InitialMemeTokenData",
+        "name": "initialData",
+        "type": "tuple"
+      },
+      {
+        "components": [
+          {
+            "internalType": "bool",
+            "name": "hasV4Hook",
+            "type": "bool"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint16",
+                "name": "liquidityFeeBps",
+                "type": "uint16"
+              },
+              {
+                "internalType": "uint16",
+                "name": "buybackFeeBps",
+                "type": "uint16"
+              },
+              {
+                "internalType": "uint16",
+                "name": "rewardFeeBps",
+                "type": "uint16"
+              },
+              {
+                "internalType": "address[]",
+                "name": "customWallets",
+                "type": "address[]"
+              },
+              {
+                "internalType": "uint16[]",
+                "name": "customWalletBps",
+                "type": "uint16[]"
+              }
+            ],
+            "internalType": "struct IBasedBidHook.HookFeeDistributionConfig",
+            "name": "hookFeeDistributionConfig",
+            "type": "tuple"
+          },
+          {
+            "internalType": "uint256",
+            "name": "feeThreshold",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "rewardToken",
+            "type": "address"
+          },
+          {
+            "components": [
+              {
+                "internalType": "Currency",
+                "name": "currency0",
+                "type": "address"
+              },
+              {
+                "internalType": "Currency",
+                "name": "currency1",
+                "type": "address"
+              },
+              {
+                "internalType": "uint24",
+                "name": "fee",
+                "type": "uint24"
+              },
+              {
+                "internalType": "int24",
+                "name": "tickSpacing",
+                "type": "int24"
+              },
+              {
+                "internalType": "contract IHooks",
+                "name": "hooks",
+                "type": "address"
+              }
+            ],
+            "internalType": "struct PoolKey",
+            "name": "rewardPoolKey",
+            "type": "tuple"
+          },
+          {
+            "internalType": "enum IBasedBidHook.FeeKind",
+            "name": "feeKind",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint24",
+            "name": "staticPoolFeeBpsBuy",
+            "type": "uint24"
+          },
+          {
+            "internalType": "uint24",
+            "name": "staticPoolFeeBpsSell",
+            "type": "uint24"
+          },
+          {
+            "internalType": "uint24",
+            "name": "hookFeeBpsBuy",
+            "type": "uint24"
+          },
+          {
+            "internalType": "uint24",
+            "name": "hookFeeBpsSell",
+            "type": "uint24"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint24",
+                "name": "minBaseFeeBpsBuy",
+                "type": "uint24"
+              },
+              {
+                "internalType": "uint24",
+                "name": "minBaseFeeBpsSell",
+                "type": "uint24"
+              },
+              {
+                "internalType": "uint24",
+                "name": "maxBaseFeeBpsBuy",
+                "type": "uint24"
+              },
+              {
+                "internalType": "uint24",
+                "name": "maxBaseFeeBpsSell",
+                "type": "uint24"
+              },
+              {
+                "internalType": "uint32",
+                "name": "baseFeeFactorBuy",
+                "type": "uint32"
+              },
+              {
+                "internalType": "uint32",
+                "name": "baseFeeFactorSell",
+                "type": "uint32"
+              },
+              {
+                "internalType": "uint24",
+                "name": "defaultBaseFeeBpsBuy",
+                "type": "uint24"
+              },
+              {
+                "internalType": "uint24",
+                "name": "defaultBaseFeeBpsSell",
+                "type": "uint24"
+              },
+              {
+                "internalType": "uint32",
+                "name": "surgeDecayPeriodSeconds",
+                "type": "uint32"
+              },
+              {
+                "internalType": "uint32",
+                "name": "surgeMultiplierPpm",
+                "type": "uint32"
+              },
+              {
+                "internalType": "bool",
+                "name": "perSwapMode",
+                "type": "bool"
+              },
+              {
+                "internalType": "uint32",
+                "name": "capAutoTuneStepPpm",
+                "type": "uint32"
+              },
+              {
+                "internalType": "uint32",
+                "name": "capAutoTuneIntervalSeconds",
+                "type": "uint32"
+              }
+            ],
+            "internalType": "struct IBasedBidHook.DynamicFeeConfig",
+            "name": "dynamicFeeConfig",
+            "type": "tuple"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint16[]",
+                "name": "buyFeesBps",
+                "type": "uint16[]"
+              },
+              {
+                "internalType": "uint16[]",
+                "name": "sellFeesBps",
+                "type": "uint16[]"
+              },
+              {
+                "internalType": "uint256[]",
+                "name": "buyFeeTierAmountLevels",
+                "type": "uint256[]"
+              },
+              {
+                "internalType": "uint256[]",
+                "name": "sellFeeTierAmountLevels",
+                "type": "uint256[]"
+              }
+            ],
+            "internalType": "struct IBasedBidHook.TieredFeeConfig",
+            "name": "tieredFeeConfig",
+            "type": "tuple"
+          },
+          {
+            "internalType": "uint48",
+            "name": "protectPeriod",
+            "type": "uint48"
+          },
+          {
+            "internalType": "uint256",
+            "name": "maxBuyPerOrigin",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "isAntiSandwich",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint32",
+            "name": "cooldownSeconds",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint24",
+            "name": "penaltyFeeBps",
+            "type": "uint24"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint32",
+                "name": "volumeIntervalSeconds",
+                "type": "uint32"
+              },
+              {
+                "internalType": "uint256[]",
+                "name": "volumeLevels",
+                "type": "uint256[]"
+              },
+              {
+                "internalType": "uint16[]",
+                "name": "volumeMultiplierBps",
+                "type": "uint16[]"
+              }
+            ],
+            "internalType": "struct IBasedBidHook.VolumeConfig",
+            "name": "volumeConfig",
+            "type": "tuple"
+          }
+        ],
+        "internalType": "struct V4HookData[]",
+        "name": "v4HookData",
+        "type": "tuple[]"
+      },
+      {
+        "internalType": "uint256",
+        "name": "minTokenBalanceForDividends",
+        "type": "uint256"
+      }
+    ],
+    "name": "createMeme",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "payable",
+    "type": "function"
+  }
+]
