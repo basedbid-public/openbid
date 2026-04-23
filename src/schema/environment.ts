@@ -10,10 +10,6 @@ const envSchema = z.object({
     .string()
     .min(1, 'CONTRACT_ADDRESS must not be empty')
     .transform((val) => val as `0x${string}`),
-  INIT_CODE: z
-    .string()
-    .min(1, 'INIT_CODE must not be empty')
-    .transform((val) => val as `0x${string}`),
 });
 
 export const validateEnvironment = () => {
@@ -23,7 +19,7 @@ export const validateEnvironment = () => {
   }
 
   if (!parsed.data) {
-    throw new Error(JSON.stringify(parsed, null, 2));
+    throw new Error(`Invalid environment: ${JSON.stringify(parsed, null, 2)}`);
   }
 
   return parsed.data;
