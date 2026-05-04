@@ -13,7 +13,9 @@
     "baseUrl": "src",
     "rootDir": "src",
     "paths": {
-      "@constants/abi/*": ["constants/abi/*"]
+      "@constants/abi/*": ["constants/abi/*"],
+      "@interfaces/*": ["interfaces/*"],
+      "@enums/*": ["enums/*"]
     }
   },
   "ts-node": {
