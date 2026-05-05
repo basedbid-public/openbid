@@ -38,7 +38,7 @@ export const createLbp = async (args: CreateLbpEvmSdk) => {
     decimals: 18,
     totalSupply: args.token.totalSupply,
     logo: logoUrl,
-    board: args.token.boardTitle ?? 'based',
+    board: args.token.boardTitle,
     twitter: args.token.metadata.twitter ?? '',
     telegram: args.token.metadata.telegram ?? '',
     website: args.token.metadata.website ?? '',

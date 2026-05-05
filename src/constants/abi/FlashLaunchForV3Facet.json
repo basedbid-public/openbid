@@ -1,0 +1,428 @@
+[
+  {
+    "inputs": [],
+    "name": "Create2EmptyBytecode",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "FailedDeployment",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "balance",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "needed",
+        "type": "uint256"
+      }
+    ],
+    "name": "InsufficientBalance",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      }
+    ],
+    "name": "SafeERC20FailedOperation",
+    "type": "error"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      },
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "positionManager",
+            "type": "address"
+          },
+          {
+            "internalType": "uint24",
+            "name": "feeTier",
+            "type": "uint24"
+          },
+          {
+            "internalType": "uint8",
+            "name": "decimals",
+            "type": "uint8"
+          },
+          {
+            "internalType": "bool",
+            "name": "isTokenBurn",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint8",
+            "name": "_padding1",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "virtualEth",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalSupply",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "baseToken",
+            "type": "address"
+          },
+          {
+            "internalType": "uint8",
+            "name": "_padding2",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "maxWalletAmount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "maxTxAmount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "protectBlocks",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint160",
+            "name": "sqrtPriceX96_1",
+            "type": "uint160"
+          },
+          {
+            "internalType": "uint8",
+            "name": "_padding3",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint160",
+            "name": "sqrtPriceX96_2",
+            "type": "uint160"
+          },
+          {
+            "internalType": "uint8",
+            "name": "_padding4",
+            "type": "uint8"
+          },
+          {
+            "internalType": "int24",
+            "name": "tickLower_1",
+            "type": "int24"
+          },
+          {
+            "internalType": "int24",
+            "name": "tickUpper_1",
+            "type": "int24"
+          },
+          {
+            "internalType": "int24",
+            "name": "tickLower_2",
+            "type": "int24"
+          },
+          {
+            "internalType": "int24",
+            "name": "tickUpper_2",
+            "type": "int24"
+          },
+          {
+            "internalType": "uint8",
+            "name": "_padding5",
+            "type": "uint8"
+          }
+        ],
+        "indexed": false,
+        "internalType": "struct FlashLaunchV3PoolInitialData",
+        "name": "poolInitialData",
+        "type": "tuple"
+      },
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          },
+          {
+            "internalType": "bool",
+            "name": "isTokenBurn",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint8",
+            "name": "_padding1",
+            "type": "uint8"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "subBoard",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "string",
+            "name": "metaData",
+            "type": "string"
+          },
+          {
+            "internalType": "address",
+            "name": "positionManager",
+            "type": "address"
+          },
+          {
+            "internalType": "uint8",
+            "name": "_padding2",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "poolId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "pool",
+            "type": "address"
+          }
+        ],
+        "indexed": false,
+        "internalType": "struct FlashLaunchV3PoolData",
+        "name": "flashLaunchV3Pool",
+        "type": "tuple"
+      }
+    ],
+    "name": "FlashLaunchV3TokenCreated",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "name",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "symbol",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "metaData",
+        "type": "string"
+      },
+      {
+        "internalType": "uint256",
+        "name": "initialBuyAmount",
+        "type": "uint256"
+      },
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "positionManager",
+            "type": "address"
+          },
+          {
+            "internalType": "uint24",
+            "name": "feeTier",
+            "type": "uint24"
+          },
+          {
+            "internalType": "uint8",
+            "name": "decimals",
+            "type": "uint8"
+          },
+          {
+            "internalType": "bool",
+            "name": "isTokenBurn",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint8",
+            "name": "_padding1",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "virtualEth",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalSupply",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "baseToken",
+            "type": "address"
+          },
+          {
+            "internalType": "uint8",
+            "name": "_padding2",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "maxWalletAmount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "maxTxAmount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "protectBlocks",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint160",
+            "name": "sqrtPriceX96_1",
+            "type": "uint160"
+          },
+          {
+            "internalType": "uint8",
+            "name": "_padding3",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint160",
+            "name": "sqrtPriceX96_2",
+            "type": "uint160"
+          },
+          {
+            "internalType": "uint8",
+            "name": "_padding4",
+            "type": "uint8"
+          },
+          {
+            "internalType": "int24",
+            "name": "tickLower_1",
+            "type": "int24"
+          },
+          {
+            "internalType": "int24",
+            "name": "tickUpper_1",
+            "type": "int24"
+          },
+          {
+            "internalType": "int24",
+            "name": "tickLower_2",
+            "type": "int24"
+          },
+          {
+            "internalType": "int24",
+            "name": "tickUpper_2",
+            "type": "int24"
+          },
+          {
+            "internalType": "uint8",
+            "name": "_padding5",
+            "type": "uint8"
+          }
+        ],
+        "internalType": "struct FlashLaunchV3PoolInitialData",
+        "name": "poolInitialData",
+        "type": "tuple"
+      },
+      {
+        "internalType": "string",
+        "name": "subBoardTitle",
+        "type": "string"
+      },
+      {
+        "internalType": "bytes",
+        "name": "initCode",
+        "type": "bytes"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "salt",
+        "type": "bytes32"
+      }
+    ],
+    "name": "customFlashLaunchV3",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "coin_address",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "name",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "symbol",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "metaData",
+        "type": "string"
+      },
+      {
+        "internalType": "uint256",
+        "name": "initialBuyAmount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "subBoardTitle",
+        "type": "string"
+      },
+      {
+        "internalType": "bytes",
+        "name": "initCode",
+        "type": "bytes"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "salt",
+        "type": "bytes32"
+      }
+    ],
+    "name": "simpleFlashLaunchV3",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "coin_address",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "payable",
+    "type": "function"
+  }
+]

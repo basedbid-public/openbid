@@ -8,6 +8,8 @@ Currently Ethereum, Binance Smart Chain and Base chains are supported. The user 
 
 Fee Builder allows users to reroute their fees however they like (up to `dex.feeTier` percent). Users can increase the percentage that goes into liquidity or buybacks from fees to strengthen their token's chart (`fees.v4.liquidity`), reward long-term token holders with airdrop payouts (`fees.v4.reward`) or send fee payouts to custom wallets (to payout KOLs or marketing teams).
 
+`boardTitle` parameter enables agents to launch their token under any whitelabel launchpad that is created on based.bid.
+
 ## Invocation
 
 Run the create-lbp script directly using ts-node:
@@ -29,13 +31,13 @@ The `createLbp` function accepts a `CreateLbpEvmSdk` interface:
 ```typescript
 interface CreateLbpEvmSdk {
   chainId: number; // 1 | 56 | 8453
-  token: {
+  token:
     name: string;
     symbol: string;
     totalSupply: number;
     initialBuyAmount: number;
     marketCap: number;
-    boardTitle?: string;
+    boardTitle?: string; // can launch under any custom board on based.bid - if omitted, it will launch under the `based` board, which is the platform default
     metadata: {
       logo: string;
       twitter?: string;
@@ -44,7 +46,7 @@ interface CreateLbpEvmSdk {
       discord?: string;
       description?: string;
     };
-  };
+  ;
   dex: {
     version: EvmDexType;
     feeTier: number;
