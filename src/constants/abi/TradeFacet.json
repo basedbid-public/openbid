@@ -1,0 +1,555 @@
+[
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      }
+    ],
+    "name": "SafeERC20FailedOperation",
+    "type": "error"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "buyer",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "memeToken",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "referrer",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amountIn",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amountOut",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amountOwnerFee",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amountSubBoardFee",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amountMemeTokenOwnerFee",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amountReferralFee",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "volumn",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "virtualReserveETH",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "virtualReserveToken",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "isHardCapReached",
+        "type": "bool"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint8",
+        "name": "decimals",
+        "type": "uint8"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "virtualReserveETHHardcap",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "virtualReserveETHSoftcap",
+        "type": "uint256"
+      }
+    ],
+    "name": "Bought",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "seller",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "memeToken",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amountIn",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amountOut",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amountOwnerFee",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amountSubBoardFee",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amountMemeTokenOwnerFee",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "volumn",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "virtualReserveETH",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "virtualReserveToken",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "isHardCapReached",
+        "type": "bool"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint8",
+        "name": "decimals",
+        "type": "uint8"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "virtualReserveETHHardcap",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "virtualReserveETHSoftcap",
+        "type": "uint256"
+      }
+    ],
+    "name": "Sold",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "memeToken",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "referrer",
+        "type": "address"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "signature",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bytes32[]",
+        "name": "proof",
+        "type": "bytes32[]"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountInBaseToken",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountOutMin",
+        "type": "uint256"
+      }
+    ],
+    "name": "buy",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "amountIn",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountOut",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "memeToken",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountOut",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "maxAllocation",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "isReferral",
+        "type": "bool"
+      }
+    ],
+    "name": "getAmountInETH",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "amountIn",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountOutAvailable",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountInWithoutFee",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountOwnerFee",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountSubBoardFee",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountMemeTokenOwnerFee",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountReferralFee",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "isHardCapReached",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "memeToken",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountOut",
+        "type": "uint256"
+      }
+    ],
+    "name": "getAmountInTokens",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "amountIn",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountOutAvailable",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountOutWithFee",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountOwnerFee",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountSubBoardFee",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountMemeTokenOwnerFee",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "isHardCapReached",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "memeToken",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountIn",
+        "type": "uint256"
+      }
+    ],
+    "name": "getAmountOutETH",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "amountInAvailable",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "amountOutAvailable",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "amountOutWithFee",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "amountOwnerFee",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "amountSubBoardFee",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "amountMemeTokenOwnerFee",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "isHardCapReached",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct TradeFacet.SellData",
+        "name": "sellData",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "memeToken",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountIn",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "maxAllocation",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "isReferral",
+        "type": "bool"
+      }
+    ],
+    "name": "getAmountOutTokens",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "amountInAvailable",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "amountOutAvailable",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "amountInWithoutFee",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "amountOwnerFee",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "amountSubBoardFee",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "amountMemeTokenOwnerFee",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "amountReferralFee",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "isHardCapReached",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct TradeFacet.BuyData",
+        "name": "buyData",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "memeToken",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "signature",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountOutMin",
+        "type": "uint256"
+      }
+    ],
+    "name": "sell",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "amountIn",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountOut",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]
