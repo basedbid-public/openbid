@@ -6,6 +6,7 @@ A TypeScript SDK for interacting with the [BasedBid](https://based.bid) platform
 
 OpenBid provides a programmatic interface for:
 
+- **Creating Boards** - Set up custom whitelabel launchpads for token launches
 - **Creating Liquidity Bootstrapping Pools (LBP)** - Launch tokens with bonding curve mechanics
 - **Creating Flash Tokens** - Instant token launches with advanced protection features (MEV, snipe, cooldown)
 - **Buying tokens** - Purchase tokens from LBPs and liquidity pools
@@ -15,6 +16,7 @@ OpenBid provides a programmatic interface for:
 
 ### Token Launch Capabilities
 
+- **Board Creation**: Create custom whitelabel launchpads for other users to launch tokens
 - **Multi-chain support**: Ethereum, BSC, and Base
 - **Multiple DEX versions**: Uniswap V3/V4, PancakeSwap V3/V4
 - **Fee Builder (V4)**: Advanced fee routing with protection mechanisms
@@ -57,6 +59,31 @@ RPC_URL=your_chain_agnostic_rpc_endpoint
 | 8453     | Base Mainnet     |
 
 ## Usage
+
+### Creating a Board
+
+Create a custom board (whitelabel launchpad) for other users to launch tokens under your brand. The account address is automatically derived from your `PRIVATE_KEY` environment variable.
+
+```typescript
+import { createBoard } from './src/create-board';
+
+const board = await createBoard({
+  chainId: 8453,  // Base Mainnet (1=Ethereum, 56=BSC, 8453=Base)
+  title: 'My Awesome Board',
+  description: 'Launch your tokens on my custom board!',
+  logo: './assets/my-logo.png',  // Path to logo image file
+});
+
+console.log('Board created:', board.boardTitle);
+```
+
+Run the script:
+
+```bash
+npx ts-node src/create-board.ts
+```
+
+See [Create Board Skill](skills/based-bid-create-board/SKILL.md) for detailed documentation.
 
 ### Creating an LBP (Liquidity Bootstrapping Pool)
 
@@ -199,6 +226,7 @@ openbid/
 ├── src/
 │   ├── buy.ts                    # Buy tokens from LBP/pools
 │   ├── sell.ts                   # Sell tokens
+│   ├── create-board.ts           # Create custom launchpad boards
 │   ├── create-lbp.ts             # Create LBP token launch
 │   ├── create-flash-token.ts     # Create flash token launch
 │   ├── test-buy.ts               # Flash token creation utilities
@@ -211,12 +239,14 @@ openbid/
 │   │   ├── fee-builder/          # Fee builder option enums
 │   │   └── launch-package.type.ts # Launch package tiers
 │   ├── interfaces/
+│   │   ├── board/                # Board creation interfaces
 │   │   ├── buy/                  # Buy request/response interfaces
 │   │   ├── sell/                 # Sell request/response interfaces
 │   │   ├── lbp/                  # LBP-related interfaces
 │   │   ├── flash-token/          # Flash token interfaces
 │   │   └── ipfs/                 # IPFS upload interfaces
 │   ├── schema/
+│   │   ├── board/                # Board creation schemas
 │   │   ├── buy/                  # Buy request schemas
 │   │   ├── sell/                 # Sell request schemas
 │   │   ├── lbp/                  # LBP validation schemas
@@ -234,6 +264,7 @@ openbid/
 ├── skills/
 │   ├── based-bid-buy/            # Buy tokens skill documentation
 │   ├── based-bid-sell/           # Sell tokens skill documentation
+│   ├── based-bid-create-board/   # Board creation skill documentation
 │   ├── based-bid-create-lbp/     # LBP creation skill documentation
 │   └── based-bid-create-flash-token/ # Flash token skill
 ├── ecosystem.config.js           # PM2 process configuration
@@ -248,6 +279,7 @@ Detailed skill documentation is available in the `skills/` directory:
 
 | Skill | Description | Documentation |
 |-------|-------------|---------------|
+| **Create Board** | Create custom whitelabel launchpads | [SKILL.md](skills/based-bid-create-board/SKILL.md) |
 | **Buy** | Purchase tokens from LBPs and pools | [SKILL.md](skills/based-bid-buy/SKILL.md) |
 | **Sell** | Sell tokens back to LBPs and pools (2-step: approve + sell) | [SKILL.md](skills/based-bid-sell/SKILL.md) |
 | **Create LBP** | Launch tokens with Liquidity Bootstrapping Pools | [SKILL.md](skills/based-bid-create-lbp/SKILL.md) |

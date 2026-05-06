@@ -85,8 +85,6 @@ export const createFlashToken = async (args: CreateFlashTokenEvmSdk) => {
     },
   };
 
-  console.log(apiPayload);
-
   const validated = evmFlashTokenCreateApiSchema.parse(apiPayload);
 
   const json = await BasedBidApi.invokeApi<CreateFlashTokenEvmResponse>(

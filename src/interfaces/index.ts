@@ -1,4 +1,5 @@
 export * from './abi-input';
+export * from './board/request';
 export * from './buy/request';
 export * from './lbp/create/evm/api';
 export * from './lbp/create/evm/response';
