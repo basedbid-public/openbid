@@ -6,7 +6,7 @@ import { SellResponse } from 'interfaces/sell/response';
 import { validateEnvironment } from 'schema/environment';
 import { sellApiSchema } from 'schema/sell/api';
 import { BasedBidApi } from 'utils/based-bid-api';
-import { initRpcClients } from 'utils/init-wallet';
+import { initRpcClients } from 'utils/init-evm-rpc';
 import { sendTransaction } from 'utils/send-transaction';
 import { erc20Abi } from 'viem';
 

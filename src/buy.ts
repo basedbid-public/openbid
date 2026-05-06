@@ -6,7 +6,7 @@ import 'dotenv/config';
 import { buyApiSchema } from 'schema/buy/api';
 import { validateEnvironment } from 'schema/environment';
 import { BasedBidApi } from 'utils/based-bid-api';
-import { initRpcClients } from 'utils/init-wallet';
+import { initRpcClients } from 'utils/init-evm-rpc';
 import { sendTransaction } from 'utils/send-transaction';
 
 export const buy = async (params: BuyRequest) => {

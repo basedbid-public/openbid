@@ -5,7 +5,7 @@ import { CreateFlashTokenEvmSdk } from 'interfaces/flash-token/create/evm/sdk';
 import { validateEnvironment } from 'schema/environment';
 import { evmFlashTokenCreateSdkSchema } from 'schema/flash-token/create/sdk';
 import { BasedBidApi } from 'utils/based-bid-api';
-import { initRpcClients } from 'utils/init-wallet';
+import { initRpcClients } from 'utils/init-evm-rpc';
 import { IpfsUpload } from 'utils/ipfs-upload';
 import { sendTransaction } from 'utils/send-transaction';
 

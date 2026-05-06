@@ -9,7 +9,7 @@ import { validateEnvironment } from 'schema/environment';
 import { evmLbpCreateApiSchema } from 'schema/lbp/create/api';
 import { evmLbpCreateSchema } from 'schema/lbp/create/sdk';
 import { BasedBidApi } from 'utils/based-bid-api';
-import { initRpcClients } from 'utils/init-wallet';
+import { initRpcClients } from 'utils/init-evm-rpc';
 import { IpfsUpload } from 'utils/ipfs-upload';
 import { normalizeByAbi } from 'utils/normalize-abi';
 import { sendTransaction } from 'utils/send-transaction';

@@ -2,29 +2,17 @@ import subBoardFacetAbi from '@constants/abi/SubBoardFacet.json';
 
 import 'dotenv/config';
 
+import { CreateBoardApiResponse } from '@interfaces/board/response';
 import { API_URL } from 'constants/api-url';
 import { writeFileSync } from 'fs';
 import { CreateBoardRequest } from 'interfaces/board/request';
 import { createBoardSchema } from 'schema/board/api';
 import { validateEnvironment } from 'schema/environment';
 import { BasedBidApi } from 'utils/based-bid-api';
-import { initRpcClients } from 'utils/init-wallet';
+import { initRpcClients } from 'utils/init-evm-rpc';
 import { IpfsUpload } from 'utils/ipfs-upload';
 import { normalizeByAbi } from 'utils/normalize-abi';
 import { sendTransaction } from 'utils/send-transaction';
-
-interface ApplySubBoardApiResponse {
-  ok: boolean;
-  functionName: string;
-  address: `0x${string}`;
-  args: unknown[];
-  value: string;
-  chain: {
-    id: number;
-    name: string;
-  };
-  data: CreateBoardRequest;
-}
 
 export const createBoard = async (args: CreateBoardRequest) => {
   const env = validateEnvironment();
@@ -85,7 +73,7 @@ export const createBoard = async (args: CreateBoardRequest) => {
     JSON.stringify(apiPayload, null, 2),
   );
 
-  const json = await BasedBidApi.invokeApi<ApplySubBoardApiResponse>(endpoint, {
+  const json = await BasedBidApi.invokeApi<CreateBoardApiResponse>(endpoint, {
     data: apiPayload,
   }).catch(() => {
     return null;
