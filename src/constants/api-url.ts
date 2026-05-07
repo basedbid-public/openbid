@@ -1,1 +1,1 @@
-export const API_URL = 'https://cdn.based.bid/api';
+export const API_URL = 'https://static.based.bid/api';
