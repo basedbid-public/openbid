@@ -1,14 +1,25 @@
 import {
   CooldownDurationType,
-  MaxBuyPerOriginType,
   PenaltyFeeType,
-  ProtectPeriodType,
   RewardTokenType,
   VolatilityDecayPeriodType,
   VolatilityMultiplierType,
   VolatilityTriggerType,
 } from '@enums/fee-builder';
 import { Address } from 'viem';
+
+export type V4BuyLimits =
+  | {
+      protectPeriod: number;
+      maxBuyPerOrigin: number;
+      isHookWhitelist: false;
+    }
+  | {
+      protectPeriod: number;
+      maxBuyPerOrigin: number;
+      isHookWhitelist: true;
+      maxBuyForWhitelisted: number;
+    };
 
 export interface V4Fees {
   liquidity: number;
@@ -35,9 +46,6 @@ export interface V4Fees {
     cooldownDuration: CooldownDurationType;
     penaltyFee: PenaltyFeeType;
   };
-  snipeProtection: {
-    maxBuyPerOrigin: MaxBuyPerOriginType;
-    protectPeriod: ProtectPeriodType;
-  };
+  buyLimits: V4BuyLimits;
   mevProtectionEnabled: boolean;
 }

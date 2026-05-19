@@ -6,7 +6,32 @@
   },
   {
     "inputs": [],
+    "name": "DynamicFeeRequired",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "EmptyVolumeLevels",
+    "type": "error"
+  },
+  {
+    "inputs": [],
     "name": "FailedDeployment",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "FailedLaunch",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "FeeBpsTooHigh",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "FeeTooHigh",
     "type": "error"
   },
   {
@@ -26,6 +51,126 @@
     "type": "error"
   },
   {
+    "inputs": [],
+    "name": "InsufficientFee",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidBaseFeeFactor",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidDefaultBaseFeeBps",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidEndTime",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidFeeThreshold",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidHardcap",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidMinTokenBalance",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidRouter",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidRouterType",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidSoftcap",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidTickSpacing",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidTierAmountLevels",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidTierConfig",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidTierFeesBps",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidTotalFeeBps",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidTotalPer",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidV3Fee",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidV4HookDataLen",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidVersion",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidVolumeLevels",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidVolumeMultiplierBps",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidWhitelistMax",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "MismatchVolume",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "Paused",
+    "type": "error"
+  },
+  {
     "inputs": [
       {
         "internalType": "address",
@@ -34,6 +179,21 @@
       }
     ],
     "name": "SafeERC20FailedOperation",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "SelfReferral",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "TransferFailed",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "WrongRewardToken",
     "type": "error"
   },
   {
@@ -690,6 +850,24 @@
         "indexed": false,
         "internalType": "struct V4HookData[]",
         "name": "v4HookData",
+        "type": "tuple[]"
+      },
+      {
+        "components": [
+          {
+            "internalType": "bool",
+            "name": "isWhitelist",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "maxBuyPerOrigin",
+            "type": "uint256"
+          }
+        ],
+        "indexed": false,
+        "internalType": "struct WhitelistOptionForHookBuy[]",
+        "name": "whitelistOptionForHookBuy",
         "type": "tuple[]"
       }
     ],
@@ -1435,6 +1613,23 @@
         "internalType": "uint256",
         "name": "minTokenBalanceForDividends",
         "type": "uint256"
+      },
+      {
+        "components": [
+          {
+            "internalType": "bool",
+            "name": "isWhitelist",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "maxBuyPerOrigin",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct WhitelistOptionForHookBuy[]",
+        "name": "whitelistOptionForHookBuy",
+        "type": "tuple[]"
       }
     ],
     "name": "createMeme",

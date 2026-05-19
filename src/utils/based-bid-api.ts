@@ -9,7 +9,7 @@ export class BasedBidApi {
     });
 
     if (!response.ok) {
-      console.error(await response.text());
+      console.error(await response.json());
 
       throw new Error(
         `BasedBid API Error: ${response.status} ${response.statusText}`,

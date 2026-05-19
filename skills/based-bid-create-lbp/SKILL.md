@@ -68,7 +68,7 @@ interface CreateLbpEvmSdk {
 }
 ```
 
-## Configurationqa
+## Configuration
 
 The script reads configuration from environment variables (see `.env`):
 
@@ -112,9 +112,11 @@ Fee tiers:
 
 ## Fee Builder Options (V4)
 
-When using V4 fee builder, exactly one protection mechanism must be enabled:
+When using V4, `fees.v4` includes liquidity/buyback/reward split, dynamic or tiered fees, cooldown/MEV options, and **`buyLimits`** (launch snipe protection + optional whitelist buy cap). Exactly one of dynamic fees or tiered fees must be enabled:
 
 ### Dynamic Fees
+
+If enabled, fees increase with project volatility.
 
 ```typescript
 {
@@ -127,6 +129,8 @@ When using V4 fee builder, exactly one protection mechanism must be enabled:
 
 ### Cooldown Protection
 
+Limits how quickly the same wallet origin can trade again.
+
 ```typescript
 {
   cooldownProtection: {
@@ -136,18 +140,43 @@ When using V4 fee builder, exactly one protection mechanism must be enabled:
 }
 ```
 
-### Snipe Protection
+### Buy limits
+
+Set the protected window, max buy per wallet (as % of supply), and optionally a higher cap for whitelisted wallets.
+
+| Field                  | Type      | Range               | Description                                                                            |
+| ---------------------- | --------- | ------------------- | -------------------------------------------------------------------------------------- |
+| `protectPeriod`        | `number`  | 0–3600              | Protected window after launch, in **seconds** (snipe / early-buy guard).               |
+| `maxBuyPerOrigin`      | `number`  | 0–10                | Max buy per wallet during that window, as **% of total supply**.                       |
+| `isHookWhitelist`      | `boolean` | —                   | If `true`, whitelisted wallets may buy up to `maxBuyForWhitelisted`.                   |
+| `maxBuyForWhitelisted` | `number`  | ≥ `maxBuyPerOrigin` | Only when `isHookWhitelist` is `true`. Higher % of supply cap for whitelisted wallets. |
+
+**Without hook whitelist** (`isHookWhitelist: false`):
 
 ```typescript
-{
-  snipeProtection: {
-    maxBuyPerOrigin: MaxBuyPerOriginType.LOW | 'MEDIUM' | 'HIGH',
-    protectPeriod: ProtectPeriodType.SHORT | 'MEDIUM' | 'LONG'
-  }
+buyLimits: {
+  protectPeriod: 600,   // 10 minutes
+  maxBuyPerOrigin: 5,   // 5% of supply per wallet
+  isHookWhitelist: false,
 }
 ```
 
+**With hook whitelist** (`isHookWhitelist: true`):
+
+```typescript
+buyLimits: {
+  protectPeriod: 600,
+  maxBuyPerOrigin: 5,       // 5% for normal wallets
+  isHookWhitelist: true,
+  maxBuyForWhitelisted: 10, // 10% for whitelisted wallets (must be >= maxBuyPerOrigin)
+}
+```
+
+`snipeProtection` is no longer used; use `buyLimits` instead.
+
 ### MEV Protection
+
+Shields against front-running and sandwich attacks. May cause issues trading on some bots or swap interfaces.
 
 ```typescript
 {
@@ -156,6 +185,8 @@ When using V4 fee builder, exactly one protection mechanism must be enabled:
 ```
 
 ### Tiered Fees
+
+Applies tiered fee multiplier depending on buy size.
 
 ```typescript
 {
@@ -168,8 +199,9 @@ When using V4 fee builder, exactly one protection mechanism must be enabled:
 1. **Input Validation** - Schema validation via `evmLbpCreateSchema`
 2. **IPFS Upload** - Token logo and metadata uploaded to IPFS
 3. **API Request** - Payload sent to `${API_URL}/create-lbp` which returns ABI-encoded contract call data
-4. **ABI Normalization** - The API returns flattened args; `normalizeByAbi` expands tuples back to nested structures viem expects
-5. **Transaction** - Signed and sent via `sendTransaction`
+4. **ABI normalization** - The API returns flattened args; `normalizeByAbi` expands tuples back to nested structures viem expects
+5. **Whitelist buy args** - If `args[14]` (`whitelistOptionForHookBuy`) is missing, it is derived from `fees.v4.buyLimits`
+6. **Transaction** - Signed and sent via `sendTransaction`
 
 **Wrong pattern** (mapping over entire ABI):
 
@@ -202,12 +234,14 @@ On success, the script outputs:
 
 Common errors:
 
-| Error                                 | Cause                                     | Fix                                                              |
-| ------------------------------------- | ----------------------------------------- | ---------------------------------------------------------------- |
-| `AbiEncodingLengthMismatchError`      | ABI args mismatch - check tuple expansion | Verify `normalizeByAbi` is correctly extracting tuple components |
-| `Invalid input arguments`             | Schema validation failed                  | Check `evmLbpCreateSchema` requirements                          |
-| `Failed to create LBP (BasedBid API)` | API returned null                         | Check API server and network connectivity                        |
-| `Missing required ABI value`          | `normalizeByAbi` can't find value         | Verify API response args match ABI input structure               |
+| Error                                       | Cause                                     | Fix                                                                |
+| ------------------------------------------- | ----------------------------------------- | ------------------------------------------------------------------ |
+| `AbiEncodingLengthMismatchError`            | ABI args mismatch - check tuple expansion | Verify `normalizeByAbi` is correctly extracting tuple components   |
+| `Invalid input arguments`                   | Schema validation failed                  | Check `evmLbpCreateSchema` requirements                            |
+| `Failed to create LBP (BasedBid API)`       | API returned null                         | Check API server and network connectivity                          |
+| `Missing required ABI value`                | `normalizeByAbi` can't find value         | Verify API response args match ABI input structure                 |
+| `Expected tuple at args[14], got undefined` | API omitted `whitelistOptionForHookBuy`   | Ensure `fees.v4.buyLimits` is set; client patches from `buyLimits` |
+| `Expected array at args[14], got undefined` | Same (LBP `createMeme` uses `tuple[]`)    | Same as above                                                      |
 
 ## Example Usage
 
@@ -261,9 +295,10 @@ const args: CreateLbpEvmSdk = {
         cooldownDuration: CooldownDurationType.MEDIUM,
         penaltyFee: PenaltyFeeType.MEDIUM,
       },
-      snipeProtection: {
-        maxBuyPerOrigin: MaxBuyPerOriginType.MEDIUM,
-        protectPeriod: ProtectPeriodType.MEDIUM,
+      buyLimits: {
+        protectPeriod: 600,
+        maxBuyPerOrigin: 5,
+        isHookWhitelist: false,
       },
       mevProtectionEnabled: true,
     },

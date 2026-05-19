@@ -97,9 +97,11 @@ export interface CreateLbpEvmResponse {
           cooldownDuration: string;
           penaltyFee: string;
         };
-        snipeProtection: {
-          maxBuyPerOrigin: string;
-          protectPeriod: string;
+        buyLimits: {
+          protectPeriod: number;
+          maxBuyPerOrigin: number;
+          isHookWhitelist: boolean;
+          maxBuyForWhitelisted?: number;
         };
         mevProtectionEnabled: boolean;
       };

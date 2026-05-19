@@ -134,9 +134,10 @@ const args = {
         cooldownDuration: 'MEDIUM',
         penaltyFee: 'MEDIUM',
       },
-      snipeProtection: {
-        maxBuyPerOrigin: 'MEDIUM',
-        protectPeriod: 'MEDIUM',
+      buyLimits: {
+        protectPeriod: 600,
+        maxBuyPerOrigin: 5,
+        isHookWhitelist: false,
       },
       mevProtectionEnabled: true,
       customWallets: [],

@@ -2,14 +2,13 @@ import { LaunchPackageType } from '@enums/launch-package.type';
 import { EvmDexType } from 'enums/evm';
 import {
   CooldownDurationType,
-  MaxBuyPerOriginType,
   PenaltyFeeType,
-  ProtectPeriodType,
   VolatilityDecayPeriodType,
   VolatilityMultiplierType,
   VolatilityTriggerType,
 } from 'enums/fee-builder';
 import { RewardTokenType } from 'enums/fee-builder/reward-token.type';
+import { v4BuyLimitsSchema } from 'schema/v4-fees/buy-limits';
 import { z } from 'zod';
 
 export const evmLbpCreateSchema = z
@@ -166,12 +165,7 @@ export const evmLbpCreateSchema = z
               penaltyFee: z.enum(PenaltyFeeType),
             })
             .optional(),
-          snipeProtection: z
-            .object({
-              maxBuyPerOrigin: z.enum(MaxBuyPerOriginType),
-              protectPeriod: z.enum(ProtectPeriodType),
-            })
-            .optional(),
+          buyLimits: v4BuyLimitsSchema,
           mevProtectionEnabled: z.boolean().optional(),
         })
         .refine(

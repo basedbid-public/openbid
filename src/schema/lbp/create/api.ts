@@ -1,14 +1,13 @@
 import { EvmDexType } from 'enums/evm';
 import {
   CooldownDurationType,
-  MaxBuyPerOriginType,
   PenaltyFeeType,
-  ProtectPeriodType,
   VolatilityDecayPeriodType,
   VolatilityMultiplierType,
   VolatilityTriggerType,
 } from 'enums/fee-builder';
 import { RewardTokenType } from 'enums/fee-builder/reward-token.type';
+import { v4BuyLimitsSchema } from 'schema/v4-fees/buy-limits';
 import { z } from 'zod';
 
 export const evmLbpCreateApiSchema = z.object({
@@ -109,10 +108,7 @@ export const evmLbpCreateApiSchema = z.object({
           cooldownDuration: z.enum(CooldownDurationType),
           penaltyFee: z.enum(PenaltyFeeType),
         }),
-        snipeProtection: z.object({
-          maxBuyPerOrigin: z.enum(MaxBuyPerOriginType),
-          protectPeriod: z.enum(ProtectPeriodType),
-        }),
+        buyLimits: v4BuyLimitsSchema,
         mevProtectionEnabled: z.boolean(),
       })
       .optional(),
