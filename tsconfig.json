@@ -15,7 +15,8 @@
     "paths": {
       "@constants/abi/*": ["constants/abi/*"],
       "@interfaces/*": ["interfaces/*"],
-      "@enums/*": ["enums/*"]
+      "@enums/*": ["enums/*"],
+      "@utils/*": ["utils/*"]
     }
   },
   "ts-node": {

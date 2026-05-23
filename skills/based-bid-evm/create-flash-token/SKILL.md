@@ -115,13 +115,23 @@ When using V4 fee builder, exactly one protection mechanism must be enabled:
 }
 ```
 
-### Snipe Protection
+### Buy limits (snipe + hook whitelist)
 
 ```typescript
 {
-  snipeProtection: {
-    maxBuyPerOrigin: MaxBuyPerOriginType.LOW | 'MEDIUM' | 'HIGH',
-    protectPeriod: ProtectPeriodType.SHORT | 'MEDIUM' | 'LONG'
+  buyLimits: {
+    protectPeriod: number,      // seconds, 0–3600
+    maxBuyPerOrigin: number,    // 0–10
+    isHookWhitelist: false
+  }
+}
+// or with hook whitelist:
+{
+  buyLimits: {
+    protectPeriod: 600,
+    maxBuyPerOrigin: 5,
+    isHookWhitelist: true,
+    maxBuyForWhitelisted: 10    // must be >= maxBuyPerOrigin
   }
 }
 ```
@@ -212,9 +222,10 @@ const args: CreateFlashTokenEvmSdk = {
         cooldownDuration: CooldownDurationType.MEDIUM,
         penaltyFee: PenaltyFeeType.MEDIUM,
       },
-      snipeProtection: {
-        maxBuyPerOrigin: MaxBuyPerOriginType.MEDIUM,
-        protectPeriod: ProtectPeriodType.MEDIUM,
+      buyLimits: {
+        protectPeriod: 600,
+        maxBuyPerOrigin: 5,
+        isHookWhitelist: false,
       },
       mevProtectionEnabled: true,
       customWallets: [],

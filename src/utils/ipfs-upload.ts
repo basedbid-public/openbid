@@ -3,6 +3,7 @@ import { readFileSync } from 'fs';
 
 export class IpfsUpload {
   static async uploadMetadata(params: object) {
+    console.log('Uploading metadata to IPFS...');
     const response = await fetch('https://cdn.based.bid/api/upload/json', {
       method: 'POST',
       body: JSON.stringify(params),
@@ -18,10 +19,12 @@ export class IpfsUpload {
 
     const json = (await response.json()) as IpfsUploadResponse;
 
+    console.log('Metadata uploaded:', json.response.url);
     return json.response.url;
   }
 
   static async uploadImage(filePath: string): Promise<string> {
+    console.log('Uploading image to IPFS...');
     const fileBuffer = readFileSync(filePath);
     const fileName = filePath.split('/').pop();
     if (!fileName) {
@@ -45,6 +48,9 @@ export class IpfsUpload {
     }
 
     const json = (await response.json()) as IpfsUploadResponse;
+
+    console.log('Image uploaded:', json.response.url);
+
     return json.response.url;
   }
 }
