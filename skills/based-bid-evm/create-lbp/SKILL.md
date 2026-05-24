@@ -8,7 +8,7 @@ Currently Ethereum, Binance Smart Chain and Base chains are supported. The user 
 
 Fee Builder allows users to reroute their fees however they like (up to `dex.feeTier` percent). Users can increase the percentage that goes into liquidity or buybacks from fees to strengthen their token's chart (`fees.v4.liquidity`), reward long-term token holders with airdrop payouts (`fees.v4.reward`) or send fee payouts to custom wallets (to payout KOLs or marketing teams).
 
-`boardTitle` parameter enables agents to launch their token under any whitelabel launchpad that is created on based.bid.
+**Optional `boardTitle`**: Only send this if the user explicitly wants to launch under a custom board they (or someone else) created via the create-board skill. If omitted, no board is sent — the token launches without being tied to any specific board. **Never send `'based'` or any default value unless the user explicitly requests it.**
 
 ## Invocation
 
@@ -40,7 +40,9 @@ import { CreateLbpEvmSdk } from 'schema/lbp/evm/sdk';
 | --------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | `package` | `LaunchPackageType` | `BASED`, `SUPER_BASED`, or `ULTRA_BASED`                                                                                       |
 | `chainId` | `number`            | `1`, `56`, or `8453`                                                                                                           |
-| `token`   | `object`            | `name`, `symbol`, `totalSupply`, `initialBuyAmount`, `marketCap`, `boardTitle`?, `metadata`                                    |
+| `token`   | `object`            | `name`, `symbol`, `totalSupply`, `initialBuyAmount`, `marketCap`, **`boardTitle`?**, `metadata`                                    |
+
+> **Board behavior:** `boardTitle` is **purely optional**. Only include it if the user explicitly provides a custom board name. Omitting it means the token launches without any board affiliation. **Do not send `'based'` or any default string.**
 | `dex`     | `object`            | `version` (EvmDexType), `feeTier`                                                                                              |
 | `fees`    | `object`            | `buyPoolCreator`, `sellPoolCreator`, `buyReferral`, `graduation`, `v4?`                                                        |
 | `sale`    | `object`            | `startTime`, `maxAllocationPerUser`, `maxAllocationPerWhitelistedUser`, `delayTradeTime?`, `whitelistedAddresses?`, `softCap?` |
@@ -235,8 +237,8 @@ const args: CreateLbpEvmSdk = {
     symbol: 'MTK',
     totalSupply: 1_000_000_000,
     initialBuyAmount: 0,
-    boardTitle: 'based',
     marketCap: 10_000,
+    // boardTitle: 'my-custom-board', // ONLY include if user explicitly wants a custom board
     metadata: {
       logo: 'path/to/logo.png',
       twitter: 'https://x.com/hande',

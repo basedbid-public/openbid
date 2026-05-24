@@ -35,7 +35,7 @@ import { CreateSolanaLbpInput } from 'schema/lbp/solana/sdk-input';
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `package` | `LaunchPackageType` | Yes | `BASED` (0), `SUPER_BASED` (1), or `ULTRA_BASED` (2) |
-| `board` | `string` | No | Board title (omit to launch under default `based` board) |
+| `board` | `string` | No | **Optional.** Custom board title. Only include if user explicitly wants a custom board. |
 | `boardOwner` | `string` | No | Board owner Solana address (required if `board` is set) |
 | `token` | `object` | Yes | Token configuration (see below) |
 | `sale` | `object` | No | Sale configuration (see below) |
@@ -43,6 +43,8 @@ import { CreateSolanaLbpInput } from 'schema/lbp/solana/sdk-input';
 | `fees` | `object` | No | Fee distribution configuration (see below) |
 
 **Validation rule:** `board` and `boardOwner` must both be defined or both omitted.
+
+> **Board behavior:** `board` is **purely optional**. Only include it if the user explicitly provides a custom board name they created via the create-board skill. Omitting it means the token launches without any board affiliation. **Do not send `'based'` or any default string unless the user explicitly requests it.**
 
 ### Token Configuration
 
@@ -129,7 +131,7 @@ Environment variables (see `.env`):
 3. **Solana Wrapper Init** - Creates RPC connection and signer from `SOLANA_PRIVATE_KEY`
 4. **Logo Upload** - Uploads logo to IPFS via `IpfsUpload.uploadImage()`
 5. **Seed Generation** - Generates a 5-digit numeric seed for metadata uniqueness
-6. **Metadata Preparation** - Builds metadata JSON with token info, social links, whitelist, board, seed
+6. **Metadata Preparation** - Builds metadata JSON with token info, social links, whitelist, and seed. `board` and `boardOwner` are only included if the user explicitly provided them.
 7. **Metadata Upload** - Uploads metadata to IPFS via `IpfsUpload.uploadMetadata()`
 8. **API Request** - Payload sent to `${API_URL}/sol/create-lbp`:
    - `package` mapped to numeric index via `getLaunchPackageIndex()`

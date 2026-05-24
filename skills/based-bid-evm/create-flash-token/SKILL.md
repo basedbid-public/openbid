@@ -10,7 +10,7 @@ Currently Ethereum, Binance Smart Chain and Base chains are supported. The user 
 
 Fee Builder allows users to reroute their fees however they like (up to `dex.feeTier` percent). Users can increase the percentage that goes into liquidity or buybacks from fees to strengthen their token's chart (`fees.v4.liquidity`), reward long-term token holders with airdrop payouts (`fees.v4.reward`) or send fee payouts to custom wallets (to payout KOLs or marketing teams).
 
-`boardTitle` parameter enables agents to launch their token under any whitelabel launchpad that is created on based.bid.
+**Optional `boardTitle`:** Only send this if the user explicitly wants to launch under a custom board they created via the create-board skill. If omitted, no board is sent. **Never send `'based'` or any default value unless the user explicitly requests it.**
 
 ## Invocation
 
@@ -43,6 +43,8 @@ import { CreateFlashTokenEvmSdk } from 'schema/flash-token/evm/sdk';
 | `chainId` | `number` | `1`, `56`, or `8453` |
 | `token` | `object` | `name`, `symbol`, `totalSupply`, `initialBuyAmount`, `metadata` (logo, social links, description) |
 | `sale` | `object` | `boardTitle?`, `marketCap`, `maxTxAmountPercent`, `protectBlocks` |
+
+> **Board behavior:** `boardTitle` is **purely optional**. Only include it if the user explicitly provides a custom board name. Omitting it means the token launches without any board affiliation. **Do not send `'based'` or any default string.**
 | `dex` | `object` | `version` (EvmDexType), `feeTier` |
 | `fees` | `object` | `v4?` (V4 fees configuration) |
 
@@ -187,7 +189,7 @@ const args: CreateFlashTokenEvmSdk = {
     metadataUrl: 'https://ipfs.based.bid/ipfs/...', // Pre-uploaded to IPFS
   },
   sale: {
-    boardTitle: 'based',
+    // boardTitle: 'my-custom-board', // ONLY include if user explicitly wants a custom board
     marketCap: 10000,
     maxTxAmountPercent: 0.1,
     protectBlocks: 20,
