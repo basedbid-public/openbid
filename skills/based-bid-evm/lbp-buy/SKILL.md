@@ -22,29 +22,30 @@ npm run build && node dist/buy.js
 
 ## Parameters
 
-The `buy` function accepts a `BuyRequest` interface:
+The `buyEvm` function accepts a `BuyEvmSdk` type (inferred from `buyEvmSdkSchema`):
 
 ```typescript
-interface BuyRequest {
-  chainId: number; // 1 (Ethereum) | 56 (BSC) | 8453 (Base)
-  address: string; // Token contract address (LBP/pool address)
-  account: string; // Buyer's wallet address
-  slippage: number; // 1 | 5 | 10 (percentage)
-  referrer: string; // Referral address (use zero address for no referrer)
-  amount: number; // Amount to buy (in native currency, e.g., ETH)
-}
-```
+import { BuyEvmSdk } from 'schema/buy/evm/sdk';
 
-### Parameter Details
+// Schema definition (for reference):
+// buyEvmSdkSchema = z.object({
+//   chainId: evmChainIdSchema,          // 1 | 56 | 8453
+//   address: evmAddressSchema,          // 0x... token/pool address
+//   slippage: z.union([z.literal(1), z.literal(5), z.literal(10)]),
+//   referrer: evmAddressSchema,         // referral address
+//   amount: z.number().min(0),          // amount in native currency
+// })
+```
 
 | Parameter  | Type     | Description                | Constraints                       |
 | ---------- | -------- | -------------------------- | --------------------------------- |
 | `chainId`  | `number` | Blockchain network ID      | Must be 1, 56, or 8453            |
 | `address`  | `string` | Token/LBP contract address | Valid EVM address (0x...)         |
-| `account`  | `string` | Buyer's wallet address     | Valid EVM address (0x...)         |
 | `slippage` | `number` | Maximum allowed slippage   | Must be 1, 5, or 10 (percent)     |
 | `referrer` | `string` | Referral wallet address    | Valid EVM address or zero address |
 | `amount`   | `number` | Purchase amount            | Must be >= 0 (in native token)    |
+
+**Note:** `account` is auto-derived from the `PRIVATE_KEY` env variable via `privateKeyToAccount()`. You do not pass it as an argument.
 
 ## Configuration
 
@@ -58,7 +59,7 @@ The script reads configuration from environment variables (see `.env`):
 ## Execution Flow
 
 1. **Environment Validation** - Validates required environment variables (`PRIVATE_KEY`, `RPC_URL`)
-2. **Input Validation** - Schema validation via `buyApiSchema` (Zod)
+2. **Input Validation** - Schema validation via `buyEvmSdkSchema` (Zod) from `schema/buy/evm/sdk`
 3. **API Request** - Payload sent to `${API_URL}/lbp-buy-preview` which returns:
    - Contract function name to call
    - Contract address
@@ -138,12 +139,11 @@ Common errors:
 ### Basic Buy
 
 ```typescript
-import { buy } from './src/buy';
+import { buyEvm } from './src/scripts/evm/lbp-buy';
 
-const receipt = await buy({
+const receipt = await buyEvm({
   chainId: 8453, // Base
   address: '0x9851fe835121322a7f467e01CC6eb8217F342b1d',
-  account: '0xC307eE0832c269d0F2A326Aa0b481b6FA032B262',
   slippage: 1,
   referrer: '0x0000000000000000000000000000000000000000',
   amount: 0.00001, // 0.00001 ETH
@@ -155,10 +155,9 @@ console.log('Transaction confirmed:', receipt.transactionHash);
 ### Buy with Referral
 
 ```typescript
-const receipt = await buy({
+const receipt = await buyEvm({
   chainId: 8453,
   address: '0x...token_address...',
-  account: '0x...your_wallet...',
   slippage: 5,
   referrer: '0x...referrer_wallet...', // Referral fees go here
   amount: 0.001,
@@ -168,10 +167,9 @@ const receipt = await buy({
 ### Higher Slippage for Volatile Pairs
 
 ```typescript
-const receipt = await buy({
+const receipt = await buyEvm({
   chainId: 1, // Ethereum
   address: '0x...token_address...',
-  account: '0x...your_wallet...',
   slippage: 10, // Higher tolerance for volatile tokens
   referrer: '0x0000000000000000000000000000000000000000',
   amount: 0.5, // 0.5 ETH
@@ -215,10 +213,10 @@ The buy function is designed to be used programmatically:
 
 ```typescript
 // Import and call directly
-import { buy } from './src/buy';
+import { buyEvm } from './src/scripts/evm/lbp-buy';
 
 // Or run the self-executing script
-// npx ts-node src/buy.ts
+// npx ts-node src/scripts/evm/lbp-buy.ts
 ```
 
 The self-executing async IIFE at the bottom of `buy.ts` demonstrates usage with hardcoded values for testing.

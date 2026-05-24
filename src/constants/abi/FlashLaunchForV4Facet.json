@@ -1,5 +1,608 @@
 [
   {
+    "inputs": [],
+    "name": "Create2EmptyBytecode",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "DynamicFeeRequired",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "EmptyVolumeLevels",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "FailedDeployment",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "FeeBpsTooHigh",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "balance",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "needed",
+        "type": "uint256"
+      }
+    ],
+    "name": "InsufficientBalance",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidBaseFeeFactor",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidDecimals",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidDefaultBaseFeeBps",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidFee",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidFeeThreshold",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidMaxTx",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidMaxWallet",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidMinTokenBalance",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidPositionManager",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidTierAmountLevels",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidTierConfig",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidTierFeesBps",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidTotalFeeBps",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidTotalSupply",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidVersion",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidVirtualEth",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidVolumeLevels",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidVolumeMultiplierBps",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "MismatchVolume",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "Paused",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      }
+    ],
+    "name": "SafeERC20FailedOperation",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "WrongRewardToken",
+    "type": "error"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      },
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "positionManager",
+            "type": "address"
+          },
+          {
+            "internalType": "uint24",
+            "name": "feeTier",
+            "type": "uint24"
+          },
+          {
+            "internalType": "uint8",
+            "name": "decimals",
+            "type": "uint8"
+          },
+          {
+            "internalType": "bool",
+            "name": "isTokenBurn",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint8",
+            "name": "_padding1",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "virtualEth",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalSupply",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "baseToken",
+            "type": "address"
+          },
+          {
+            "internalType": "uint8",
+            "name": "_padding2",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "maxWalletAmount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "maxTxAmount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "protectBlocks",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint160",
+            "name": "sqrtPriceX96_1",
+            "type": "uint160"
+          },
+          {
+            "internalType": "uint8",
+            "name": "_padding3",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint160",
+            "name": "sqrtPriceX96_2",
+            "type": "uint160"
+          },
+          {
+            "internalType": "uint8",
+            "name": "_padding4",
+            "type": "uint8"
+          },
+          {
+            "internalType": "int24",
+            "name": "tickLower_1",
+            "type": "int24"
+          },
+          {
+            "internalType": "int24",
+            "name": "tickUpper_1",
+            "type": "int24"
+          },
+          {
+            "internalType": "int24",
+            "name": "tickLower_2",
+            "type": "int24"
+          },
+          {
+            "internalType": "int24",
+            "name": "tickUpper_2",
+            "type": "int24"
+          },
+          {
+            "internalType": "uint8",
+            "name": "_padding5",
+            "type": "uint8"
+          }
+        ],
+        "indexed": false,
+        "internalType": "struct FlashLaunchV4PoolInitialData",
+        "name": "poolInitialData",
+        "type": "tuple"
+      },
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          },
+          {
+            "internalType": "bool",
+            "name": "isTokenBurn",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint8",
+            "name": "_padding1",
+            "type": "uint8"
+          },
+          {
+            "internalType": "address",
+            "name": "baseToken",
+            "type": "address"
+          },
+          {
+            "internalType": "uint8",
+            "name": "_padding2",
+            "type": "uint8"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "subBoard",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "string",
+            "name": "metaData",
+            "type": "string"
+          },
+          {
+            "internalType": "address",
+            "name": "positionManager",
+            "type": "address"
+          },
+          {
+            "internalType": "uint8",
+            "name": "_padding3",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "poolId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "contract IHooks",
+            "name": "hooks",
+            "type": "address"
+          },
+          {
+            "components": [
+              {
+                "internalType": "bool",
+                "name": "hasV4Hook",
+                "type": "bool"
+              },
+              {
+                "components": [
+                  {
+                    "internalType": "uint16",
+                    "name": "liquidityFeeBps",
+                    "type": "uint16"
+                  },
+                  {
+                    "internalType": "uint16",
+                    "name": "buybackFeeBps",
+                    "type": "uint16"
+                  },
+                  {
+                    "internalType": "uint16",
+                    "name": "rewardFeeBps",
+                    "type": "uint16"
+                  },
+                  {
+                    "internalType": "address[]",
+                    "name": "customWallets",
+                    "type": "address[]"
+                  },
+                  {
+                    "internalType": "uint16[]",
+                    "name": "customWalletBps",
+                    "type": "uint16[]"
+                  }
+                ],
+                "internalType": "struct IBasedBidHook.HookFeeDistributionConfig",
+                "name": "hookFeeDistributionConfig",
+                "type": "tuple"
+              },
+              {
+                "internalType": "uint256",
+                "name": "feeThreshold",
+                "type": "uint256"
+              },
+              {
+                "internalType": "address",
+                "name": "rewardToken",
+                "type": "address"
+              },
+              {
+                "components": [
+                  {
+                    "internalType": "Currency",
+                    "name": "currency0",
+                    "type": "address"
+                  },
+                  {
+                    "internalType": "Currency",
+                    "name": "currency1",
+                    "type": "address"
+                  },
+                  {
+                    "internalType": "uint24",
+                    "name": "fee",
+                    "type": "uint24"
+                  },
+                  {
+                    "internalType": "int24",
+                    "name": "tickSpacing",
+                    "type": "int24"
+                  },
+                  {
+                    "internalType": "contract IHooks",
+                    "name": "hooks",
+                    "type": "address"
+                  }
+                ],
+                "internalType": "struct PoolKey",
+                "name": "rewardPoolKey",
+                "type": "tuple"
+              },
+              {
+                "internalType": "enum IBasedBidHook.FeeKind",
+                "name": "feeKind",
+                "type": "uint8"
+              },
+              {
+                "internalType": "uint24",
+                "name": "staticPoolFeeBpsBuy",
+                "type": "uint24"
+              },
+              {
+                "internalType": "uint24",
+                "name": "staticPoolFeeBpsSell",
+                "type": "uint24"
+              },
+              {
+                "internalType": "uint24",
+                "name": "hookFeeBpsBuy",
+                "type": "uint24"
+              },
+              {
+                "internalType": "uint24",
+                "name": "hookFeeBpsSell",
+                "type": "uint24"
+              },
+              {
+                "components": [
+                  {
+                    "internalType": "uint24",
+                    "name": "minBaseFeeBpsBuy",
+                    "type": "uint24"
+                  },
+                  {
+                    "internalType": "uint24",
+                    "name": "minBaseFeeBpsSell",
+                    "type": "uint24"
+                  },
+                  {
+                    "internalType": "uint24",
+                    "name": "maxBaseFeeBpsBuy",
+                    "type": "uint24"
+                  },
+                  {
+                    "internalType": "uint24",
+                    "name": "maxBaseFeeBpsSell",
+                    "type": "uint24"
+                  },
+                  {
+                    "internalType": "uint32",
+                    "name": "baseFeeFactorBuy",
+                    "type": "uint32"
+                  },
+                  {
+                    "internalType": "uint32",
+                    "name": "baseFeeFactorSell",
+                    "type": "uint32"
+                  },
+                  {
+                    "internalType": "uint24",
+                    "name": "defaultBaseFeeBpsBuy",
+                    "type": "uint24"
+                  },
+                  {
+                    "internalType": "uint24",
+                    "name": "defaultBaseFeeBpsSell",
+                    "type": "uint24"
+                  },
+                  {
+                    "internalType": "uint32",
+                    "name": "surgeDecayPeriodSeconds",
+                    "type": "uint32"
+                  },
+                  {
+                    "internalType": "uint32",
+                    "name": "surgeMultiplierPpm",
+                    "type": "uint32"
+                  },
+                  {
+                    "internalType": "bool",
+                    "name": "perSwapMode",
+                    "type": "bool"
+                  },
+                  {
+                    "internalType": "uint32",
+                    "name": "capAutoTuneStepPpm",
+                    "type": "uint32"
+                  },
+                  {
+                    "internalType": "uint32",
+                    "name": "capAutoTuneIntervalSeconds",
+                    "type": "uint32"
+                  }
+                ],
+                "internalType": "struct IBasedBidHook.DynamicFeeConfig",
+                "name": "dynamicFeeConfig",
+                "type": "tuple"
+              },
+              {
+                "components": [
+                  {
+                    "internalType": "uint16[]",
+                    "name": "buyFeesBps",
+                    "type": "uint16[]"
+                  },
+                  {
+                    "internalType": "uint16[]",
+                    "name": "sellFeesBps",
+                    "type": "uint16[]"
+                  },
+                  {
+                    "internalType": "uint256[]",
+                    "name": "buyFeeTierAmountLevels",
+                    "type": "uint256[]"
+                  },
+                  {
+                    "internalType": "uint256[]",
+                    "name": "sellFeeTierAmountLevels",
+                    "type": "uint256[]"
+                  }
+                ],
+                "internalType": "struct IBasedBidHook.TieredFeeConfig",
+                "name": "tieredFeeConfig",
+                "type": "tuple"
+              },
+              {
+                "internalType": "uint48",
+                "name": "protectPeriod",
+                "type": "uint48"
+              },
+              {
+                "internalType": "uint256",
+                "name": "maxBuyPerOrigin",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bool",
+                "name": "isAntiSandwich",
+                "type": "bool"
+              },
+              {
+                "internalType": "uint32",
+                "name": "cooldownSeconds",
+                "type": "uint32"
+              },
+              {
+                "internalType": "uint24",
+                "name": "penaltyFeeBps",
+                "type": "uint24"
+              },
+              {
+                "components": [
+                  {
+                    "internalType": "uint32",
+                    "name": "volumeIntervalSeconds",
+                    "type": "uint32"
+                  },
+                  {
+                    "internalType": "uint256[]",
+                    "name": "volumeLevels",
+                    "type": "uint256[]"
+                  },
+                  {
+                    "internalType": "uint16[]",
+                    "name": "volumeMultiplierBps",
+                    "type": "uint16[]"
+                  }
+                ],
+                "internalType": "struct IBasedBidHook.VolumeConfig",
+                "name": "volumeConfig",
+                "type": "tuple"
+              }
+            ],
+            "internalType": "struct V4HookData",
+            "name": "v4HookData",
+            "type": "tuple"
+          }
+        ],
+        "indexed": false,
+        "internalType": "struct FlashLaunchV4PoolData",
+        "name": "flashLaunchV4Pool",
+        "type": "tuple"
+      }
+    ],
+    "name": "FlashLaunchV4TokenCreated",
+    "type": "event"
+  },
+  {
     "inputs": [
       {
         "internalType": "string",
@@ -288,7 +891,6 @@
               },
               {
                 "internalType": "uint24",
-
                 "name": "defaultBaseFeeBpsBuy",
                 "type": "uint24"
               },
@@ -410,6 +1012,23 @@
         "internalType": "uint256",
         "name": "minTokenBalanceForDividends",
         "type": "uint256"
+      },
+      {
+        "components": [
+          {
+            "internalType": "bool",
+            "name": "isWhitelist",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "maxBuyPerOrigin",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct WhitelistOptionForHookBuy",
+        "name": "whitelistOptionForHookBuy",
+        "type": "tuple"
       }
     ],
     "name": "customFlashLaunchV4",

@@ -61,6 +61,7 @@ export async function sendTransaction(
       throw new Error(`Transaction reverted at block ${receipt.blockNumber}`);
     }
 
+    console.log('Receipt:', receipt);
     return receipt;
   } catch (error) {
     console.error(`${errorLabel} failed:`, error);

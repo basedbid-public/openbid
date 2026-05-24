@@ -31,20 +31,21 @@ npm run build && node dist/sell.js
 
 ## Parameters
 
-The `sell` function accepts a `SellRequest` interface:
+The `sell` function accepts a `SellEvmSdk` type (inferred from `sellEvmSdkSchema`):
 
 ```typescript
-interface SellRequest {
-  chainId: number; // 1 (Ethereum) | 56 (BSC) | 8453 (Base)
-  address: string; // Token contract address (the token you're selling)
-  account: string; // Seller's wallet address
-  slippage: number; // 1 | 5 | 10 (percentage)
-  referrer: string; // Referral address (use zero address for no referrer)
-  amount: number; // Amount to sell (in token units, not ETH)
-}
-```
+import { SellEvmSdk } from 'schema/sell/evm/sdk';
 
-### Parameter Details
+// Schema definition (for reference):
+// sellEvmSdkSchema = sellApiSchema.extend({
+//   chainId: evmChainIdSchema,          // 1 | 56 | 8453
+//   address: evmAddressSchema,          // 0x... token address
+//   account: evmAddressSchema,         // seller address
+//   slippage: z.union([z.literal(1), z.literal(5), z.literal(10)]),
+//   referrer: evmAddressSchema,
+//   amount: z.number().min(0),         // amount in token units
+// })
+```
 
 | Parameter  | Type     | Description                           | Constraints                       |
 | ---------- | -------- | ------------------------------------- | --------------------------------- |
@@ -67,7 +68,7 @@ The script reads configuration from environment variables (see `.env`):
 ## Execution Flow
 
 1. **Environment Validation** - Validates required environment variables (`PRIVATE_KEY`, `RPC_URL`)
-2. **Input Validation** - Schema validation via `sellApiSchema` (Zod)
+2. **Input Validation** - Schema validation via `sellEvmSdkSchema` (Zod) from `schema/sell/evm/sdk`
 3. **API Request** - Payload sent to `${API_URL}/lbp-sell-preview` which returns two transactions:
    - `trx1`: ERC20 approve transaction data
    - `trx2`: TradeFacet sell transaction data
@@ -157,7 +158,7 @@ Common errors:
 ### Basic Sell
 
 ```typescript
-import { sell } from './src/sell';
+import { sell } from './src/scripts/evm/lbp-sell';
 
 const receipt = await sell({
   chainId: 8453, // Base

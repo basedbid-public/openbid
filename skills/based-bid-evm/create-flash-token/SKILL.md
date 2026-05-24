@@ -17,44 +17,34 @@ Fee Builder allows users to reroute their fees however they like (up to `dex.fee
 Run the create-flash-token script directly using ts-node:
 
 ```bash
-npx ts-node src/create-flash-token.ts
+npx ts-node src/scripts/evm/create-flash-token.ts
 ```
 
 Or build and run:
 
 ```bash
-npm run build && node dist/create-flash-token.js
+npm run build && node dist/scripts/evm/create-flash-token.js
 ```
 
 ## Parameters
 
-The `createFlashToken` function accepts a `CreateFlashTokenEvmSdk` interface:
+The `createFlashToken` function accepts a `CreateFlashTokenEvmSdk` type (inferred from `evmFlashTokenCreateSdkSchema`):
 
 ```typescript
-interface CreateFlashTokenEvmSdk {
-  chainId: number; // 1 | 56 | 8453
-  token: {
-    name: string;
-    symbol: string;
-    totalSupply: number;
-    initialBuyAmount: number;
-    metadataUrl: string; // IPFS URL for token metadata
-  };
-  sale: {
-    boardTitle?: string; // can launch under any custom board on based.bid - if omitted, it will launch under the `based` board, which is the platform default
-    marketCap: number;
-    maxTxAmountPercent: number; // maximum transaction amount as percentage (anti-whale protection)
-    protectBlocks: number; // number of blocks to protect from snipers
-  };
-  dex: {
-    version: EvmDexType;
-    feeTier: number;
-  };
-  fees: {
-    v4: V4Fees;
-  };
-}
+import { CreateFlashTokenEvmSdk } from 'schema/flash-token/evm/sdk';
 ```
+
+**Schema location:** `schema/flash-token/evm/sdk.ts` — `evmFlashTokenCreateSdkSchema` (Zod)
+
+**Key fields:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `chainId` | `number` | `1`, `56`, or `8453` |
+| `token` | `object` | `name`, `symbol`, `totalSupply`, `initialBuyAmount`, `metadata` (logo, social links, description) |
+| `sale` | `object` | `boardTitle?`, `marketCap`, `maxTxAmountPercent`, `protectBlocks` |
+| `dex` | `object` | `version` (EvmDexType), `feeTier` |
+| `fees` | `object` | `v4?` (V4 fees configuration) |
 
 ## Configuration
 

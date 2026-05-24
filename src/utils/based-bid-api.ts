@@ -1,5 +1,9 @@
 export class BasedBidApi {
-  static async invokeApi<T>(endpoint: string, payload: object) {
+  static async invokeApi<T>(
+    endpoint: string,
+    payload: object,
+    errorMessage: string,
+  ) {
     const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
@@ -17,6 +21,12 @@ export class BasedBidApi {
     }
 
     const json = (await response.json()) as T;
+
+    if (!json) {
+      throw new Error(
+        `Based Bid API Error: ${errorMessage ?? 'Unknown error'}`,
+      );
+    }
 
     return json;
   }

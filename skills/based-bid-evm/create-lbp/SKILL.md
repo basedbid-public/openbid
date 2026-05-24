@@ -26,47 +26,24 @@ npm run build && node dist/create-lbp.js
 
 ## Parameters
 
-The `createLbp` function accepts a `CreateLbpEvmSdk` interface:
+The `createLbp` function accepts a `CreateLbpEvmSdk` type (inferred from `evmLbpCreateSchema`):
 
 ```typescript
-interface CreateLbpEvmSdk {
-  chainId: number; // 1 | 56 | 8453
-  token:
-    name: string;
-    symbol: string;
-    totalSupply: number;
-    initialBuyAmount: number;
-    marketCap: number;
-    boardTitle?: string; // can launch under any custom board on based.bid - if omitted, it will launch under the `based` board, which is the platform default
-    metadata: {
-      logo: string;
-      twitter?: string;
-      telegram?: string;
-      website?: string;
-      discord?: string;
-      description?: string;
-    };
-  ;
-  dex: {
-    version: EvmDexType;
-    feeTier: number;
-  };
-  fees: {
-    buyPoolCreator: number;
-    sellPoolCreator: number;
-    buyReferral: number;
-    graduation: number;
-    v4: V4Fees;
-  };
-  sale: {
-    startTime: number;
-    maxAllocationPerUser: number;
-    maxAllocationPerWhitelistedUser: number;
-    whitelistedAddresses: string[];
-  };
-  package: LaunchPackageType;
-}
+import { CreateLbpEvmSdk } from 'schema/lbp/evm/sdk';
 ```
+
+**Schema location:** `schema/lbp/evm/sdk.ts` — `evmLbpCreateSchema` (Zod)
+
+**Key fields:**
+
+| Parameter | Type                | Description                                                                                                                    |
+| --------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `package` | `LaunchPackageType` | `BASED`, `SUPER_BASED`, or `ULTRA_BASED`                                                                                       |
+| `chainId` | `number`            | `1`, `56`, or `8453`                                                                                                           |
+| `token`   | `object`            | `name`, `symbol`, `totalSupply`, `initialBuyAmount`, `marketCap`, `boardTitle`?, `metadata`                                    |
+| `dex`     | `object`            | `version` (EvmDexType), `feeTier`                                                                                              |
+| `fees`    | `object`            | `buyPoolCreator`, `sellPoolCreator`, `buyReferral`, `graduation`, `v4?`                                                        |
+| `sale`    | `object`            | `startTime`, `maxAllocationPerUser`, `maxAllocationPerWhitelistedUser`, `delayTradeTime?`, `whitelistedAddresses?`, `softCap?` |
 
 ## Configuration
 
@@ -196,12 +173,13 @@ Applies tiered fee multiplier depending on buy size.
 
 ## Execution Flow
 
-1. **Input Validation** - Schema validation via `evmLbpCreateSchema`
+1. **Input Validation** - Schema validation via `evmLbpCreateSchema` from `schema/lbp/evm/sdk`
 2. **IPFS Upload** - Token logo and metadata uploaded to IPFS
 3. **API Request** - Payload sent to `${API_URL}/create-lbp` which returns ABI-encoded contract call data
-4. **ABI normalization** - The API returns flattened args; `normalizeByAbi` expands tuples back to nested structures viem expects
-5. **Whitelist buy args** - If `args[14]` (`whitelistOptionForHookBuy`) is missing, it is derived from `fees.v4.buyLimits`
-6. **Transaction** - Signed and sent via `sendTransaction`
+4. **API Schema Validation** - `evmLbpCreateApiSchema.parse(apiPayload)` from `schema/lbp/evm/api`
+5. **ABI normalization** - The API returns flattened args; `normalizeByAbi` expands tuples back to nested structures viem expects
+6. **Whitelist buy args** - If `args[14]` (`whitelistOptionForHookBuy`) is missing, it is derived from `fees.v4.buyLimits`
+7. **Transaction** - Signed and sent via `sendTransaction`
 
 **Wrong pattern** (mapping over entire ABI):
 
@@ -245,9 +223,11 @@ Common errors:
 
 ## Example Usage
 
-Modify `src/create-lbp.ts` to configure your LBP:
+Modify `src/scripts/evm/create-lbp.ts` to configure your LBP:
 
 ```typescript
+import { createLbp } from './src/scripts/evm/create-lbp';
+
 const args: CreateLbpEvmSdk = {
   chainId: base.id,
   token: {

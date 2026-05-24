@@ -41,10 +41,21 @@ export class SolanaWrapper {
     return this.keyPairSigner.address;
   }
 
+  async getSignerFromPrivateKey(privateKey: string) {
+    // Build the mint keypair signer from the hex-encoded secret.
+    //    The secret is 64 bytes: first 32 = ed25519 private key, last 32 = public key.
+    const privateKeyBytes = Buffer.from(privateKey, 'hex').subarray(0, 32);
+
+    const signer =
+      await createKeyPairSignerFromPrivateKeyBytes(privateKeyBytes);
+
+    return signer;
+  }
   async sendTransaction(
     transaction: string,
     blockhash: string,
     lastValidBlockHeight: number,
+    keyPairs?: CryptoKeyPair[],
   ) {
     // 1. Decode the base64-encoded compiled transaction
     const txBytes = getBase64Encoder().encode(transaction);
@@ -61,7 +72,7 @@ export class SolanaWrapper {
 
     // 3. Sign with the user's keypair
     const signedTx = await signTransaction(
-      [this.keyPairSigner.keyPair],
+      [this.keyPairSigner.keyPair, ...(keyPairs ?? [])],
       compiledTx,
     );
 

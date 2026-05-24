@@ -21,7 +21,7 @@ export type V4BuyLimits =
       maxBuyForWhitelisted: number;
     };
 
-export interface V4Fees {
+export interface EVM_V4_FEES {
   liquidity: number;
   buyback: number;
   reward: {
@@ -48,4 +48,21 @@ export interface V4Fees {
   };
   buyLimits: V4BuyLimits;
   mevProtectionEnabled: boolean;
+}
+
+export interface SOLANA_V4_FEES {
+  liquidity: number;
+  buyback: number;
+  reward: {
+    token: RewardTokenType;
+    amount: number;
+    minTokenBalanceForDividends: number;
+  };
+  customWallets: Array<{
+    name: string;
+    address: Address;
+    amount: number;
+  }>;
+  feeThreshold: 0.01 | 0.1 | 0.25 | 0.5 | 1;
+  dynamicFees: boolean;
 }

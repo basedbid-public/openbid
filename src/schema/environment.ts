@@ -58,3 +58,12 @@ export const validateEnvironment = () => {
 
   return parsed.data;
 };
+
+export const validateEnvironmentSolana = () => {
+  const env = validateEnvironment();
+  if (!env.SOLANA_PRIVATE_KEY) {
+    throw new Error('SOLANA_PRIVATE_KEY is not defined');
+  }
+
+  return env;
+};
