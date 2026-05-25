@@ -149,6 +149,6 @@ await claimEvmFees({
   chainId: 8453,
   address: '0x...',
   target: 'pool',
-  isSandboxMode: true,  // Accepted but no effect on EVM (always uses mainnet)
+  isSandboxMode: true, // Accepted but no effect on EVM (always uses mainnet)
 });
 ```
