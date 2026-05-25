@@ -121,5 +121,7 @@ export const createLbp = async (args: CreateLbpEvmSdk) => {
     functionName: json.functionName,
     args: tupleArgs,
     value: txValue,
+    errorLabel: 'Create LBP',
+    skipConfirmation: args.isSandboxMode,
   });
 };

@@ -14,4 +14,7 @@ export type SendContractTransactionParams = {
 
   /** Prepended to console.error on failure */
   errorLabel?: string;
+
+  /** Skip transaction confirmation prompt (for automated flows) */
+  skipConfirmation?: boolean;
 };

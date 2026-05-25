@@ -38,6 +38,7 @@ export const sell = async (args: SellEvmSdk) => {
     args: [approveTx.args[0] as `0x${string}`, BigInt(approveTx.args[1])],
     value: BigInt(approveTx.value),
     errorLabel: 'Approve',
+    skipConfirmation: args.isSandboxMode,
   });
 
   console.log(
@@ -57,6 +58,7 @@ export const sell = async (args: SellEvmSdk) => {
     args: sellTx.args,
     value: BigInt(sellTx.value),
     errorLabel: 'Sell',
+    skipConfirmation: args.isSandboxMode,
   });
 
   return sellReceipt;

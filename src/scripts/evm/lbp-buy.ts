@@ -37,5 +37,6 @@ export const buyEvm = async (args: BuyEvmSdk) => {
     args: json.args,
     value: txValue,
     errorLabel: 'Buy',
+    skipConfirmation: args.isSandboxMode,
   });
 };

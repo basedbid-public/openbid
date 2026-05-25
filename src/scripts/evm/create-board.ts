@@ -87,5 +87,7 @@ export const createBoard = async (args: CreateEvmBoardSdk) => {
     functionName: json.functionName,
     args: tupleArgs,
     value: txValue,
+    errorLabel: 'Create Board',
+    skipConfirmation: args.isSandboxMode,
   });
 };

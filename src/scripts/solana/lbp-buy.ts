@@ -42,6 +42,11 @@ export const buySolana = async (args: BuySolanaSdk) => {
     transaction,
     blockhash,
     lastValidBlockHeight,
+    undefined,
+    {
+      description: `Buy ${data.amount} tokens`,
+      skipConfirmation: data.isSandboxMode,
+    },
   );
 
   await solanaWrapper.awaitTxConfirmation(signature);

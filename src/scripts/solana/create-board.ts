@@ -62,6 +62,8 @@ export const createBoardSolana = async (args: CreateSolanaBoardSdk) => {
     transaction,
     blockhash,
     lastValidBlockHeight,
+    undefined,
+    { description: 'Create Board', skipConfirmation: args.isSandboxMode },
   );
 
   await solanaWrapper.awaitTxConfirmation(signature);

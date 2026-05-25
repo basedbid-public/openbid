@@ -122,5 +122,7 @@ export const createFlashToken = async (args: CreateFlashTokenEvmSdk) => {
     functionName: json.functionName,
     args: tupleArgs,
     value: txValue,
+    errorLabel: 'Create Flash Token',
+    skipConfirmation: args.isSandboxMode,
   });
 };

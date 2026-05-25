@@ -131,6 +131,7 @@ export const createLbpSolana = async (args: CreateSolanaLbpInput) => {
     blockhash,
     lastValidBlockHeight,
     [mintSigner.keyPair],
+    { description: 'Create LBP', skipConfirmation: args.isSandboxMode },
   );
 
   await solanaWrapper.awaitTxConfirmation(signature);

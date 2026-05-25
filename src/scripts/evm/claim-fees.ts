@@ -43,6 +43,7 @@ export const claimEvmFees = async (args: ClaimEvmFeesSdk) => {
     args: json.args,
     value: txValue,
     errorLabel: 'Claim Fees',
+    skipConfirmation: args.isSandboxMode,
   });
 
   return receipt;

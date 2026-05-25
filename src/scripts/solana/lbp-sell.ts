@@ -40,6 +40,11 @@ export const sellSolana = async (args: SellSolanaSdk) => {
     transaction,
     blockhash,
     lastValidBlockHeight,
+    undefined,
+    {
+      description: `Sell ${data.amount} tokens`,
+      skipConfirmation: data.isSandboxMode,
+    },
   );
 
   await solanaWrapper.awaitTxConfirmation(signature);

@@ -106,6 +106,10 @@ export const createFlashTokenSolana = async (args: CreateSolanaFlashInput) => {
     tx1Response.blockhash,
     tx1Response.lastValidBlockHeight,
     [mintSigner.keyPair],
+    {
+      description: 'Create Flash Token (TX1)',
+      skipConfirmation: args.isSandboxMode,
+    },
   );
 
   await solanaWrapper.awaitTxConfirmation(tx1Signature);
@@ -176,6 +180,10 @@ export const createFlashTokenSolana = async (args: CreateSolanaFlashInput) => {
     tx2Response.blockhash,
     tx2Response.lastValidBlockHeight,
     tx2Signers,
+    {
+      description: 'Create Flash Token (TX2)',
+      skipConfirmation: args.isSandboxMode,
+    },
   );
 
   await solanaWrapper.awaitTxConfirmation(tx2Signature);

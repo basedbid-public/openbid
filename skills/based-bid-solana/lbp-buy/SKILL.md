@@ -171,6 +171,22 @@ await buySolana({
 
 **Default:** `false` (uses mainnet based.bid)
 
+## Transaction Confirmation
+
+**Important for AI Agents:** When executing this skill, you MUST:
+
+1. **Display the transaction cost preview** to the user (shown automatically - includes estimated SOL fee)
+2. **Wait for user confirmation** before proceeding with the transaction
+3. **Do not submit the transaction** until the user explicitly approves
+
+The script will prompt: `Do you want to proceed? (y/n):`
+
+- Type `y` or `yes` to confirm and submit the transaction
+- Type `n` or `no` to cancel the operation
+- The transaction will NOT be submitted until explicit confirmation is received
+
+**Automated flows:** Set `SKIP_TX_CONFIRMATION=true` environment variable or use `isSandboxMode: true` to bypass the confirmation prompt (for testing/automation).
+
 ## Best Practices
 
 1. **Start small** - Test with small amounts first

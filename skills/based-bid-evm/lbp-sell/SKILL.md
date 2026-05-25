@@ -286,3 +286,22 @@ await sell({
   isSandboxMode: true,  // Accepted but no effect on EVM (always uses mainnet)
 });
 ```
+
+## Transaction Confirmation
+
+**Important for AI Agents:** When executing this skill, you MUST:
+
+1. **Display the transaction cost preview** to the user (shown automatically - includes gas estimate and total cost in ETH)
+2. **Wait for user confirmation** before proceeding with the transaction
+3. **Do not submit the transaction** until the user explicitly approves
+
+Since this operation requires **2 transactions** (approve + sell), you will receive TWO confirmation prompts:
+
+1. First prompt: "Do you want to proceed? (y/n):" for the **Approve** transaction
+2. Second prompt: "Do you want to proceed? (y/n):" for the **Sell** transaction
+
+- Type `y` or `yes` to confirm and submit each transaction
+- Type `n` or `no` to cancel that particular transaction
+- Each transaction requires separate confirmation
+
+**Automated flows:** Set `SKIP_TX_CONFIRMATION=true` environment variable or use `isSandboxMode: true` to bypass confirmation prompts (for testing/automation).

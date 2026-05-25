@@ -14,6 +14,33 @@ import {
 
 import { SolanaRpcApiDevnet } from '@solana/kit';
 import bs58 from 'bs58';
+import { createInterface } from 'readline';
+
+const LAMPORTS_PER_SOL = 1_000_000_000;
+const BASE_FEE_PER_SIGNATURE = 5000;
+
+const formatLamports = (lamports: bigint): string => {
+  const sol = Number(lamports) / LAMPORTS_PER_SOL;
+  if (sol < 0.0001) {
+    return `${lamports.toString()} lamports`;
+  }
+  return `${sol.toFixed(6)} SOL`;
+};
+
+const askConfirmation = (question: string): Promise<boolean> => {
+  return new Promise((resolve) => {
+    const rl = createInterface({
+      input: process.stdin,
+      output: process.stdout,
+    });
+
+    rl.question(question, (answer) => {
+      rl.close();
+      const normalizedAnswer = answer.trim().toLowerCase();
+      resolve(normalizedAnswer === 'y' || normalizedAnswer === 'yes');
+    });
+  });
+};
 
 export class SolanaWrapper {
   private rpc!: Rpc<SolanaRpcApiDevnet>;
@@ -42,8 +69,6 @@ export class SolanaWrapper {
   }
 
   async getSignerFromPrivateKey(privateKey: string) {
-    // Build the mint keypair signer from the hex-encoded secret.
-    //    The secret is 64 bytes: first 32 = ed25519 private key, last 32 = public key.
     const privateKeyBytes = Buffer.from(privateKey, 'hex').subarray(0, 32);
 
     const signer =
@@ -51,17 +76,66 @@ export class SolanaWrapper {
 
     return signer;
   }
+
+  estimateTransactionFee(transaction: string): bigint {
+    try {
+      const txBytes = getBase64Encoder().encode(transaction);
+      const numSignatures =
+        txBytes.length > 0 ? Math.max(1, Math.ceil(txBytes.length / 64)) : 1;
+      const estimatedFee = BigInt(numSignatures * BASE_FEE_PER_SIGNATURE);
+
+      return estimatedFee;
+    } catch {
+      return BigInt(BASE_FEE_PER_SIGNATURE * 2);
+    }
+  }
+
+  showTransactionCostPreview(
+    transaction: string,
+    description: string = 'Transaction',
+  ): void {
+    console.log('\n========================================');
+    console.log('       Transaction Cost Preview');
+    console.log('========================================');
+    console.log(`  Description: ${description}`);
+    console.log(`  Network:     Solana Devnet`);
+    console.log(`  RPC:         ${this.rpcUrl}`);
+
+    const estimatedFee = this.estimateTransactionFee(transaction);
+
+    console.log('----------------------------------------');
+    console.log(`  Estimated fee: ${formatLamports(estimatedFee)}`);
+    console.log('========================================\n');
+  }
+
   async sendTransaction(
     transaction: string,
     blockhash: string,
     lastValidBlockHeight: number,
     keyPairs?: CryptoKeyPair[],
+    options?: {
+      skipConfirmation?: boolean;
+      description?: string;
+    },
   ) {
-    // 1. Decode the base64-encoded compiled transaction
+    const { skipConfirmation = false, description = 'Transaction' } =
+      options || {};
+
+    this.showTransactionCostPreview(transaction, description);
+
+    const shouldProceed =
+      skipConfirmation ||
+      process.env.SKIP_TX_CONFIRMATION === 'true' ||
+      (await askConfirmation('Do you want to proceed? (y/n): '));
+
+    if (!shouldProceed) {
+      console.log('Transaction cancelled by user.');
+      process.exit(0);
+    }
+
     const txBytes = getBase64Encoder().encode(transaction);
     const decodedTx = getTransactionDecoder().decode(txBytes);
 
-    // 2. Attach the blockhash lifetime
     const compiledTx = {
       ...decodedTx,
       lifetimeConstraint: {
@@ -70,16 +144,13 @@ export class SolanaWrapper {
       },
     };
 
-    // 3. Sign with the user's keypair
     const signedTx = await signTransaction(
       [this.keyPairSigner.keyPair, ...(keyPairs ?? [])],
       compiledTx,
     );
 
-    // 4. Narrow the size brand for sendAndConfirm
     assertIsTransactionWithinSizeLimit(signedTx);
 
-    // 5. Send the transaction
     const signature = getSignatureFromTransaction(signedTx);
     const wireTransaction = getBase64EncodedWireTransaction(signedTx);
 
@@ -97,7 +168,6 @@ export class SolanaWrapper {
   }
 
   async awaitTxConfirmation(signature: Signature) {
-    // 6. Poll getSignatureStatuses until finalized
     const POLL_INTERVAL_MS = 1000;
     const TIMEOUT_MS = 90_000;
     const startedAt = Date.now();
@@ -124,9 +194,13 @@ export class SolanaWrapper {
       await new Promise((r) => setTimeout(r, POLL_INTERVAL_MS));
     }
 
-    console.log('Transaction finalized:', signature);
+    console.log('\n========================================');
+    console.log('       Transaction Confirmed!');
+    console.log('========================================');
+    console.log(`Signature: ${signature}`);
     console.log(
       `Explorer: https://explorer.solana.com/tx/${signature}?cluster=devnet`,
     );
+    console.log('========================================\n');
   }
 }

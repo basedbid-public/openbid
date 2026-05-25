@@ -37,6 +37,11 @@ export const claimFlashTokenFeesSolana = async (
     transaction,
     blockhash,
     lastValidBlockHeight,
+    undefined,
+    {
+      description: 'Claim Flash Token Fees',
+      skipConfirmation: args.isSandboxMode,
+    },
   );
 
   await solanaWrapper.awaitTxConfirmation(signature);

@@ -35,6 +35,8 @@ export const claimLbpFeesSolana = async (args: ClaimFeesSolanaRequest) => {
     transaction,
     blockhash,
     lastValidBlockHeight,
+    undefined,
+    { description: 'Claim LBP Fees', skipConfirmation: args.isSandboxMode },
   );
 
   await solanaWrapper.awaitTxConfirmation(signature);
