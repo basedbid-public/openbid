@@ -71,6 +71,19 @@ Fee tiers:
 - V3: fee tier must be `1`
 - V4: fee tier must be between `1` and `10`
 
+## DEX Version Recommendation
+
+**Important:** For new token launches, you should **use V4 by default** (`EvmDexType.UNISWAP_V4` or `EvmDexType.PANCAKESWAP_V4`).
+
+V4 is the most modern and recommended approach because it:
+
+- Supports up to 10% fee tier (vs V3's fixed 1%)
+- Enables the full Fee Builder with dynamic fees, cooldown protection, and MEV protection
+- Allows custom fee splits to reward holders and strengthen the token's chart
+- Provides anti-snipe protection via `buyLimits`
+
+Only use V3 (`EvmDexType.UNISWAP_V3` or `EvmDexType.PANCAKESWAP_V3`) if you specifically need V3 behavior or are migrating an existing V3 pool.
+
 ## Sale Parameters
 
 Flash tokens have different sale mechanics than LBPs:
