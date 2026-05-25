@@ -146,6 +146,25 @@ await sellSolana({
 | `referrer` | Supported | Not supported |
 | Gas/Token flow | Approve ERC20, then TradeFacet swap | Single VersionedTransaction |
 
+## Sandbox Mode
+
+Solana supports sandbox mode for testing. When `isSandboxMode: true` is passed:
+
+- The transaction is submitted via **testnet.based.bid** instead of the mainnet based.bid app
+- Operations execute against test infrastructure
+- No real funds are used
+
+```typescript
+await sellSolana({
+  isSandboxMode: true,  // Enable sandbox mode (uses testnet.based.bid)
+  address: 'HosNdWFESKtjAiJbyXBxu7pX6iBADgBZuZ7BgPdo6bid',
+  amount: 1000,
+  slippage: 1,
+});
+```
+
+**Default:** `false` (uses mainnet based.bid)
+
 ## Best Practices
 
 1. **Check token balance** - Ensure you have enough tokens to sell
@@ -153,3 +172,4 @@ await sellSolana({
 3. **Consider timing** - Large sells can impact token price
 4. **Verify addresses** - Double-check the mint address (you're selling THIS token)
 5. **Ensure SOL balance** - Your wallet needs SOL for transaction fees
+6. **Use sandbox mode for testing** - Set `isSandboxMode: true` to test without real funds

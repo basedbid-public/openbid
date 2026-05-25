@@ -268,3 +268,21 @@ The self-executing async IIFE at the bottom of `sell.ts` demonstrates usage with
 | Gas costs           | ~150k-300k       | ~100k (approve) + ~200k (sell) |
 | Slippage protection | Yes              | Yes                            |
 | Referral support    | Yes              | Yes                            |
+
+## Sandbox Mode
+
+For EVM chains, `isSandboxMode` is accepted in the SDK schema but **has no effect** — all operations execute on mainnet of the target chain (Ethereum, BSC, or Base). The parameter exists for API consistency with Solana workflows.
+
+When using Solana, setting `isSandboxMode: true` routes to **testnet.based.bid** instead of the mainnet based.bid app, allowing experimentation without real funds. EVM always uses mainnet regardless of this setting.
+
+```typescript
+// isSandboxMode is accepted but ignored for EVM
+await sell({
+  chainId: 8453,
+  address: '0x9851fe835121322a7f467e01CC6eb8217F342b1d',
+  slippage: 1,
+  referrer: '0x0000000000000000000000000000000000000000',
+  amount: 1000,
+  isSandboxMode: true,  // Accepted but no effect on EVM (always uses mainnet)
+});
+```

@@ -117,9 +117,28 @@ await claimFlashTokenFeesSolana({
 | API param | `memeMint` | `flashMint` |
 | Target pool type | LBP pool | Flash token pool |
 
+## Sandbox Mode
+
+Solana supports sandbox mode for testing. When `isSandboxMode: true` is passed:
+
+- The transaction is submitted via **testnet.based.bid** instead of the mainnet based.bid app
+- Operations execute against test infrastructure
+- No real funds are used
+
+```typescript
+await claimFlashTokenFeesSolana({
+  isSandboxMode: true,  // Enable sandbox mode (uses testnet.based.bid)
+  chainId: 5011,
+  address: 'C6eGKQXPK4VzBog3VRKnXfbyhgwRAjjNjaMUVBnhvbid',
+});
+```
+
+**Default:** `false` (uses mainnet based.bid)
+
 ## Best Practices
 
 1. **Verify ownership** - Only the flash token creator can claim fees
 2. **Check fee balance** - Ensure there are accumulated fees
 3. **Ensure SOL balance** - Your wallet needs SOL for transaction fees
 4. **Use correct endpoint** - Don't confuse LBP and flash token fee collection
+5. **Use sandbox mode for testing** - Set `isSandboxMode: true` to test without real funds

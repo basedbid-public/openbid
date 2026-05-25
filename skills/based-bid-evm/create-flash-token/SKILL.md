@@ -239,3 +239,19 @@ await createFlashToken(args);
 | Anti-Snipe   | `maxTxAmountPercent`, `protectBlocks`                      | Whitelist, allocation limits           |
 | API Endpoint | `/create-flash`                                            | `/create-lbp`                          |
 | ABI Files    | `FlashLaunchForV3Facet.json`, `FlashLaunchForV4Facet.json` | `CreationFacet.json`                   |
+
+## Sandbox Mode
+
+For EVM chains, `isSandboxMode` is accepted in the SDK schema but **has no effect** — all operations execute on mainnet of the target chain (Ethereum, BSC, or Base). The parameter exists for API consistency with Solana workflows.
+
+When using Solana, setting `isSandboxMode: true` routes to **testnet.based.bid** instead of the mainnet based.bid app, allowing experimentation without real funds. EVM always uses mainnet regardless of this setting.
+
+```typescript
+// isSandboxMode is accepted but ignored for EVM
+await createFlashToken({
+  chainId: 8453,
+  token: { name: 'Test', symbol: 'TST', totalSupply: 1_000_000, initialBuyAmount: 0, metadata: { logo: './logo.png' } },
+  dex: { version: EvmDexType.UNISWAP_V4, feeTier: 3 },
+  isSandboxMode: true,  // Accepted but no effect on EVM (always uses mainnet)
+});
+```

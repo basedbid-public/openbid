@@ -282,6 +282,25 @@ await createLbpSolana({
 | Fee distribution | Included in create payload | Separate API endpoint after creation |
 | DEX config | `version` + `feeTier` | `routerId` + `meteoraFeeTierIndex` / `raydiumFeeTierIndex` |
 
+## Sandbox Mode
+
+Solana supports sandbox mode for testing. When `isSandboxMode: true` is passed:
+
+- The transaction is submitted via **testnet.based.bid** instead of the mainnet based.bid app
+- Operations execute against test infrastructure
+- No real funds are used
+
+```typescript
+await createLbpSolana({
+  isSandboxMode: true,  // Enable sandbox mode (uses testnet.based.bid)
+  token: { ... },
+  package: LaunchPackageType.BASED,
+  dex: { version: SolanaDexType.METEORA, feeTier: '1' },
+});
+```
+
+**Default:** `false` (uses mainnet based.bid)
+
 ## Best Practices
 
 1. **Always test on devnet first** - Solana LBPs are irreversible on mainnet
@@ -291,3 +310,4 @@ await createLbpSolana({
 5. **Consider soft cap carefully** - Set realistic goals and end times
 6. **Validate fee percentages** - Must sum to exactly 50%
 7. **Whitelist thoughtfully** - Add addresses before launch to prevent sniping
+8. **Use sandbox mode for testing** - Set `isSandboxMode: true` to test without real funds

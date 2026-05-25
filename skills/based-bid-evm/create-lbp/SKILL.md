@@ -296,3 +296,22 @@ const args: CreateLbpEvmSdk = {
 
 await createLbp(args);
 ```
+
+## Sandbox Mode
+
+For EVM chains, `isSandboxMode` is accepted in the SDK schema but **has no effect** — all operations execute on mainnet of the target chain (Ethereum, BSC, or Base). The parameter exists for API consistency with Solana workflows.
+
+When using Solana, setting `isSandboxMode: true` routes to **testnet.based.bid** instead of the mainnet based.bid app, allowing experimentation without real funds. EVM always uses mainnet regardless of this setting.
+
+```typescript
+// isSandboxMode is accepted but ignored for EVM
+await createLbp({
+  chainId: 8453,
+  package: LaunchPackageType.BASED,
+  token: { ... },
+  dex: { version: EvmDexType.UNISWAP_V4, feeTier: 3 },
+  fees: { ... },
+  sale: { ... },
+  isSandboxMode: true,  // Accepted but no effect on EVM (always uses mainnet)
+});
+```

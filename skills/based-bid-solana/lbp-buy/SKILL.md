@@ -151,6 +151,26 @@ await buySolana({
 | Address param | `address` (pool contract) | `address` (token mint) |
 | `account` | Passed in args | Derived from `SOLANA_PRIVATE_KEY` |
 
+## Sandbox Mode
+
+Solana supports sandbox mode for testing. When `isSandboxMode: true` is passed:
+
+- The transaction is submitted via **testnet.based.bid** instead of the mainnet based.bid app
+- Operations execute against test infrastructure
+- No real funds are used
+
+```typescript
+await buySolana({
+  isSandboxMode: true,  // Enable sandbox mode (uses testnet.based.bid)
+  address: 'HosNdWFESKtjAiJbyXBxu7pX6iBADgBZuZ7BgPdo6bid',
+  amount: 0.001,
+  slippage: 1,
+  referrer: '11111111111111111111111111111111',
+});
+```
+
+**Default:** `false` (uses mainnet based.bid)
+
 ## Best Practices
 
 1. **Start small** - Test with small amounts first
@@ -158,3 +178,4 @@ await buySolana({
 3. **Check token address** - Double-check the mint address before buying
 4. **Ensure SOL balance** - Your wallet needs SOL for transaction fees
 5. **Use referral codes** - Set a referrer to support community members
+6. **Use sandbox mode for testing** - Set `isSandboxMode: true` to test without real funds

@@ -189,3 +189,22 @@ async function main() {
 
 main();
 ```
+
+## Sandbox Mode
+
+Solana supports sandbox mode for testing. When `isSandboxMode: true` is passed:
+
+- The transaction is submitted via **testnet.based.bid** instead of the mainnet based.bid app
+- Operations execute against test infrastructure
+- No real funds are used
+
+```typescript
+await createBoardSolana({
+  isSandboxMode: true,  // Enable sandbox mode (uses testnet.based.bid)
+  title: 'Test Board',
+  description: 'A test board for sandbox',
+  logo: './path/to/logo.png',
+});
+```
+
+**Default:** `false` (uses mainnet based.bid)

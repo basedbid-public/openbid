@@ -136,3 +136,19 @@ const receipt = await claimEvmFees({
 2. **Check fee balance** - Ensure there are accumulated fees before claiming
 3. **Use correct target** - `"pool"` for pool trading fees, `"board"` for board listing fees
 4. **Consider gas costs** - Small fee claims may not be worth the gas on Ethereum mainnet
+
+## Sandbox Mode
+
+For EVM chains, `isSandboxMode` is accepted in the SDK schema but **has no effect** — all operations execute on mainnet of the target chain (Ethereum, BSC, or Base). The parameter exists for API consistency with Solana workflows.
+
+When using Solana, setting `isSandboxMode: true` routes to **testnet.based.bid** instead of the mainnet based.bid app, allowing experimentation without real funds. EVM always uses mainnet regardless of this setting.
+
+```typescript
+// isSandboxMode is accepted but ignored for EVM
+await claimEvmFees({
+  chainId: 8453,
+  address: '0x...',
+  target: 'pool',
+  isSandboxMode: true,  // Accepted but no effect on EVM (always uses mainnet)
+});
+```

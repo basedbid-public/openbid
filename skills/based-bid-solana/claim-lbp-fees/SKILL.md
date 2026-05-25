@@ -107,8 +107,27 @@ await claimLbpFeesSolana({
 | `Failed to claim LBP fees on Solana` | API error | Check token address and API availability |
 | `Transaction failed` | On-chain failure | Verify you are the pool owner, ensure fees exist |
 
+## Sandbox Mode
+
+Solana supports sandbox mode for testing. When `isSandboxMode: true` is passed:
+
+- The transaction is submitted via **testnet.based.bid** instead of the mainnet based.bid app
+- Operations execute against test infrastructure
+- No real funds are used
+
+```typescript
+await claimLbpFeesSolana({
+  isSandboxMode: true,  // Enable sandbox mode (uses testnet.based.bid)
+  chainId: 5011,
+  address: 'JZYVVHDmgVb8TbUy8eVhFEamuS4uRzYrP5BQc3Kmbid',
+});
+```
+
+**Default:** `false` (uses mainnet based.bid)
+
 ## Best Practices
 
 1. **Verify ownership** - Only the pool owner can claim fees
 2. **Check fee balance** - Ensure there are accumulated fees
 3. **Ensure SOL balance** - Your wallet needs SOL for transaction fees
+4. **Use sandbox mode for testing** - Set `isSandboxMode: true` to test without real funds

@@ -289,6 +289,25 @@ const result = await createFlashTokenSolana({
 | Seed         | 5-digit numeric seed                    | `flashSeed` from TX1 response |
 | DEX support  | Meteora, Raydium                        | Meteora, Raydium              |
 
+## Sandbox Mode
+
+Solana supports sandbox mode for testing. When `isSandboxMode: true` is passed:
+
+- The transaction is submitted via **testnet.based.bid** instead of the mainnet based.bid app
+- Operations execute against test infrastructure
+- No real funds are used
+
+```typescript
+await createFlashTokenSolana({
+  isSandboxMode: true,  // Enable sandbox mode (uses testnet.based.bid)
+  flashDex: SolanaDexType.METEORA,
+  token: { ... },
+  meteora: { ... },
+});
+```
+
+**Default:** `false` (uses mainnet based.bid)
+
 ## Best Practices
 
 1. **Choose DEX carefully** — Raydium and Meteora have different config requirements
@@ -297,3 +316,4 @@ const result = await createFlashTokenSolana({
 4. **Test on devnet first** — Flash tokens are irreversible on mainnet
 5. **Use correct signers** — Wallet first, then mint keypair (and position NFT keypair for Raydium TX2)
 6. **Validate fee tiers** — Check DEX documentation for valid `feeTierIndex` values
+7. **Use sandbox mode for testing** — Set `isSandboxMode: true` to test without real funds
