@@ -1,16 +1,19 @@
-import { SolanaDexType } from '@enums/solana/dex.type';
-import { CreateLbpSolanaApiResponse } from '@interfaces/lbp/create/solana/api-response';
-import { getLaunchPackageIndex } from '@utils/get-launch-package-index';
-import { API_URL } from 'constants/api-url';
-import { SOLANA_DECIMALS } from 'constants/solana';
-import { SOLANA_BASE_TOKEN_PAIR } from 'constants/solana/base-token-pair';
+import { SOLANA_BASE_TOKEN_PAIR, SOLANA_DECIMALS } from 'constants/solana';
 import 'dotenv/config';
+import { ApiType, SolanaDexType } from 'enums';
+import { CreateLbpSolanaApiResponse } from 'interfaces/lbp/create/solana/api-response';
 import { validateEnvironmentSolana } from 'schema/environment';
 import { createLbpSolanaApiPayloadSchema } from 'schema/lbp/solana/api-request';
 import { solanaFeeDistributionApiPayloadSchema } from 'schema/lbp/solana/fee-distribution';
 import { CreateSolanaLbpInput } from 'schema/lbp/solana/sdk-input';
 import { SolanaLbpValidator } from 'schema/lbp/solana/validator';
-import { BasedBidApi, IpfsUpload, SeedGenerator, SolanaWrapper } from 'utils';
+import {
+  BasedBidApi,
+  getLaunchPackageIndex,
+  IpfsUpload,
+  SeedGenerator,
+  SolanaWrapper,
+} from 'utils';
 
 export const createLbpSolana = async (args: CreateSolanaLbpInput) => {
   const env = validateEnvironmentSolana();
@@ -59,12 +62,11 @@ export const createLbpSolana = async (args: CreateSolanaLbpInput) => {
 
   const metadataUrl = await IpfsUpload.uploadMetadata(ipfsMetadata);
 
-  const endpoint = `${API_URL}/sol/create-lbp`;
-
   const apiPayload = {
-    chainId: 5011,
+    chainId: args.chainId,
     signer: solanaWrapper.publicKey,
     data: {
+      isSandboxMode: data.isSandboxMode,
       seed,
       advanced: true,
       package: getLaunchPackageIndex(data.package),
@@ -111,9 +113,11 @@ export const createLbpSolana = async (args: CreateSolanaLbpInput) => {
   const validated = createLbpSolanaApiPayloadSchema.parse(apiPayload);
 
   const json = await BasedBidApi.invokeApi<CreateLbpSolanaApiResponse>(
-    endpoint,
+    ApiType.SDK,
+    'sol/create-lbp',
     validated,
     'Failed to create LBP on Solana',
+    args.isSandboxMode,
   );
 
   const { transaction, mintSignerSecretHex, blockhash, lastValidBlockHeight } =
@@ -136,10 +140,9 @@ export const createLbpSolana = async (args: CreateSolanaLbpInput) => {
   }
 
   // Call fee-distribution API to set Fee Builder params
-  const feeDistributionEndpoint = `https://testnet.based.bid/api/token/fee-distribution`;
 
   const feeDistributionPayload = {
-    chainId: 5011,
+    chainId: args.chainId,
     address: json.mintAddress,
     ...fees,
   };
@@ -154,8 +157,10 @@ export const createLbpSolana = async (args: CreateSolanaLbpInput) => {
   }
 
   await BasedBidApi.invokeApi(
-    feeDistributionEndpoint,
+    ApiType.PLATFORM,
+    'token/fee-distribution',
     solanaFeeDistributionValidated.data,
     'Failed to set fee distribution on Solana',
+    args.isSandboxMode,
   );
 };

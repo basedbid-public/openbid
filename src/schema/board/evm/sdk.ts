@@ -2,6 +2,7 @@ import { boardFeeSchema, evmChainIdSchema } from 'schema/common';
 import { z } from 'zod';
 
 export const createEvmBoardSchema = z.object({
+  isSandboxMode: z.boolean().default(false),
   chainId: evmChainIdSchema,
   title: z.string().min(1, 'Title is required').max(100, 'Title too long'),
   description: z

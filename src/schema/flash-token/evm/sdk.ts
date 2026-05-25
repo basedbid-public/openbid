@@ -1,17 +1,18 @@
-import { EvmDexType } from 'enums/evm';
+import { EvmDexType } from 'enums';
 import {
   CooldownDurationType,
   PenaltyFeeType,
+  RewardTokenType,
   VolatilityDecayPeriodType,
   VolatilityMultiplierType,
   VolatilityTriggerType,
 } from 'enums/fee-builder';
-import { RewardTokenType } from 'enums/fee-builder/reward-token.type';
 import { evmChainIdSchema, metadataInputSchema } from 'schema/common';
 import { v4BuyLimitsSchema } from 'schema/v4-fees/buy-limits';
 import { z } from 'zod';
 
-const evmFlashTokenCreateSdkSchema = z.object({
+export const evmFlashTokenCreateSdkSchema = z.object({
+  isSandboxMode: z.boolean().default(false),
   chainId: evmChainIdSchema,
   token: z.object({
     name: z.string().min(1).max(100),
@@ -122,8 +123,6 @@ const evmFlashTokenCreateSdkSchema = z.object({
     })
     .optional(),
 });
-
-export { evmFlashTokenCreateSdkSchema };
 
 export type CreateFlashTokenEvmSdk = z.infer<
   typeof evmFlashTokenCreateSdkSchema

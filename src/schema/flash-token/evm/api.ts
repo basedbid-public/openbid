@@ -12,6 +12,7 @@ import { v4BuyLimitsSchema } from 'schema/v4-fees/buy-limits';
 import { z } from 'zod';
 
 export const evmFlashTokenCreateApiSchema = z.object({
+  isSandboxMode: z.boolean().default(false),
   chainId: evmChainIdSchema,
   token: z.object({
     name: z.string().max(100, 'Token name must be less than 100 characters'),

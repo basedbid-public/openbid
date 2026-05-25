@@ -1,16 +1,16 @@
-import subBoardFacetAbi from '@constants/abi/SubBoardFacet.json';
-
+import subBoardFacetAbi from 'constants/abi/SubBoardFacet.json';
 import 'dotenv/config';
-
-import { CreateBoardApiResponse } from '@interfaces/board/evm/api-response';
-import { API_URL } from 'constants/api-url';
+import { ApiType } from 'enums';
+import { EvmApiResponse } from 'interfaces';
 import { createEvmBoardSchema, CreateEvmBoardSdk } from 'schema/board/evm/sdk';
 import { validateEnvironment } from 'schema/environment';
-import { BasedBidApi } from 'utils/based-bid-api';
-import { initRpcClients } from 'utils/init-evm-rpc';
-import { IpfsUpload } from 'utils/ipfs-upload';
-import { normalizeByAbi } from 'utils/normalize-abi';
-import { sendTransaction } from 'utils/send-transaction';
+import {
+  BasedBidApi,
+  initRpcClients,
+  IpfsUpload,
+  normalizeByAbi,
+  sendTransaction,
+} from 'utils';
 
 export const createBoard = async (args: CreateEvmBoardSdk) => {
   const env = validateEnvironment();
@@ -34,8 +34,6 @@ export const createBoard = async (args: CreateEvmBoardSdk) => {
     banner: bannerUrl,
   });
 
-  const endpoint = `${API_URL}/create-board`;
-
   const { publicClient, walletClient, account } = initRpcClients(
     validated.chainId,
     env.EVM_RPC_URL,
@@ -51,14 +49,17 @@ export const createBoard = async (args: CreateEvmBoardSdk) => {
     bannerUrl,
     metaUri: metadataUrl,
     fees: validated.fees,
+    isSandboxMode: validated.isSandboxMode,
   };
 
-  const json = await BasedBidApi.invokeApi<CreateBoardApiResponse>(
-    endpoint,
+  const json = await BasedBidApi.invokeApi<EvmApiResponse>(
+    ApiType.SDK,
+    'create-board',
     {
       data: apiPayload,
     },
     'Failed to create board on EVM',
+    args.isSandboxMode,
   );
 
   const txValue = BigInt(json.value);

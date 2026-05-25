@@ -1,6 +1,6 @@
-import { CreateBoardSolanaApiResponse } from '@interfaces/board/solana/api-response';
-import { API_URL } from 'constants/api-url';
 import 'dotenv/config';
+import { ApiType } from 'enums';
+import { CreateBoardSolanaApiResponse } from 'interfaces/board/solana/api-response';
 import { createSolanaBoardApiSchema } from 'schema/board/solana/api';
 import {
   CreateSolanaBoardSdk,
@@ -34,15 +34,14 @@ export const createBoardSolana = async (args: CreateSolanaBoardSdk) => {
     banner: bannerUrl,
   });
 
-  const endpoint = `${API_URL}/sol/apply-sub-board`;
-
   const apiPayload = {
-    chainId: 5011,
+    chainId: args.chainId,
     signer: solanaWrapper.publicKey,
     seed: SeedGenerator.generateBoardSeed(),
     metaData: metadataUrl,
     flashLaunchFeePer: args.flashLaunchFeePer,
     fees: args.fees,
+    isSandboxMode: args.isSandboxMode,
   };
 
   console.log('Calling API for board creation transaction data...');
@@ -50,9 +49,11 @@ export const createBoardSolana = async (args: CreateSolanaBoardSdk) => {
   const validated = createSolanaBoardApiSchema.parse(apiPayload);
 
   const json = await BasedBidApi.invokeApi<CreateBoardSolanaApiResponse>(
-    endpoint,
+    ApiType.SDK,
+    'sol/apply-sub-board',
     validated,
     'Failed to create board on Solana',
+    args.isSandboxMode,
   );
 
   const { transaction, blockhash, lastValidBlockHeight } = json;

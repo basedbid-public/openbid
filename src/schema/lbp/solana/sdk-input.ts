@@ -1,17 +1,19 @@
-import { LaunchPackageType } from '@enums/launch-package.type';
 import { SOLANA_DECIMALS, SOLANA_ZERO_ADDRESS } from 'constants/solana';
-import { SolanaDexType } from 'enums/solana';
+import { LaunchPackageType, SolanaDexType } from 'enums';
 import {
+  metadataInputSchema,
   numberStringSchema,
   saleTimeSchema,
+  solanaAddressSchema,
   solanaDexFeeTierSchema,
 } from 'schema/common';
-import { metadataInputSchema } from 'schema/common/sdk-input/metadata.schema';
-import { solanaAddressSchema } from 'schema/common/solana-address.schema';
+import { solanaChainIdSchema } from 'schema/common/sdk-input';
 import { z } from 'zod';
 
 export const createSolanaLbpInputSchema = z
   .object({
+    isSandboxMode: z.boolean().default(false),
+    chainId: solanaChainIdSchema,
     package: z.union([
       z.literal(LaunchPackageType.BASED),
       z.literal(LaunchPackageType.SUPER_BASED),

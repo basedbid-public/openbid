@@ -1,7 +1,6 @@
-import { SolanaDexType } from '@enums/solana/dex.type';
+import { SolanaDexType } from 'enums/solana/dex.type';
 
 export interface CreateLbpFlashSdk {
-  flashDex: SolanaDexType;
   token: {
     name: string;
     symbol: string;
@@ -16,18 +15,14 @@ export interface CreateLbpFlashSdk {
       description?: string;
     };
   };
-  // Raydium specific
-  raydium?: {
-    feeTierIndex: string;
+  dex: {
+    version: SolanaDexType;
+    feeTier: number;
     finalStartPrice: number;
     hasInitialSwap: boolean;
     solanaInitialBuyHuman: string;
-  };
-  // Meteora specific
-  meteora?: {
     virtualUsd: number;
     nativeSolPriceUsd: number;
-    feeTierIndex: string;
     hasHookDynamicFee: boolean;
     boardSeed?: string;
   };

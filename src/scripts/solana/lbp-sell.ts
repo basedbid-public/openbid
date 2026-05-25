@@ -1,11 +1,11 @@
-import { SellSolanaResponse } from '@interfaces/sell/solana/response';
-import { SolanaWrapper } from '@utils/solana-wrapper';
-import { API_URL } from 'constants/api-url';
 import 'dotenv/config';
+import { ApiType } from 'enums';
+import { SellSolanaResponse } from 'interfaces/sell/solana/response';
 import { validateEnvironmentSolana } from 'schema/environment';
 import { SellSolanaApi } from 'schema/sell/solana/api';
 import { SellSolanaSdk, sellSolanaSdkSchema } from 'schema/sell/solana/sdk';
 import { BasedBidApi } from 'utils/based-bid-api';
+import { SolanaWrapper } from 'utils/solana-wrapper';
 
 export const sellSolana = async (args: SellSolanaSdk) => {
   const env = validateEnvironmentSolana();
@@ -18,10 +18,8 @@ export const sellSolana = async (args: SellSolanaSdk) => {
   );
   await solanaWrapper.init();
 
-  const endpoint = `${API_URL}/sol/lbp-sell`;
-
   const payload: SellSolanaApi = {
-    chainId: 5011,
+    chainId: data.chainId,
     signer: solanaWrapper.publicKey,
     memeMint: data.address,
     amount: data.amount,
@@ -29,9 +27,11 @@ export const sellSolana = async (args: SellSolanaSdk) => {
   };
 
   const json = await BasedBidApi.invokeApi<SellSolanaResponse>(
-    endpoint,
+    ApiType.SDK,
+    'sol/lbp-sell',
     payload,
     `Failed to sell ${data.address} on Solana`,
+    data.isSandboxMode,
   );
 
   const { transaction, blockhash, lastValidBlockHeight } = json;

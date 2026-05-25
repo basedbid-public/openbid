@@ -1,11 +1,12 @@
-import { ClaimSolanaFeeResponse } from '@interfaces/claim-fees/solana/api';
 import 'dotenv/config';
+import { ApiType } from 'enums';
+import { ClaimSolanaFeeResponse } from 'interfaces/claim-fees/solana/api';
 import { ClaimFeesSolanaRequest } from 'schema/claim-fees/solana/request';
 import { validateEnvironmentSolana } from 'schema/environment';
 import { BasedBidApi, SolanaWrapper } from 'utils';
 
 export const claimFlashTokenFeesSolana = async (
-  params: ClaimFeesSolanaRequest,
+  args: ClaimFeesSolanaRequest,
 ) => {
   const env = validateEnvironmentSolana();
 
@@ -15,18 +16,19 @@ export const claimFlashTokenFeesSolana = async (
   );
   await solanaWrapper.init();
 
-  const endpoint = `https://cdn.based.bid/api/sol/collect-flash-fees`;
-
   console.log('Calling API for flash token fees collection...');
 
   const json = await BasedBidApi.invokeApi<ClaimSolanaFeeResponse>(
-    endpoint,
+    ApiType.SDK,
+    'sol/collect-flash-fees',
     {
-      chainId: params.chainId,
+      chainId: args.chainId,
       signer: solanaWrapper.publicKey,
-      flashMint: params.address,
+      flashMint: args.address,
+      isSandboxMode: args.isSandboxMode,
     },
     'Failed to claim flash token fees on Solana',
+    args.isSandboxMode,
   );
 
   const { transaction, blockhash, lastValidBlockHeight } = json;

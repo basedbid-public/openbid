@@ -1,29 +1,27 @@
-import tradeFacetAbi from '@constants/abi/TradeFacet.json';
-import { API_URL } from 'constants/api-url';
+import tradeFacetAbi from 'constants/abi/TradeFacet.json';
 import 'dotenv/config';
-import { SellResponse } from 'interfaces/sell/response';
+import { ApiType } from 'enums';
+import { SellEvmApiResponse } from 'interfaces';
 import { validateEnvironment } from 'schema/environment';
 import { SellEvmSdk } from 'schema/sell/evm/sdk';
-import { BasedBidApi } from 'utils/based-bid-api';
-import { initRpcClients } from 'utils/init-evm-rpc';
-import { sendTransaction } from 'utils/send-transaction';
+import { BasedBidApi, initRpcClients, sendTransaction } from 'utils';
 import { erc20Abi } from 'viem';
 
-export const sell = async (params: SellEvmSdk) => {
+export const sell = async (args: SellEvmSdk) => {
   const env = validateEnvironment();
 
-  const endpoint = `${API_URL}/lbp-sell-preview`;
-
-  const json = await BasedBidApi.invokeApi<SellResponse>(
-    endpoint,
+  const json = await BasedBidApi.invokeApi<SellEvmApiResponse>(
+    ApiType.SDK,
+    'lbp-sell-preview',
     {
-      data: params,
+      data: args,
     },
     'Failed to sell LBP on EVM',
+    args.isSandboxMode,
   );
 
   const { publicClient, walletClient, account } = initRpcClients(
-    params.chainId,
+    args.chainId,
     env.EVM_RPC_URL,
     env.PRIVATE_KEY,
   );

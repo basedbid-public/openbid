@@ -3,7 +3,7 @@ import {
   SOLANA_DECIMALS,
   SOLANA_ZERO_ADDRESS,
 } from 'constants/solana';
-import { SolanaDexType } from 'enums/solana';
+import { SolanaDexType } from 'enums';
 import {
   numberStringSchema,
   saleTimeSchema,
@@ -15,6 +15,7 @@ export const createLbpSolanaApiPayloadSchema = z.object({
   chainId: z.number().int().min(0),
   signer: z.string(),
   data: z.object({
+    isSandboxMode: z.boolean().default(false),
     seed: z.string(),
     advanced: z.literal(true),
     package: z.union([z.literal(0), z.literal(1), z.literal(2)]),

@@ -1,11 +1,6 @@
-import { SolanaDexType } from '@enums/solana/dex.type';
-import {
-  CreateSolanaFlashTx1ApiResponse,
-  CreateSolanaFlashTxApiResponse,
-} from '@interfaces/lbp/create/solana-flash/api';
-import { SolanaWrapper } from '@utils/solana-wrapper';
-import { API_URL } from 'constants/api-url';
 import 'dotenv/config';
+import { ApiType, SolanaDexType } from 'enums';
+import { CreateSolanaFlashTx1ApiResponse } from 'interfaces/lbp/create/solana-flash/api';
 import { validateEnvironmentSolana } from 'schema/environment';
 import {
   CreateSolanaFlashTx1Api,
@@ -13,8 +8,7 @@ import {
 } from 'schema/flash-token/solana/api';
 import { CreateSolanaFlashInput } from 'schema/flash-token/solana/sdk';
 import { SolanaFlashValidator } from 'schema/flash-token/solana/validator';
-import { BasedBidApi } from 'utils/based-bid-api';
-import { IpfsUpload } from 'utils/ipfs-upload';
+import { BasedBidApi, IpfsUpload, SolanaWrapper } from 'utils';
 
 export const createFlashTokenSolana = async (args: CreateSolanaFlashInput) => {
   const env = validateEnvironmentSolana();
@@ -55,12 +49,11 @@ export const createFlashTokenSolana = async (args: CreateSolanaFlashInput) => {
   // ==================== TX1 ====================
   console.log('\n=== Preparing Transaction 1 ===');
 
-  const tx1Endpoint = `${API_URL}/sol/create-flash-tx1`;
-
   const tx1Payload: CreateSolanaFlashTx1Api = {
-    chainId: 5011,
+    chainId: args.chainId,
     signer: solanaWrapper.publicKey,
     flashDex,
+    isSandboxMode: args.isSandboxMode,
     token: {
       name: token.name,
       symbol: token.symbol,
@@ -91,9 +84,11 @@ export const createFlashTokenSolana = async (args: CreateSolanaFlashInput) => {
   console.log('Calling API for Transaction 1...');
   const tx1Response =
     await BasedBidApi.invokeApi<CreateSolanaFlashTx1ApiResponse>(
-      tx1Endpoint,
-      { data: tx1Payload },
+      ApiType.SDK,
+      'sol/create-flash-tx1',
+      tx1Payload,
       'Failed to create flash token Transaction 1',
+      args.isSandboxMode,
     );
 
   if (!tx1Response || !tx1Response.transaction) {
@@ -118,12 +113,11 @@ export const createFlashTokenSolana = async (args: CreateSolanaFlashInput) => {
   // ==================== TX2 ====================
   console.log('\n=== Preparing Transaction 2 ===');
 
-  const tx2Endpoint = `${API_URL}/sol/create-flash-tx2`;
-
   const tx2Payload: CreateSolanaFlashTx2Api = {
     chainId: 5011,
     signer: solanaWrapper.publicKey,
     flashDex,
+    isSandboxMode: args.isSandboxMode,
     tx1Signature,
     flashSeed: tx1Response.flashSeed,
     mintAddress: tx1Response.mintAddress,
@@ -150,10 +144,12 @@ export const createFlashTokenSolana = async (args: CreateSolanaFlashInput) => {
 
   console.log('Calling API for Transaction 2...');
   const tx2Response =
-    await BasedBidApi.invokeApi<CreateSolanaFlashTxApiResponse>(
-      tx2Endpoint,
-      { data: tx2Payload },
+    await BasedBidApi.invokeApi<CreateSolanaFlashTx1ApiResponse>(
+      ApiType.SDK,
+      'sol/create-flash-tx2',
+      tx2Payload,
       'Failed to create flash token Transaction 2',
+      args.isSandboxMode,
     );
 
   if (!tx2Response || !tx2Response.transaction) {

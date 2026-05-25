@@ -5,7 +5,7 @@ import {
   VolatilityDecayPeriodType,
   VolatilityMultiplierType,
   VolatilityTriggerType,
-} from '@enums/fee-builder';
+} from 'enums/fee-builder';
 import { Address } from 'viem';
 
 export type V4BuyLimits =
@@ -50,19 +50,4 @@ export interface EVM_V4_FEES {
   mevProtectionEnabled: boolean;
 }
 
-export interface SOLANA_V4_FEES {
-  liquidity: number;
-  buyback: number;
-  reward: {
-    token: RewardTokenType;
-    amount: number;
-    minTokenBalanceForDividends: number;
-  };
-  customWallets: Array<{
-    name: string;
-    address: Address;
-    amount: number;
-  }>;
-  feeThreshold: 0.01 | 0.1 | 0.25 | 0.5 | 1;
-  dynamicFees: boolean;
-}
+

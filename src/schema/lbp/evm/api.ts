@@ -1,18 +1,22 @@
-import { EvmDexType } from 'enums/evm';
+import { EvmDexType } from 'enums';
 import {
   CooldownDurationType,
   PenaltyFeeType,
+  RewardTokenType,
   VolatilityDecayPeriodType,
   VolatilityMultiplierType,
   VolatilityTriggerType,
 } from 'enums/fee-builder';
-import { RewardTokenType } from 'enums/fee-builder/reward-token.type';
-import { packageIndexSchema, saleTimeSchema } from 'schema/common';
-import { evmChainIdSchema } from 'schema/common/sdk-input/evm-chain-id.schema';
+import {
+  evmChainIdSchema,
+  packageIndexSchema,
+  saleTimeSchema,
+} from 'schema/common';
 import { v4BuyLimitsSchema } from 'schema/v4-fees/buy-limits';
 import { z } from 'zod';
 
 export const evmLbpCreateApiSchema = z.object({
+  isSandboxMode: z.boolean().default(false),
   package: packageIndexSchema,
   chainId: evmChainIdSchema,
   token: z.object({

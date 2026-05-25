@@ -1,12 +1,12 @@
-import { CHAIN_CONFIG } from 'constants/chain-config';
-import { ChainId } from 'types/chain-id';
+import { CHAIN_CONFIG } from '@constants/index';
+import { EvmChainId } from 'types/chain-id';
 import { createWalletClient, http } from 'viem';
 
 import { createPublicClient } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 
 export const initRpcClients = (
-  chainId: ChainId,
+  chainId: EvmChainId,
   rpcUrl: string,
   privateKey: `0x${string}` | undefined,
 ) => {

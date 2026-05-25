@@ -1,8 +1,9 @@
-import { solanaChainIdSchema } from 'schema/common/sdk-input/solana-chain-id.schema';
-import { solanaAddressSchema } from 'schema/common/solana-address.schema';
+import { solanaAddressSchema } from 'schema/common';
+import { solanaChainIdSchema } from 'schema/common/sdk-input';
 import z from 'zod';
 
 export const claimFeesSolanaRequestSchema = z.object({
+  isSandboxMode: z.boolean().default(false),
   chainId: solanaChainIdSchema,
   address: solanaAddressSchema,
 });

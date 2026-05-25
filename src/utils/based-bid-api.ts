@@ -1,9 +1,31 @@
+import { ApiType } from 'enums';
+
 export class BasedBidApi {
+  static sdkApiUrl(isSandboxMode: boolean) {
+    return isSandboxMode
+      ? 'https://cdn.based.bid/api'
+      : `https://static.based.bid/api`;
+  }
+
+  static platformApiUrl(isSandboxMode: boolean) {
+    return isSandboxMode
+      ? 'https://testnet.based.bid/api'
+      : `https://based.bid/api`;
+  }
+
   static async invokeApi<T>(
-    endpoint: string,
+    apiType: ApiType,
+    path: string,
     payload: object,
     errorMessage: string,
+    isSandboxMode: boolean,
   ) {
+    const apiUrl =
+      apiType === ApiType.SDK
+        ? this.sdkApiUrl(isSandboxMode)
+        : this.platformApiUrl(isSandboxMode);
+    const endpoint = `${apiUrl}/${path}`;
+
     const response = await fetch(endpoint, {
       method: 'POST',
       headers: {

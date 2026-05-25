@@ -1,21 +1,21 @@
-import { API_URL } from 'constants/api-url';
+import flashLaunchV3Abi from 'constants/abi/FlashLaunchForV3Facet.json';
+import flashLaunchV4Abi from 'constants/abi/FlashLaunchForV4Facet.json';
 import 'dotenv/config';
+import { ApiType, EvmDexType } from 'enums';
+import { EvmApiResponse } from 'interfaces';
 import { validateEnvironment } from 'schema/environment';
-import { BasedBidApi } from 'utils/based-bid-api';
-import { initRpcClients } from 'utils/init-evm-rpc';
-import { IpfsUpload } from 'utils/ipfs-upload';
-import { sendTransaction } from 'utils/send-transaction';
-
-import flashLaunchV3Abi from '@constants/abi/FlashLaunchForV3Facet.json';
-import flashLaunchV4Abi from '@constants/abi/FlashLaunchForV4Facet.json';
-import { EvmDexType } from '@enums/evm';
-import { CreateFlashTokenEvmResponse } from '@interfaces/flash-token/create/evm/response';
 import {
   CreateFlashTokenEvmApi,
   evmFlashTokenCreateApiSchema,
 } from 'schema/flash-token/evm/api';
 import { CreateFlashTokenEvmSdk } from 'schema/flash-token/evm/sdk';
-import { normalizeByAbi } from 'utils/normalize-abi';
+import {
+  BasedBidApi,
+  initRpcClients,
+  IpfsUpload,
+  normalizeByAbi,
+  sendTransaction,
+} from 'utils';
 
 export const createFlashToken = async (args: CreateFlashTokenEvmSdk) => {
   const env = validateEnvironment();
@@ -44,8 +44,6 @@ export const createFlashToken = async (args: CreateFlashTokenEvmSdk) => {
 
   const metadataUrl = await IpfsUpload.uploadMetadata(metadataIpfs);
 
-  const endpoint = `${API_URL}/create-flash`;
-
   let sale = args.sale;
   if (!sale) {
     sale = {
@@ -56,6 +54,7 @@ export const createFlashToken = async (args: CreateFlashTokenEvmSdk) => {
   }
 
   const apiPayload: CreateFlashTokenEvmApi = {
+    isSandboxMode: args.isSandboxMode,
     chainId: args.chainId,
     token: {
       name: args.token.name,
@@ -81,12 +80,14 @@ export const createFlashToken = async (args: CreateFlashTokenEvmSdk) => {
 
   const payload = evmFlashTokenCreateApiSchema.parse(apiPayload);
 
-  const json = await BasedBidApi.invokeApi<CreateFlashTokenEvmResponse>(
-    endpoint,
+  const json = await BasedBidApi.invokeApi<EvmApiResponse>(
+    ApiType.SDK,
+    'create-flash',
     {
       data: payload,
     },
     'Failed to create flash token on EVM',
+    args.isSandboxMode,
   );
 
   const txValue = BigInt(json.value);

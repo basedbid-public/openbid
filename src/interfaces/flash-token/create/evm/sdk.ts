@@ -1,4 +1,4 @@
-import { EVM_V4_FEES } from '@interfaces/v4-fees';
+import { EVM_V4_FEES } from 'interfaces/v4-fees';
 import { EvmDexType } from 'enums/evm';
 import { ChainId } from 'types/chain-id';
 

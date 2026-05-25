@@ -1,4 +1,4 @@
-import { LaunchPackageType } from '@enums/launch-package.type';
+import { LaunchPackageType } from 'enums/launch-package.type';
 
 export const getLaunchPackageIndex = (launchPackage: LaunchPackageType) => {
   switch (launchPackage) {

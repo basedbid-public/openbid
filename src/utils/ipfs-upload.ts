@@ -1,5 +1,5 @@
-import { IpfsUploadResponse } from '@interfaces/ipfs/upload-response';
 import { readFileSync } from 'fs';
+import { IpfsUploadResponse } from 'interfaces/ipfs/upload-response';
 
 export class IpfsUpload {
   static async uploadMetadata(params: object) {

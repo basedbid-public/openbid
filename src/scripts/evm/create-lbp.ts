@@ -1,18 +1,18 @@
-import creationFacetAbi from '@constants/abi/CreationFacet.json';
-
+import creationFacetAbi from 'constants/abi/CreationFacet.json';
 import 'dotenv/config';
-
-import { EvmApiResponse } from '@interfaces/common/evm/api-response';
-import { getLaunchPackageIndex } from '@utils/get-launch-package-index';
-import { API_URL } from 'constants/api-url';
+import { ApiType } from 'enums';
+import { EvmApiResponse } from 'interfaces';
 import { validateEnvironment } from 'schema/environment';
 import { CreateLbpEvmApi, evmLbpCreateApiSchema } from 'schema/lbp/evm/api';
 import { CreateLbpEvmSdk, evmLbpCreateSchema } from 'schema/lbp/evm/sdk';
-import { BasedBidApi } from 'utils/based-bid-api';
-import { initRpcClients } from 'utils/init-evm-rpc';
-import { IpfsUpload } from 'utils/ipfs-upload';
-import { normalizeByAbi } from 'utils/normalize-abi';
-import { sendTransaction } from 'utils/send-transaction';
+import {
+  BasedBidApi,
+  getLaunchPackageIndex,
+  initRpcClients,
+  IpfsUpload,
+  normalizeByAbi,
+  sendTransaction,
+} from 'utils';
 
 export const createLbp = async (args: CreateLbpEvmSdk) => {
   const env = validateEnvironment();
@@ -50,9 +50,8 @@ export const createLbp = async (args: CreateLbpEvmSdk) => {
 
   const metadataUrl = await IpfsUpload.uploadMetadata(metadataIpfs);
 
-  const endpoint = `${API_URL}/create-lbp`;
-
   const apiPayload: CreateLbpEvmApi = {
+    isSandboxMode: input.isSandboxMode,
     package: getLaunchPackageIndex(input.package),
     chainId: input.chainId,
     token: {
@@ -88,11 +87,13 @@ export const createLbp = async (args: CreateLbpEvmSdk) => {
   const validated = evmLbpCreateApiSchema.parse(apiPayload);
 
   const json = await BasedBidApi.invokeApi<EvmApiResponse>(
-    endpoint,
+    ApiType.SDK,
+    'create-lbp',
     {
       data: validated,
     },
-    'Failed to create LBP on EVM',
+    'Failed to create flash token on EVM',
+    args.isSandboxMode,
   );
 
   const txValue = BigInt(json.value);

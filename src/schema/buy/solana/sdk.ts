@@ -1,9 +1,11 @@
 import { SOLANA_ZERO_ADDRESS } from 'constants/solana';
-import { slippageSchema } from 'schema/common/slippage.schema';
-import { solanaAddressSchema } from 'schema/common/solana-address.schema';
+import { slippageSchema, solanaAddressSchema } from 'schema/common';
+import { solanaChainIdSchema } from 'schema/common/sdk-input';
 import { z } from 'zod';
 
 export const buySolanaSdkSchema = z.object({
+  isSandboxMode: z.boolean().default(false),
+  chainId: solanaChainIdSchema,
   address: solanaAddressSchema,
   amount: z.number().min(0),
   slippage: slippageSchema,

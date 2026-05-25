@@ -1,11 +1,10 @@
-import { BuySolanaResponse } from '@interfaces/buy/solana/response';
-import { SolanaWrapper } from '@utils/solana-wrapper';
-import { API_URL } from 'constants/api-url';
 import 'dotenv/config';
-import { BuySolanaApi } from 'schema/buy/solana/api';
+import { ApiType } from 'enums';
+import { BuySolanaResponse } from 'interfaces/buy/solana/api-response';
+import { buySolanaApiSchema } from 'schema/buy/solana/api';
 import { BuySolanaSdk, buySolanaSdkSchema } from 'schema/buy/solana/sdk';
 import { validateEnvironmentSolana } from 'schema/environment';
-import { BasedBidApi } from 'utils/based-bid-api';
+import { BasedBidApi, SolanaWrapper } from 'utils';
 
 export const buySolana = async (args: BuySolanaSdk) => {
   const env = validateEnvironmentSolana();
@@ -18,24 +17,25 @@ export const buySolana = async (args: BuySolanaSdk) => {
   );
   await solanaWrapper.init();
 
-  const endpoint = `${API_URL}/sol/lbp-buy`;
-
-  const apiPayload: BuySolanaApi = {
-    chainId: 5011,
+  const apiPayload = {
+    chainId: data.chainId,
     signer: solanaWrapper.publicKey,
     memeMint: data.address,
     amount: data.amount,
     slippage: data.slippage,
-    tokenBalance: '0.001',
     referrer: data.referrer,
+    isSandboxMode: data.isSandboxMode,
   };
 
-  const json = await BasedBidApi.invokeApi<BuySolanaResponse>(
-    endpoint,
-    apiPayload,
-    `Failed to buy ${data.address} on Solana`,
-  );
+  const validated = buySolanaApiSchema.parse(apiPayload);
 
+  const json = await BasedBidApi.invokeApi<BuySolanaResponse>(
+    ApiType.SDK,
+    'sol/lbp-buy',
+    validated,
+    `Failed to buy ${data.address} on Solana`,
+    data.isSandboxMode,
+  );
   const { transaction, blockhash, lastValidBlockHeight } = json;
 
   const signature = await solanaWrapper.sendTransaction(

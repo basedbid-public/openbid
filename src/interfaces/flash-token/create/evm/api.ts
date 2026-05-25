@@ -1,5 +1,5 @@
-import { EvmDexType } from '@enums/evm';
-import { EVM_V4_FEES } from '@interfaces/v4-fees';
+import { EvmDexType } from 'enums/evm';
+import { EVM_V4_FEES } from 'interfaces/v4-fees';
 
 export interface CreateFlashTokenEvmApi {
   chainId: number;

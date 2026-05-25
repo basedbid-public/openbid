@@ -1,6 +1,6 @@
 import { SOLANA_DECIMALS } from 'constants/solana';
-import { metadataUrlSchema } from 'schema/common';
-import { solanaAddressSchema } from 'schema/common/solana-address.schema';
+import { metadataUrlSchema, solanaAddressSchema } from 'schema/common';
+import { solanaChainIdSchema } from 'schema/common/sdk-input';
 import { z } from 'zod';
 
 const tokenSchemaTx1 = z.object({
@@ -18,9 +18,10 @@ const tokenSchemaTx2 = z.object({
 
 export const createSolanaFlashTx1ApiSchema = z
   .object({
-    chainId: z.literal(5011),
+    chainId: solanaChainIdSchema,
     signer: solanaAddressSchema,
     flashDex: z.union([z.literal(1), z.literal(2)]), // 1 = Meteora, 2 = Raydium
+    isSandboxMode: z.boolean().default(false),
     token: tokenSchemaTx1,
     // Raydium specific
     raydiumFeeTierIndex: z.string().optional(),
@@ -65,9 +66,10 @@ export type CreateSolanaFlashTx1Api = z.infer<
 >;
 
 export const createSolanaFlashTx2ApiSchema = z.object({
-  chainId: z.literal(5011),
+  chainId: solanaChainIdSchema,
   signer: solanaAddressSchema,
   flashDex: z.union([z.literal(1), z.literal(2)]),
+  isSandboxMode: z.boolean().default(false),
   tx1Signature: z.string(),
   flashSeed: z.string(),
   mintAddress: z.string(),

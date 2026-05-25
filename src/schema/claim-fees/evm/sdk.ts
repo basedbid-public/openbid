@@ -1,8 +1,8 @@
-import { evmChainIdSchema } from 'schema/common';
-import { evmAddressSchema } from 'schema/common/evm-address.schema';
+import { evmAddressSchema, evmChainIdSchema } from 'schema/common';
 import z from 'zod';
 
 export const claimEvmFeesSdkSchema = z.object({
+  isSandboxMode: z.boolean().default(false),
   address: evmAddressSchema,
   target: z.enum(['pool', 'board']),
   chainId: evmChainIdSchema,

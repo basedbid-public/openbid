@@ -1,16 +1,12 @@
-import collectFeeForLBPFacetAbi from '@constants/abi/CollectFeeForLBPFacet.json';
-import { EvmApiResponse } from '@interfaces/common/evm/api-response';
-import { initRpcClients } from '@utils/init-evm-rpc';
-import { sendTransaction } from '@utils/send-transaction';
-import { API_URL } from 'constants/api-url';
+import collectFeeForLBPFacetAbi from 'constants/abi/CollectFeeForLBPFacet.json';
 import 'dotenv/config';
+import { ApiType } from 'enums';
+import { EvmApiResponse } from 'interfaces';
 import { ClaimEvmFeesSdk } from 'schema/claim-fees/evm/sdk';
 import { validateEnvironment } from 'schema/environment';
-import { BasedBidApi } from 'utils/based-bid-api';
+import { BasedBidApi, initRpcClients, sendTransaction } from 'utils';
 export const claimEvmFees = async (args: ClaimEvmFeesSdk) => {
   const env = validateEnvironment();
-
-  const endpoint = `${API_URL}/collect-fee`;
 
   const { publicClient, walletClient, account } = initRpcClients(
     args.chainId,
@@ -26,11 +22,13 @@ export const claimEvmFees = async (args: ClaimEvmFeesSdk) => {
   };
 
   const json = await BasedBidApi.invokeApi<EvmApiResponse>(
-    endpoint,
+    ApiType.SDK,
+    'collect-fee',
     {
       data: payload,
     },
     'Failed to claim fees on EVM',
+    args.isSandboxMode,
   );
 
   const txValue = BigInt(json.value);

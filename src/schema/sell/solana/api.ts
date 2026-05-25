@@ -1,9 +1,9 @@
-import { slippageSchema } from 'schema/common/slippage.schema';
-import { solanaAddressSchema } from 'schema/common/solana-address.schema';
+import { slippageSchema, solanaAddressSchema } from 'schema/common';
+import { solanaChainIdSchema } from 'schema/common/sdk-input';
 import { z } from 'zod';
 
 export const sellSolanaApiPayloadSchema = z.object({
-  chainId: z.literal(5011),
+  chainId: solanaChainIdSchema,
   signer: solanaAddressSchema,
   memeMint: solanaAddressSchema,
   amount: z.number().min(0),

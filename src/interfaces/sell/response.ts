@@ -7,7 +7,7 @@ export interface SellTransaction {
   value: string;
 }
 
-export interface SellResponse {
+export interface SellEvmApiResponse {
   trx1: SellTransaction;
   trx2: SellTransaction;
   chain: {

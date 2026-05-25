@@ -1,4 +1,4 @@
-import { LbpFees } from '@interfaces/lbp/fees';
+import { LbpFees } from 'interfaces/lbp/fees';
 import { EvmDexType } from 'enums/evm/dex.type';
 import { LaunchPackageType } from 'enums/launch-package.type';
 import { ChainId } from 'types/chain-id';

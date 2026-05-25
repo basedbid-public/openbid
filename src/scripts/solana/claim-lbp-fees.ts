@@ -1,10 +1,11 @@
-import { ClaimSolanaFeeResponse } from '@interfaces/claim-fees/solana/api';
 import 'dotenv/config';
+import { ApiType } from 'enums';
+import { ClaimSolanaFeeResponse } from 'interfaces/claim-fees/solana/api';
 import { ClaimFeesSolanaRequest } from 'schema/claim-fees/solana/request';
 import { validateEnvironmentSolana } from 'schema/environment';
 import { BasedBidApi, SolanaWrapper } from 'utils';
 
-export const claimLbpFeesSolana = async (params: ClaimFeesSolanaRequest) => {
+export const claimLbpFeesSolana = async (args: ClaimFeesSolanaRequest) => {
   const env = validateEnvironmentSolana();
 
   const solanaWrapper = new SolanaWrapper(
@@ -13,18 +14,19 @@ export const claimLbpFeesSolana = async (params: ClaimFeesSolanaRequest) => {
   );
   await solanaWrapper.init();
 
-  const endpoint = `https://cdn.based.bid/api/sol/collect-lbp-fees`;
-
   console.log('Calling API for LBP fees collection...');
 
   const json = await BasedBidApi.invokeApi<ClaimSolanaFeeResponse>(
-    endpoint,
+    ApiType.SDK,
+    'sol/collect-lbp-fees',
     {
-      chainId: params.chainId,
+      chainId: args.chainId,
       signer: solanaWrapper.publicKey,
-      memeMint: params.address,
+      memeMint: args.address,
+      isSandboxMode: args.isSandboxMode,
     },
     'Failed to claim LBP fees on Solana',
+    args.isSandboxMode,
   );
 
   const { transaction, blockhash, lastValidBlockHeight } = json;

@@ -1,24 +1,22 @@
-import tradeFacetAbi from '@constants/abi/TradeFacet.json';
-import { BuyResponse } from '@interfaces/buy/response';
-import { API_URL } from 'constants/api-url';
+import tradeFacetAbi from 'constants/abi/TradeFacet.json';
 import 'dotenv/config';
+import { ApiType } from 'enums';
+import { EvmApiResponse } from 'interfaces';
 import { BuyEvmSdk } from 'schema/buy/evm/sdk';
 import { validateEnvironment } from 'schema/environment';
-import { BasedBidApi } from 'utils/based-bid-api';
-import { initRpcClients } from 'utils/init-evm-rpc';
-import { sendTransaction } from 'utils/send-transaction';
+import { BasedBidApi, initRpcClients, sendTransaction } from 'utils';
 
 export const buyEvm = async (args: BuyEvmSdk) => {
   const env = validateEnvironment();
 
-  const endpoint = `${API_URL}/lbp-buy-preview`;
-
-  const json = await BasedBidApi.invokeApi<BuyResponse>(
-    endpoint,
+  const json = await BasedBidApi.invokeApi<EvmApiResponse>(
+    ApiType.SDK,
+    'lbp-buy-preview',
     {
       data: args,
     },
     'Failed to buy LBP on EVM',
+    args.isSandboxMode,
   );
 
   const { publicClient, walletClient, account } = initRpcClients(
