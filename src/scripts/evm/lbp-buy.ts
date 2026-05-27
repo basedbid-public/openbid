@@ -1,5 +1,5 @@
 import tradeFacetAbi from 'constants/abi/TradeFacet.json';
-import { CHAIN_NAME_CONFIG } from 'constants/chain-config';
+import { CHAIN_NAME_CONFIG, CHAIN_SLUG_CONFIG } from 'constants/chain-config';
 import 'dotenv/config';
 import { ApiType } from 'enums';
 import { DryRunOptions } from 'helpers/run';
@@ -92,7 +92,7 @@ export const evmLbpBuy = async (args: BuyEvmSdk, dryRun?: DryRunOptions) => {
         network: CHAIN_NAME_CONFIG[argsValidated.data.chainId],
         tokenAddress: argsValidated.data.address,
         signature: result.transactionHash,
-        basedBidUrl: `${BasedBidApi.platformApiUrl(args.isSandboxMode)}/${CHAIN_SLUG_CONFIG[input.chainId]}/token/${json.address}`,
+        basedBidUrl: `${BasedBidApi.platformApiUrl(args.isSandboxMode)}/${CHAIN_SLUG_CONFIG[argsValidated.data.chainId]}/token/${json.address}`,
       },
       null,
       2,

@@ -1,358 +1,731 @@
 # OpenBid
 
-A TypeScript SDK for interacting with the [BasedBid](https://based.bid) platform - a decentralized token launchpad for creating and trading meme tokens on EVM chains.
+A TypeScript SDK for interacting with the [BasedBid](https://based.bid) platform - a decentralized token launchpad for creating and trading meme tokens on EVM chains and Solana.
 
-## Overview
+## Table of Contents
 
-OpenBid provides a programmatic interface for:
+- [Quick Start - Human](#quick-start---human)
+- [Quick Start - Agent / AI](#quick-start---agent--ai)
+- [Required Environment Variables](#required-environment-variables)
+- [Config File Examples](#config-file-examples)
+- [Dry Run and Validate Modes](#dry-run-and-validate-modes)
+- [Debug Mode](#debug-mode)
+- [Common Errors](#common-errors)
+- [Project Overview](#project-overview)
+- [Running Scripts](#running-scripts)
+- [Configuration Reference](#configuration-reference)
+- [Skills Documentation](#skills-documentation)
 
-- **Creating Boards** - Set up custom whitelabel launchpads for token launches
-- **Creating Liquidity Bootstrapping Pools (LBP)** - Launch tokens with bonding curve mechanics
-- **Creating Flash Tokens** - Instant token launches with advanced protection features (MEV, snipe, cooldown)
-- **Buying tokens** - Purchase tokens from LBPs and liquidity pools
-- **Selling tokens** - Sell tokens back to pools
+---
 
-## Features
+## Quick Start - Human
 
-### Token Launch Capabilities
-
-- **Board Creation**: Create custom whitelabel launchpads for other users to launch tokens
-- **Multi-chain support**: Ethereum, BSC, and Base
-- **Multiple DEX versions**: Uniswap V3/V4, PancakeSwap V3/V4
-- **Fee Builder (V4)**: Advanced fee routing with protection mechanisms
-  - Dynamic fees (volatility-based)
-  - Cooldown protection
-  - Snipe protection
-  - MEV protection
-  - Tiered fees
-- **IPFS Integration**: Automatic logo and metadata uploads
-- **Whitelabel support**: Launch under any custom board on BasedBid
-
-### Security & Protection
-
-- Environment variable validation with Zod schemas
-- Gas estimation before transaction execution
-- Transaction confirmation tracking
-- Comprehensive error handling
-
-## Installation
+### 1. Clone and Install
 
 ```bash
+git clone <repo-url>
+cd openbid
 npm install
 ```
 
-## Configuration
+### 2. Configure Environment
 
-Create a `.env` file in the project root:
+Create a `.env` file:
 
 ```env
+# EVM (Ethereum, Base, BSC)
 PRIVATE_KEY=your_wallet_private_key
-RPC_URL=your_chain_agnostic_rpc_endpoint
+EVM_RPC_URL=https://mainnet.base.org  # or your RPC endpoint
+
+# Solana
+SOLANA_RPC_URL=https://api.devnet.solana.com
+SOLANA_PRIVATE_KEY=your_solana_private_key_as_base58
+
+# Optional
+BASEDBID_API_KEY=your_api_key_if_needed
 ```
+
+### 3. Run Your First LBP
+
+```bash
+# Test with dry-run first (no real transactions)
+npm run evm:create-lbp -- evm-create-lbp ./src/helpers/configs/evm/create-lbp.json --dry-run
+
+# If dry-run looks good, run for real
+npm run evm:create-lbp -- evm-create-lbp ./src/helpers/configs/evm/create-lbp.json
+```
+
+### 4. Parse the Output
+
+Every script outputs structured JSON at the end:
+
+```json
+{
+  "ok": true,
+  "type": "pool",
+  "network": "base-mainnet",
+  "mintAddress": "0x...",
+  "signature": "0x...",
+  "metadataUrl": "ipfs://...",
+  "basedBidUrl": "https://based.markets/pool/8453/0x..."
+}
+```
+
+---
+
+## Quick Start - Agent / AI
+
+### Core Commands
+
+```bash
+# Build
+npm run build
+
+# EVM Operations
+npm run evm:create-lbp -- <operation> <config-file> [--dry-run] [--validate]
+npm run evm:create-board -- <operation> <config-file> [--dry-run] [--validate]
+npm run evm:create-flash-token -- <operation> <config-file> [--dry-run] [--validate]
+npm run evm:lbp-buy -- <operation> <config-file> [--dry-run] [--validate]
+npm run evm:lbp-sell -- <operation> <config-file> [--dry-run] [--validate]
+npm run evm:claim-fees -- <operation> <config-file> [--dry-run] [--validate]
+
+# Solana Operations
+npm run solana:create-lbp -- <operation> <config-file> [--dry-run] [--validate]
+npm run solana:create-board -- <operation> <config-file> [--dry-run] [--validate]
+npm run solana:create-flash-token -- <operation> <config-file> [--dry-run] [--validate]
+npm run solana:lbp-buy -- <operation> <config-file> [--dry-run] [--validate]
+npm run solana:lbp-sell -- <operation> <config-file> [--dry-run] [--validate]
+npm run solana:claim-lbp-fees -- <operation> <config-file> [--dry-run] [--validate]
+```
+
+### Workflow
+
+1. **Validate first**: Always run with `--validate` to check schema without any operations
+2. **Dry-run second**: Run with `--dry-run` to see what API calls would be made
+3. **Execute**: Run without flags to execute for real
+
+### Flag Behavior
+
+| Flag | What it does |
+|------|--------------|
+| `--dry-run` | Validates env + schema, prints API payloads, skips all execution (no IPFS, no API calls, no transactions) |
+| `--validate` | Validates schema only, prints config summary, skips all operations |
+
+### Structured Output
+
+Every script returns JSON with these fields:
+
+**Success:**
+```json
+{
+  "ok": true,
+  "type": "pool|board|flash-token|buy|sell|fees",
+  "network": "solana-devnet|base-mainnet|ethereum-mainnet",
+  "mintAddress": "...",
+  "signature": "...",
+  "metadataUrl": "...",
+  "basedBidUrl": "..."
+}
+```
+
+**Failure:**
+```json
+{
+  "ok": false,
+  "type": "...",
+  "stage": "create-lbp|...",
+  "network": "...",
+  "error": "...",
+  "retryable": true|false,
+  "nextSteps": ["..."]
+}
+```
+
+---
+
+## Required Environment Variables
+
+### EVM Chains (Ethereum, Base, BSC)
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `PRIVATE_KEY` | Yes | Wallet private key (with 0x prefix for Base/Ethereum) |
+| `EVM_RPC_URL` | Yes | RPC endpoint for EVM chain |
+| `BASEDBID_API_KEY` | No | API key for custom board launches |
+
+### Solana
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `SOLANA_PRIVATE_KEY` | Yes | Private key as base58 string |
+| `SOLANA_RPC_URL` | Yes | RPC endpoint (devnet or mainnet) |
 
 ### Supported Chains
 
-| Chain ID | Network          |
-| -------- | ---------------- |
-| 1        | Ethereum Mainnet |
-| 56       | BNB Smart Chain  |
-| 8453     | Base Mainnet     |
+**EVM:**
+| Chain ID | Network |
+|----------|---------|
+| 1 | Ethereum Mainnet |
+| 56 | BNB Smart Chain |
+| 8453 | Base Mainnet |
 
-## Usage
+**Solana:**
+| Chain ID | Network |
+|----------|---------|
+| 5011 | Solana Devnet |
+| 1399811149 | Solana Mainnet |
 
-### Creating a Board
+---
 
-Create a custom board (whitelabel launchpad) for other users to launch tokens under your brand. The account address is automatically derived from your `PRIVATE_KEY` environment variable.
+## Config File Examples
 
-```typescript
-import { createBoard } from './src/create-board';
+### EVM Create LBP (`configs/evm/create-lbp.json`)
 
-const board = await createBoard({
-  chainId: 8453,  // Base Mainnet (1=Ethereum, 56=BSC, 8453=Base)
-  title: 'My Awesome Board',
-  description: 'Launch your tokens on my custom board!',
-  logo: './assets/my-logo.png',  // Path to logo image file
-});
-
-console.log('Board created:', board.boardTitle);
-```
-
-Run the script:
-
-```bash
-npx ts-node src/create-board.ts
-```
-
-See [Create Board Skill](skills/based-bid-create-board/SKILL.md) for detailed documentation.
-
-### Creating an LBP (Liquidity Bootstrapping Pool)
-
-```typescript
-import { createLbp } from './src/create-lbp';
-import { EvmDexType } from './src/enums/evm';
-import { LaunchPackageType } from './src/enums/launch-package.type';
-
-const args = {
-  chainId: 8453, // Base
-  package: LaunchPackageType.BASED,
-  token: {
-    name: 'My Token',
-    symbol: 'MTK',
-    totalSupply: 1_000_000_000,
-    initialBuyAmount: 0,
-    marketCap: 10_000,
-    boardTitle: 'based',
-    metadata: {
-      logo: './logo.png',
-      twitter: 'https://x.com/mytoken',
-      telegram: 'https://t.me/mytoken',
-      website: 'https://mytoken.com',
-      description: 'The next generation meme token',
+```json
+{
+  "isSandboxMode": true,
+  "package": "based",
+  "chainId": 8453,
+  "token": {
+    "boardTitle": "",
+    "name": "My Token",
+    "symbol": "MTK",
+    "totalSupply": 1000000,
+    "initialBuyAmount": 0,
+    "metadata": {
+      "logo": "./assets/logo.png"
     },
+    "marketCap": 10000
   },
-  dex: {
-    version: EvmDexType.UNISWAP_V4,
-    feeTier: 3, // 0.3% for V4 (can be 1-10%)
+  "sale": {
+    "startTime": 0,
+    "maxAllocationPerUser": 0,
+    "maxAllocationPerWhitelistedUser": 0,
+    "delayTradeTime": 0,
+    "whitelistedAddresses": []
   },
-  fees: {
-    buyPoolCreator: 0.01, // 1%
-    sellPoolCreator: 0.01, // 1%
-    buyReferral: 0.01, // 1%
-    graduation: 0.025, // 2.5%
-    v4: {
-      liquidity: 1,
-      buyback: 1,
-      feeThreshold: 0.1,
-      tieredFeesEnabled: false,
-      dynamicFees: {
-        hasHookDynamicFee: true,
-        volatilityDecayPeriod: 'MEDIUM',
-        volatilityMultiplier: 'MEDIUM',
-        volatilityTrigger: 'PER_BLOCK',
-      },
-      cooldownProtection: {
-        cooldownDuration: 'MEDIUM',
-        penaltyFee: 'MEDIUM',
-      },
-      buyLimits: {
-        protectPeriod: 600,
-        maxBuyPerOrigin: 5,
-        isHookWhitelist: false,
-      },
-      mevProtectionEnabled: true,
-      customWallets: [],
-    },
+  "dex": {
+    "version": "uniswap_v4",
+    "feeTier": 3
   },
-  sale: {
-    startTime: Math.floor(Date.now() / 1000),
-    maxAllocationPerUser: 0,
-    maxAllocationPerWhitelistedUser: 0,
-    whitelistedAddresses: [],
-  },
-};
-
-await createLbp(args);
+  "fees": {
+    "buyPoolCreator": 0.001,
+    "sellPoolCreator": 0.001,
+    "buyReferral": 0,
+    "graduation": 0.0025
+  }
+}
 ```
 
-Run the script:
+### EVM Create Board (`configs/evm/create-board.json`)
+
+```json
+{
+  "isSandboxMode": true,
+  "chainId": 8453,
+  "title": "My Board",
+  "description": "A test board description",
+  "logo": "./assets/logo.png",
+  "banner": "./assets/banner.png",
+  "fees": [
+    { "launchPackage": "based", "feePer": "0.001" }
+  ]
+}
+```
+
+### EVM Create Flash Token (`configs/evm/create-flash-token.json`)
+
+```json
+{
+  "isSandboxMode": true,
+  "package": "based",
+  "chainId": 8453,
+  "token": {
+    "name": "Flash Token",
+    "symbol": "FLASH",
+    "totalSupply": 1000000,
+    "initialBuyAmount": 0,
+    "metadata": {
+      "logo": "./assets/logo.png"
+    }
+  },
+  "dex": {
+    "version": "uniswap_v4",
+    "feeTier": 3
+  },
+  "fees": {
+    "buyPoolCreator": 0.001,
+    "sellPoolCreator": 0.001,
+    "buyReferral": 0,
+    "graduation": 0.0025
+  }
+}
+```
+
+### EVM LBP Buy (`configs/evm/lbp-buy.json`)
+
+```json
+{
+  "isSandboxMode": true,
+  "chainId": 8453,
+  "address": "0xTokenAddress",
+  "slippage": 5,
+  "referrer": "0x0000000000000000000000000000000000000000",
+  "amount": 0.01
+}
+```
+
+### EVM LBP Sell (`configs/evm/lbp-sell.json`)
+
+```json
+{
+  "isSandboxMode": true,
+  "chainId": 8453,
+  "address": "0xTokenAddress",
+  "slippage": 5,
+  "referrer": "0x0000000000000000000000000000000000000000",
+  "amount": 100
+}
+```
+
+### EVM Claim Fees (`configs/evm/claim-fees.json`)
+
+```json
+{
+  "isSandboxMode": true,
+  "chainId": 8453,
+  "target": "pool",
+  "address": "0xPoolOrBoardAddress"
+}
+```
+
+### Solana Create LBP (`configs/solana/create-lbp.json`)
+
+```json
+{
+  "isSandboxMode": true,
+  "package": "based",
+  "chainId": 5011,
+  "board": "",
+  "token": {
+    "name": "My Token",
+    "symbol": "MTK",
+    "totalSupply": "1000000000",
+    "initialBuyAmount": "0",
+    "metadata": {
+      "logo": "./assets/logo.png"
+    }
+  },
+  "sale": {
+    "marketCap": "9000",
+    "startTime": 0,
+    "maxAllocationPerUser": "0",
+    "whitelistedAddresses": []
+  },
+  "dex": {
+    "version": "meteora",
+    "feeTier": "1"
+  },
+  "fees": {
+    "buyPoolCreator": 0,
+    "sellPoolCreator": 0,
+    "buyReferral": 0,
+    "graduation": 0
+  }
+}
+```
+
+### Solana Create Flash Token (`configs/solana/create-flash-token.json`)
+
+```json
+{
+  "isSandboxMode": true,
+  "package": "based",
+  "chainId": 5011,
+  "dex": {
+    "version": "meteora",
+    "feeTier": "1"
+  },
+  "token": {
+    "name": "Flash Token",
+    "symbol": "FLASH",
+    "totalSupply": "1000000000",
+    "decimals": 9,
+    "metadata": {
+      "logo": "./assets/logo.png"
+    }
+  },
+  "meteora": {
+    "virtualUsd": 0.01,
+    "nativeSolPriceUsd": 150,
+    "feeTierIndex": "1",
+    "hasHookDynamicFee": true
+  },
+  "fees": {
+    "feeDistribution": false,
+    "dynamicFee": false,
+    "liquidityPercent": 10,
+    "buybackPercent": 10,
+    "rewardPercent": 10,
+    "marketingPercent": 5,
+    "creatorPercent": 5,
+    "customFeePercent": 0,
+    "customFees": [],
+    "collectQuoteThreshold": "0",
+    "collectBaseThreshold": "0",
+    "feeDistributionPayoutKind": "SOL",
+    "minTokenBalanceForDividends": "0"
+  }
+}
+```
+
+### Solana LBP Buy (`configs/solana/lbp-buy.json`)
+
+```json
+{
+  "isSandboxMode": true,
+  "chainId": 5011,
+  "address": "MintAddress",
+  "amount": 0.01,
+  "slippage": 5,
+  "referrer": "11111111111111111111111111111111"
+}
+```
+
+### Solana LBP Sell (`configs/solana/lbp-sell.json`)
+
+```json
+{
+  "isSandboxMode": true,
+  "chainId": 5011,
+  "address": "MintAddress",
+  "amount": 100,
+  "slippage": 5
+}
+```
+
+---
+
+## Dry Run and Validate Modes
+
+### Validate Mode (Schema Only)
+
+Check if your config file is valid without doing anything else:
 
 ```bash
-npx ts-node src/create-lbp.ts
+npm run evm:create-lbp -- evm-create-lbp ./src/helpers/configs/evm/create-lbp.json --validate
 ```
 
-### Creating a Flash Token
+Output:
+```
+Schema validation passed for EVM Create LBP
 
-Flash tokens are instant-launched tokens with advanced protection:
-
-```typescript
-import { createFlashToken } from './src/test-buy';
-
-await createFlashToken('Token Name', 'SYMBOL');
+========== VALIDATE MODE - No operations executed ==========
 ```
 
-### Buying Tokens
+### Dry Run Mode (Full Preview)
 
-Purchase tokens from LBPs or existing liquidity pools with configurable slippage protection.
-
-```typescript
-import { buy } from './src/buy';
-
-const receipt = await buy({
-  chainId: 8453,
-  address: '0x...token_contract_address...',
-  account: '0x...your_wallet_address...',
-  slippage: 1, // 1% slippage tolerance (1, 5, or 10)
-  referrer: '0x0000000000000000000000000000000000000000', // or referral address
-  amount: 0.00001, // Amount to buy (in native currency)
-});
-```
-
-Run the script:
+Preview everything including API payloads, but skip actual execution:
 
 ```bash
-npx ts-node src/buy.ts
+npm run evm:create-lbp -- evm-create-lbp ./src/helpers/configs/evm/create-lbp.json --dry-run
 ```
 
-See [Buy Token Skill](skills/based-bid-buy/SKILL.md) for detailed documentation.
+Output shows:
+- Loaded config
+- IPFS URLs that would be uploaded
+- Full API payload JSON
+- What would be skipped
 
-### Selling Tokens
-
-Sell tokens from LBPs or liquidity pools back to the pool (requires 2 transactions: approve + sell).
-
-```typescript
-import { sell } from './src/sell';
-
-const receipt = await sell({
-  chainId: 8453,
-  address: '0x...token_contract_address...',  // Token you're selling
-  account: '0x...your_wallet_address...',
-  slippage: 1,  // 1% slippage tolerance (1, 5, or 10)
-  referrer: '0x0000000000000000000000000000000000000000',  // or referral address
-  amount: 1000,  // Amount of tokens to sell
-});
-```
-
-Run the script:
+### Using Both Flags
 
 ```bash
-npx ts-node src/sell.ts
+# Both flags can be combined - validate runs first, then dry-run
+npm run evm:create-lbp -- evm-create-lbp ./src/helpers/configs/evm/create-lbp.json --validate --dry-run
 ```
 
-See [Sell Token Skill](skills/based-bid-sell/SKILL.md) for detailed documentation.
+---
 
-## Project Structure
+## Debug Mode
 
-```
-openbid/
-├── src/
-│   ├── buy.ts                    # Buy tokens from LBP/pools
-│   ├── sell.ts                   # Sell tokens
-│   ├── create-board.ts           # Create custom launchpad boards
-│   ├── create-lbp.ts             # Create LBP token launch
-│   ├── create-flash-token.ts     # Create flash token launch
-│   ├── test-buy.ts               # Flash token creation utilities
-│   ├── constants/
-│   │   ├── abi/                  # Smart contract ABIs
-│   │   ├── api-url.ts            # BasedBid API endpoint
-│   │   └── chain-config.ts       # Chain configurations
-│   ├── enums/
-│   │   ├── evm/                  # EVM-related enums (DEX types)
-│   │   ├── fee-builder/          # Fee builder option enums
-│   │   └── launch-package.type.ts # Launch package tiers
-│   ├── interfaces/
-│   │   ├── board/                # Board creation interfaces
-│   │   ├── buy/                  # Buy request/response interfaces
-│   │   ├── sell/                 # Sell request/response interfaces
-│   │   ├── lbp/                  # LBP-related interfaces
-│   │   ├── flash-token/          # Flash token interfaces
-│   │   └── ipfs/                 # IPFS upload interfaces
-│   ├── schema/
-│   │   ├── board/                # Board creation schemas
-│   │   ├── buy/                  # Buy request schemas
-│   │   ├── sell/                 # Sell request schemas
-│   │   ├── lbp/                  # LBP validation schemas
-│   │   ├── flash-token/          # Flash token schemas
-│   │   └── environment.ts        # Environment variable schema
-│   ├── types/
-│   │   ├── chain-id.ts           # Chain ID type definitions
-│   │   └── send-contract-parameters.ts
-│   └── utils/
-│       ├── based-bid-api.ts      # API request wrapper
-│       ├── init-wallet.ts        # Wallet/client initialization
-│       ├── ipfs-upload.ts        # IPFS upload utilities
-│       ├── normalize-abi.ts      # ABI argument normalization
-│       └── send-transaction.ts   # Transaction sender
-├── skills/
-│   ├── based-bid-buy/            # Buy tokens skill documentation
-│   ├── based-bid-sell/           # Sell tokens skill documentation
-│   ├── based-bid-create-board/   # Board creation skill documentation
-│   ├── based-bid-create-lbp/     # LBP creation skill documentation
-│   └── based-bid-create-flash-token/ # Flash token skill
-├── ecosystem.config.js           # PM2 process configuration
-├── package.json
-├── tsconfig.json
-└── README.md
+### Enable Debug Logging
+
+Set debug environment variable before running:
+
+```bash
+# Linux/macOS
+export DEBUG=openbid:*
+
+# Windows (cmd)
+set DEBUG=openbid:*
+
+# Run with debug
+npm run evm:create-lbp -- evm-create-lbp ./src/helpers/configs/evm/create-lbp.json
 ```
 
-## Skills
+### View Full Error Traces
+
+```bash
+# Run with full stack traces
+npm run evm:create-lbp -- evm-create-lbp ./src/helpers/configs/evm/create-lbp.json 2>&1
+```
+
+### Check API Responses
+
+Edit `src/utils/based-bid-api.ts` to add request/response logging:
+
+```typescript
+console.log('API Request:', endpoint, JSON.stringify(payload, null, 2));
+console.log('API Response:', JSON.stringify(result, null, 2));
+```
+
+---
+
+## Common Errors
+
+### Schema Validation Failed
+
+**Error:**
+```
+Schema validation failed for EVM Create LBP:
+Expected number, received string
+```
+
+**Fix:** Check your config JSON - numbers may be strings in JSON. Parse values appropriately:
+```json
+"totalSupply": 1000000    // not "1000000"
+```
+
+### Private Key Not Found
+
+**Error:**
+```
+Private key not found in environment
+```
+
+**Fix:** Ensure `.env` file exists and `PRIVATE_KEY` is set:
+```env
+PRIVATE_KEY=0xyour_private_key_here
+```
+
+### RPC Connection Failed
+
+**Error:**
+```
+Failed to connect to RPC endpoint
+```
+
+**Fix:**
+- Check your `EVM_RPC_URL` or `SOLANA_RPC_URL`
+- Try a different RPC endpoint (Infura, Alchemy, etc.)
+- Check your internet connection
+
+### Insufficient Balance
+
+**Error:**
+```
+insufficient funds for gas
+```
+
+**Fix:** Add more funds to your wallet or use a testnet with faucet
+
+### Invalid Chain ID
+
+**Error:**
+```
+Invalid chain ID
+```
+
+**Fix:** Use supported chain IDs only:
+- EVM: 1 (Ethereum), 56 (BSC), 8453 (Base)
+- Solana: 5011 (Devnet), 1399811149 (Mainnet)
+
+### IPFS Upload Failed
+
+**Error:**
+```
+Failed to upload to IPFS
+```
+
+**Fix:** Check your internet connection, or the logo/banner file path exists
+
+### Transaction Failed
+
+**Error:**
+```
+Transaction reverted
+```
+
+**Fix:** Check the transaction on-chain explorer for more details. Common causes:
+- Token already launched
+- Invalid parameters
+- Network congestion (try again)
+
+### Vanity Address Release Failed
+
+**Error:**
+```
+Failed to release vanity
+```
+
+**Fix:** The mint transaction may have succeeded. Check the mint address output and contact support if needed.
+
+---
+
+## What to Share with Devs
+
+When reporting issues, include:
+
+### 1. The Error Message
+```
+Schema validation failed for Solana Create LBP:
+Expected number, received string at "dex.feeTier"
+```
+
+### 2. Your Config (redact private keys)
+```json
+{
+  "chainId": 5011,
+  "token": { "name": "Test", "symbol": "TEST" },
+  "dex": { "version": "meteora", "feeTier": "1" }
+}
+```
+
+### 3. The Structured Output
+```json
+{
+  "ok": false,
+  "type": "pool",
+  "stage": "create-lbp",
+  "network": "solana-devnet",
+  "error": "...",
+  "retryable": true
+}
+```
+
+### 4. What You Tried
+- Ran with `--validate` first: yes/no
+- Ran with `--dry-run` first: yes/no
+- Tried with different RPC: yes/no
+
+---
+
+## Project Overview
+
+OpenBid provides a programmatic interface for:
+
+- **Creating Boards** - Set up custom whitelabel launchpads
+- **Creating LBPs** - Launch tokens with bonding curve mechanics
+- **Creating Flash Tokens** - Instant token launches with advanced protection
+- **Buying tokens** - Purchase tokens from LBPs and pools
+- **Selling tokens** - Sell tokens back to pools
+- **Claiming fees** - Collect fees from pools you created
+
+### Supported Chains
+
+- **EVM**: Ethereum, BNB Chain, Base
+- **Solana**: Devnet, Mainnet
+
+### Key Features
+
+- IPFS integration for metadata uploads
+- Zod schema validation
+- Transaction confirmation tracking
+- Comprehensive error handling with structured output
+- Dry-run and validate modes for safe testing
+
+---
+
+## Running Scripts
+
+### Using npm scripts
+
+```bash
+# Build first
+npm run build
+
+# EVM
+npm run evm:create-lbp
+npm run evm:create-board
+npm run evm:create-flash-token
+npm run evm:lbp-buy
+npm run evm:lbp-sell
+npm run evm:claim-fees
+
+# Solana
+npm run solana:create-lbp
+npm run solana:create-board
+npm run solana:create-flash-token
+npm run solana:lbp-buy
+npm run solana:lbp-sell
+npm run solana:claim-lbp-fees
+```
+
+### Using ts-node directly
+
+```bash
+npx ts-node ./src/helpers/run.ts evm-create-lbp ./src/helpers/configs/evm/create-lbp.json
+```
+
+### Help
+
+```bash
+# Show available flags
+npm run evm:create-lbp -- --help
+```
+
+---
+
+## Configuration Reference
+
+### Launch Packages
+
+| Package | Value | Description |
+|---------|-------|-------------|
+| `based` | 0 | Basic launch, free |
+| `super_based` | 1 | Team posts sale alerts |
+| `ultra_based` | 2 | Team posts sale + buy alerts |
+
+### DEX Versions
+
+**EVM:**
+| Version | Description |
+|---------|-------------|
+| `uniswap_v3` | Uniswap V3 |
+| `uniswap_v4` | Uniswap V4 (preferred, supports Fee Builder) |
+| `pancakeswap_v3` | PancakeSwap V3 |
+| `pancakeswap_v4` | PancakeSwap V4 |
+
+**Solana:**
+| Version | Description |
+|---------|-------------|
+| `raydium` | Raydium DEX |
+| `meteora` | Meteora DEX (preferred) |
+
+### Fee Tiers
+
+| Chain | Version | Range |
+|-------|---------|-------|
+| EVM V3 | Uniswap/PancakeSwap | 1% only |
+| EVM V4 | Uniswap/PancakeSwap | 1-10% |
+| Solana Raydium | Raydium | 1-10% |
+| Solana Meteora | Meteora | Configurable |
+
+---
+
+## Skills Documentation
 
 Detailed skill documentation is available in the `skills/` directory:
 
-| Skill | Description | Documentation |
-|-------|-------------|---------------|
-| **Create Board** | Create custom whitelabel launchpads | [SKILL.md](skills/based-bid-create-board/SKILL.md) |
-| **Buy** | Purchase tokens from LBPs and pools | [SKILL.md](skills/based-bid-buy/SKILL.md) |
-| **Sell** | Sell tokens back to LBPs and pools (2-step: approve + sell) | [SKILL.md](skills/based-bid-sell/SKILL.md) |
-| **Create LBP** | Launch tokens with Liquidity Bootstrapping Pools | [SKILL.md](skills/based-bid-create-lbp/SKILL.md) |
-| **Create Flash Token** | Instant token launches with advanced protection | [SKILL.md](skills/based-bid-create-flash-token/SKILL.md) |
+| Skill | Description |
+|-------|-------------|
+| [Create Board](skills/based-bid-create-board/SKILL.md) | Create custom whitelabel launchpads |
+| [Create LBP](skills/based-bid-create-lbp/SKILL.md) | Launch tokens with LBPs |
+| [Create Flash Token](skills/based-bid-create-flash-token/SKILL.md) | Instant token launches with protection |
+| [Buy](skills/based-bid-buy/SKILL.md) | Purchase tokens from LBPs |
+| [Sell](skills/based-bid-sell/SKILL.md) | Sell tokens (2-step: approve + sell) |
 
-## Launch Packages
-
-Choose from three tiers when creating an LBP:
-
-| Package       | Value | Description                               |
-| ------------- | ----- | ----------------------------------------- |
-| `BASED`       | `0`   | Basic launch, free                        |
-| `SUPER_BASED` | `1`   | Team posts sale alerts on socials         |
-| `ULTRA_BASED` | `2`   | Team posts sale and buy alerts on socials |
-
-## Fee Structure
-
-### Standard Fees (Max Values)
-
-| Fee Type          | Max Value |
-| ----------------- | --------- |
-| `buyPoolCreator`  | 1%        |
-| `sellPoolCreator` | 1%        |
-| `buyReferral`     | 1%        |
-| `graduation`      | 2.5%      |
-
-### DEX Version Differences
-
-| DEX                      | Fee Tier Range | Notes                    |
-| ------------------------ | -------------- | ------------------------ |
-| V3 (Uniswap/PancakeSwap) | 1% only        | Limited fee flexibility  |
-| V4 (Uniswap/PancakeSwap) | 1-10%          | Full Fee Builder support |
-
-**Note**: V4 is always preferred for new launches as it enables:
-
-- Higher fee payouts (up to 10%)
-- Fee Builder customization
-- Advanced protection features
-
-## API Reference
-
-### BasedBid API
-
-Base URL: `https://cdn.based.bid/api`
-
-Endpoints:
-
-- `POST /create-lbp` - Create LBP transaction data
-- `POST /create-flash` - Create flash token transaction data
-- `POST /lbp-buy-preview` - Get buy transaction preview
-- `POST /lbp-sell-preview` - Get sell transaction preview
-- `POST /upload` - Upload image to IPFS
-- `POST /upload/json` - Upload metadata to IPFS
-
-### Utility Classes
-
-#### `BasedBidApi`
-
-Static API request wrapper for BasedBid endpoints.
-
-```typescript
-const response = await BasedBidApi.invokeApi<ReturnType>(endpoint, payload);
-```
-
-#### `IpfsUpload`
-
-Handles image and metadata uploads to IPFS.
-
-```typescript
-const logoUrl = await IpfsUpload.uploadImage('./logo.png');
-const metadataUrl = await IpfsUpload.uploadMetadata(metadataObject);
-```
+---
 
 ## Development
 
@@ -371,45 +744,16 @@ npx eslint src/
 ### Format
 
 ```bash
-npx prettier --write src/
+npm run format
 ```
 
-## Deployment
-
-The project includes PM2 configuration for process management:
-
-```bash
-pm2 start ecosystem.config.js
-```
-
-## Dependencies
-
-### Core
-
-- `viem` - Modern Ethereum interface
-- `ethers` - Ethereum library
-- `zod` - Schema validation
-- `dotenv` - Environment configuration
-
-### Development
-
-- `typescript` - Type system
-- `ts-node` - TypeScript execution
-- `eslint` - Linting
-- `prettier` - Code formatting
+---
 
 ## Architecture Notes
 
 ### ABI Normalization
 
-The BasedBid API returns flattened transaction arguments. The `normalizeByAbi` utility expands these into nested tuple structures that viem expects:
-
-```typescript
-// API returns flat array - normalizeByAbi expands to ABI structure
-const tupleArgs = createMemeAbi.inputs.map((input, index) =>
-  normalizeByAbi(json.args[index], input, `args[${index}]`),
-);
-```
+The BasedBid API returns flattened transaction arguments. The `normalizeByAbi` utility expands these into nested tuple structures that viem expects.
 
 ### IPFS Upload Flow
 
@@ -421,16 +765,17 @@ const tupleArgs = createMemeAbi.inputs.map((input, index) =>
 ### Transaction Flow
 
 1. Validate input parameters (Zod schemas)
-2. Upload logo/metadata to IPFS
+2. Upload logo/metadata to IPFS (unless dry-run)
 3. Call BasedBid API for transaction data
-4. Estimate gas
-5. Send transaction
-6. Wait for confirmation
-7. Output transaction receipt
+4. Send transaction
+5. Wait for confirmation
+6. Output structured JSON result
+
+---
 
 ## Security Considerations
 
 - Never commit `.env` files with private keys
 - Use dedicated wallet addresses for automation
 - Verify contract addresses before transactions
-- Test with small amounts on mainnet
+- Test with small amounts on testnet/sandbox mode first
