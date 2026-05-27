@@ -6,7 +6,7 @@ import { BuyEvmSdk } from 'schema/buy/evm/sdk';
 import { validateEnvironment } from 'schema/environment';
 import { BasedBidApi, initRpcClients, sendTransaction } from 'utils';
 
-export const buyEvm = async (args: BuyEvmSdk) => {
+export const evmLbpBuy = async (args: BuyEvmSdk) => {
   const env = validateEnvironment();
 
   const json = await BasedBidApi.invokeApi<EvmApiResponse>(

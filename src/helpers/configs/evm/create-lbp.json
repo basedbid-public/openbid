@@ -1,0 +1,38 @@
+{
+  "isSandboxMode": true,
+  "package": "based",
+  "chainId": 8453,
+  "token": {
+    "boardTitle": "",
+    "name": "Test Token",
+    "symbol": "TEST",
+    "totalSupply": 1000000,
+    "initialBuyAmount": 0,
+    "metadata": {
+      "logo": "./assets/logo.png",
+      "twitter": "",
+      "telegram": "",
+      "website": "",
+      "discord": "",
+      "description": ""
+    },
+    "marketCap": 10000
+  },
+  "sale": {
+    "startTime": 0,
+    "maxAllocationPerUser": 0,
+    "maxAllocationPerWhitelistedUser": 0,
+    "delayTradeTime": 0,
+    "whitelistedAddresses": []
+  },
+  "dex": {
+    "version": "uniswap_v4",
+    "feeTier": 3
+  },
+  "fees": {
+    "buyPoolCreator": 0.001,
+    "sellPoolCreator": 0.001,
+    "buyReferral": 0,
+    "graduation": 0.0025
+  }
+}

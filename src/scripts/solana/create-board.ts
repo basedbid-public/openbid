@@ -8,7 +8,8 @@ import {
 } from 'schema/board/solana/sdk';
 import { validateEnvironmentSolana } from 'schema/environment';
 import { BasedBidApi, IpfsUpload, SeedGenerator, SolanaWrapper } from 'utils';
-export const createBoardSolana = async (args: CreateSolanaBoardSdk) => {
+
+export const createSolanaBoard = async (args: CreateSolanaBoardSdk) => {
   const env = validateEnvironmentSolana();
 
   const argsValidated = createSolanaBoardSdkSchema.safeParse(args);

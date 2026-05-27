@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import { ApiType, SolanaDexType } from 'enums';
 import { CreateSolanaFlashTx1ApiResponse } from 'interfaces/lbp/create/solana-flash/api';
+import { SolanaVanityUpdate } from 'interfaces/solana-vanity-update';
 import { validateEnvironmentSolana } from 'schema/environment';
 import {
   CreateSolanaFlashTx1Api,
@@ -9,16 +10,11 @@ import {
 import { CreateSolanaFlashInput } from 'schema/flash-token/solana/sdk';
 import { SolanaFlashValidator } from 'schema/flash-token/solana/validator';
 import { solanaFeeDistributionApiPayloadSchema } from 'schema/lbp/solana/fee-distribution';
-import { SolanaChainId } from 'types/chain-id';
 import { BasedBidApi, IpfsUpload, SolanaWrapper } from 'utils';
 
-let launchedToken: {
-  chainId: SolanaChainId;
-  mintAddress: string;
-  signature: string;
-} | null = null;
+let launchedToken: SolanaVanityUpdate | null = null;
 
-export const createFlashTokenSolana = async (args: CreateSolanaFlashInput) => {
+export const createSolanaFlashToken = async (args: CreateSolanaFlashInput) => {
   let launchConfirmed = false;
 
   try {
@@ -40,7 +36,7 @@ export const createFlashTokenSolana = async (args: CreateSolanaFlashInput) => {
     const metadataIpfs = {
       name: token.name,
       symbol: token.symbol,
-      decimals: token.decimals,
+      decimals: 9,
       totalSupply: token.totalSupply,
       logo: logoUrl,
       twitter: token.metadata.twitter ?? '',
@@ -54,9 +50,6 @@ export const createFlashTokenSolana = async (args: CreateSolanaFlashInput) => {
 
     const metadataUrl = await IpfsUpload.uploadMetadata(metadataIpfs);
 
-    // Determine flashDex value (1 = Meteora, 2 = Raydium)
-    const flashDex = args.flashDex === SolanaDexType.METEORA ? 1 : 2;
-
     // ==================== TX1 ====================
     console.log('\nStep 1 of 3: Creating the token mint');
     console.log(
@@ -66,16 +59,19 @@ export const createFlashTokenSolana = async (args: CreateSolanaFlashInput) => {
     const tx1Payload: CreateSolanaFlashTx1Api = {
       chainId: args.chainId,
       signer: solanaWrapper.publicKey,
-      flashDex,
+      dex: {
+        version: args.dex.version,
+        feeTier: args.dex.feeTier,
+      },
       token: {
         name: token.name,
         symbol: token.symbol,
         metadataUrl: metadataUrl,
         totalSupply: token.totalSupply,
-        decimals: token.decimals,
+        decimals: 9,
       },
       // Add Raydium specific fields if applicable
-      ...(input.flashDex === SolanaDexType.RAYDIUM &&
+      ...(input.dex.version === SolanaDexType.RAYDIUM &&
         raydium && {
           raydiumFeeTierIndex: raydium.feeTierIndex,
           finalStartPrice: raydium.finalStartPrice,
@@ -83,7 +79,7 @@ export const createFlashTokenSolana = async (args: CreateSolanaFlashInput) => {
           solanaInitialBuyHuman: raydium.solanaInitialBuyHuman,
         }),
       // Add Meteora specific fields if applicable
-      ...(input.flashDex === SolanaDexType.METEORA &&
+      ...(input.dex.version === SolanaDexType.METEORA &&
         meteora && {
           baseTokenMint: 'So11111111111111111111111111111111111111112',
           virtualUsd: meteora.virtualUsd,
@@ -143,7 +139,10 @@ export const createFlashTokenSolana = async (args: CreateSolanaFlashInput) => {
     const tx2Payload: CreateSolanaFlashTx2Api = {
       chainId: args.chainId,
       signer: solanaWrapper.publicKey,
-      flashDex,
+      dex: {
+        version: args.dex.version,
+        feeTier: args.dex.feeTier,
+      },
       tx1Signature,
       flashSeed: tx1Response.flashSeed,
       mintAddress: tx1Response.mintAddress,
@@ -154,7 +153,7 @@ export const createFlashTokenSolana = async (args: CreateSolanaFlashInput) => {
         decimals: 9,
       },
       // Add Raydium specific fields if applicable
-      ...(args.flashDex === SolanaDexType.RAYDIUM &&
+      ...(args.dex.version === SolanaDexType.RAYDIUM &&
         args.raydium && {
           raydiumFeeTierIndex: args.raydium.feeTierIndex,
           finalStartPrice: args.raydium.finalStartPrice,
@@ -162,10 +161,11 @@ export const createFlashTokenSolana = async (args: CreateSolanaFlashInput) => {
           solanaInitialBuyHuman: args.raydium.solanaInitialBuyHuman,
         }),
       // Add Meteora specific fields if applicable
-      ...(args.flashDex === SolanaDexType.METEORA &&
+      ...(args.dex.version === SolanaDexType.METEORA &&
         args.meteora && {
           meteoraFeeTierIndex: args.meteora.feeTierIndex,
           meteoraTokenAccountSeed: tx1Response.meteoraTokenAccountSeed,
+          finalStartPrice: args.meteora.finalStartPrice,
         }),
     };
 

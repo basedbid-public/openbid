@@ -1,0 +1,49 @@
+{
+  "isSandboxMode": true,
+  "package": "based",
+  "chainId": 5011,
+  "token": {
+    "name": "Flash Token",
+    "symbol": "FLASH",
+    "totalSupply": "1000000000",
+    "initialBuyAmount": "0",
+    "metadata": {
+      "logo": "./assets/images.jpeg",
+      "twitter": "",
+      "telegram": "",
+      "website": "",
+      "discord": "",
+      "description": ""
+    }
+  },
+  "dex": {
+    "version": "meteora",
+    "feeTier": "1"
+  },
+  "fees": {
+    "buyPoolCreator": 0,
+    "sellPoolCreator": 0,
+    "buyReferral": 0,
+    "graduation": 0,
+    "feeDistribution": false,
+    "dynamicFee": false,
+    "customFeePercent": 0,
+    "liquidityPercent": 10,
+    "buybackPercent": 10,
+    "rewardPercent": 0,
+    "marketingPercent": 0,
+    "creatorPercent": 5,
+    "customFees": [],
+    "collectQuoteThreshold": "0",
+    "collectBaseThreshold": "0",
+    "feeDistributionPayoutKind": "SOL",
+    "minTokenBalanceForDividends": "0"
+  },
+  "meteora": {
+    "virtualUsd": 0.01,
+    "nativeSolPriceUsd": 150,
+    "feeTierIndex": "1",
+    "hasHookDynamicFee": true,
+    "finalStartPrice": 0.05
+  }
+}

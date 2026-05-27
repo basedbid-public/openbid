@@ -1,4 +1,5 @@
 import { SOLANA_DECIMALS } from 'constants/solana';
+import { SolanaDexType } from 'enums';
 import { metadataUrlSchema, solanaAddressSchema } from 'schema/common';
 import { solanaChainIdSchema } from 'schema/common/sdk-input';
 import { z } from 'zod';
@@ -20,7 +21,10 @@ export const createSolanaFlashTx1ApiSchema = z
   .object({
     chainId: solanaChainIdSchema,
     signer: solanaAddressSchema,
-    flashDex: z.union([z.literal(1), z.literal(2)]), // 1 = Meteora, 2 = Raydium
+    dex: z.object({
+      version: z.enum(SolanaDexType),
+      feeTier: z.string(),
+    }),
     token: tokenSchemaTx1,
     // Raydium specific
     raydiumFeeTierIndex: z.string().optional(),
@@ -37,7 +41,7 @@ export const createSolanaFlashTx1ApiSchema = z
   })
   .refine(
     (data) => {
-      if (data.flashDex === 1) {
+      if (data.dex.version === SolanaDexType.RAYDIUM) {
         return (
           data.raydiumFeeTierIndex !== undefined &&
           data.finalStartPrice !== undefined &&
@@ -56,7 +60,7 @@ export const createSolanaFlashTx1ApiSchema = z
     },
     {
       message:
-        'Raydium specific fields are required when flashDex is 1, and Meteora specific fields are required when flashDex is 2',
+        'Raydium specific fields are required when DEX version is raydium, and Meteora specific fields are required when DEX version is meteora',
     },
   );
 
@@ -67,7 +71,10 @@ export type CreateSolanaFlashTx1Api = z.infer<
 export const createSolanaFlashTx2ApiSchema = z.object({
   chainId: solanaChainIdSchema,
   signer: solanaAddressSchema,
-  flashDex: z.union([z.literal(1), z.literal(2)]),
+  dex: z.object({
+    version: z.enum(SolanaDexType),
+    feeTier: z.string(),
+  }),
   tx1Signature: z.string(),
   flashSeed: z.string(),
   mintAddress: z.string(),

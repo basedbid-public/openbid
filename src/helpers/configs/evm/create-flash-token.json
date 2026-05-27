@@ -1,0 +1,57 @@
+{
+  "isSandboxMode": true,
+  "package": "based",
+  "chainId": 8453,
+  "token": {
+    "name": "dante sdk",
+    "symbol": "dante",
+    "totalSupply": 1000000,
+    "initialBuyAmount": 0,
+    "metadata": {
+      "logo": "./assets/images.jpeg",
+      "twitter": "",
+      "telegram": "",
+      "website": "",
+      "discord": "",
+      "description": ""
+    }
+  },
+  "dex": {
+    "version": "uniswap_v4",
+    "feeTier": 3
+  },
+  "fees": {
+    "buyPoolCreator": 0.001,
+    "sellPoolCreator": 0.001,
+    "buyReferral": 0,
+    "graduation": 0.0025,
+    "v4": {
+      "liquidity": 1,
+      "buyback": 1,
+      "reward": {
+        "token": "USDC",
+        "amount": 1,
+        "minTokenBalanceForDividends": 0.01
+      },
+      "customWallets": [],
+      "feeThreshold": 0.1,
+      "tieredFeesEnabled": false,
+      "dynamicFees": {
+        "hasHookDynamicFee": true,
+        "volatilityDecayPeriod": "medium",
+        "volatilityMultiplier": "medium",
+        "volatilityTrigger": "per_block"
+      },
+      "cooldownProtection": {
+        "cooldownDuration": "medium",
+        "penaltyFee": "medium"
+      },
+      "buyLimits": {
+        "protectPeriod": 600,
+        "maxBuyPerOrigin": 5,
+        "isHookWhitelist": false
+      },
+      "mevProtectionEnabled": false
+    }
+  }
+}

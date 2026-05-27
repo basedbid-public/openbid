@@ -1,0 +1,8 @@
+{
+  "isSandboxMode": true,
+  "chainId": 8453,
+  "address": "0xTokenAddress",
+  "slippage": 5,
+  "referrer": "0x0000000000000000000000000000000000000000",
+  "amount": 0.01
+}

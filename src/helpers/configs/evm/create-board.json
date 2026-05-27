@@ -1,0 +1,11 @@
+{
+  "isSandboxMode": true,
+  "chainId": 8453,
+  "title": "My Board",
+  "description": "A test board description",
+  "logo": "./assets/logo.png",
+  "banner": "./assets/banner.png",
+  "fees": [
+    { "launchPackage": "based", "feePer": "0.001" }
+  ]
+}

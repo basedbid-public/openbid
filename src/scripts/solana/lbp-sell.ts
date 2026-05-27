@@ -7,7 +7,7 @@ import { SellSolanaSdk, sellSolanaSdkSchema } from 'schema/sell/solana/sdk';
 import { BasedBidApi } from 'utils/based-bid-api';
 import { SolanaWrapper } from 'utils/solana-wrapper';
 
-export const sellSolana = async (args: SellSolanaSdk) => {
+export const solanaLbpSell = async (args: SellSolanaSdk) => {
   const env = validateEnvironmentSolana();
 
   const data = sellSolanaSdkSchema.parse(args);

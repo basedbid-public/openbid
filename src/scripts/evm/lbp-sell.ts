@@ -7,7 +7,7 @@ import { SellEvmSdk } from 'schema/sell/evm/sdk';
 import { BasedBidApi, initRpcClients, sendTransaction } from 'utils';
 import { erc20Abi } from 'viem';
 
-export const sell = async (args: SellEvmSdk) => {
+export const evmLbpSell = async (args: SellEvmSdk) => {
   const env = validateEnvironment();
 
   const json = await BasedBidApi.invokeApi<SellEvmApiResponse>(

@@ -124,30 +124,6 @@ export const createSolanaLbpInputSchema = z
           message:
             'rewardToken is required when rewardPercent is greater than 0',
         },
-      )
-      .refine(
-        (data) => {
-          if (!data) {
-            return true;
-          }
-
-          const customFeesTotal = data.customFees.reduce(
-            (sum, fee) => sum + fee.percent,
-            0,
-          );
-          const total =
-            data.liquidityPercent +
-            data.buybackPercent +
-            data.rewardPercent +
-            data.marketingPercent +
-            data.creatorPercent +
-            customFeesTotal;
-          return total === 50;
-        },
-        {
-          message:
-            'liquidityPercent + buybackPercent + rewardPercent + marketingPercent + creatorPercent + customFees percentages must equal 50',
-        },
       ),
   })
   .refine(

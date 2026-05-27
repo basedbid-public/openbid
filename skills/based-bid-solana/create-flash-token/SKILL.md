@@ -33,19 +33,26 @@ import { CreateSolanaFlashInput } from 'schema/flash-token/solana/sdk';
 
 ### Top-Level Fields
 
-| Parameter    | Type            | Required | Description                                   |
-| ------------ | --------------- | -------- | --------------------------------------------- |
-| `flashDex`   | `SolanaDexType` | Yes      | `METEORA` or `RAYDIUM`                        |
-| `board`      | `string`        | No       | **Optional.** Custom board title. Only include if user explicitly wants a custom board. |
-| `boardOwner` | `string`        | No       | Board owner address (required if `board` set) |
-| `token`      | `object`        | Yes      | Token configuration (see below)               |
-| `raydium`    | `object`        | Yes\*    | Raydium-specific config (see below)           |
-| `meteora`    | `object`        | Yes\*    | Meteora-specific config (see below)           |
+| Parameter | Type       | Required | Description                                   |
+| --------- | ---------- | -------- | --------------------------------------------- |
+| `dex`     | `object`   | Yes      | DEX configuration (`version` + `feeTier`)     |
+| `board`   | `string`   | No       | **Optional.** Custom board title. Only include if user explicitly wants a custom board. |
+| `boardOwner` | `string` | No       | Board owner address (required if `board` set) |
+| `token`   | `object`   | Yes      | Token configuration (see below)               |
+| `raydium` | `object`   | Yes\*    | Raydium-specific config (see below)           |
+| `meteora` | `object`   | Yes\*    | Meteora-specific config (see below)           |
+
+**DEX Configuration:**
+
+| Field   | Type            | Required | Description                       |
+| ------- | --------------- | -------- | --------------------------------- |
+| `version` | `SolanaDexType` | Yes      | `METEORA` or `RAYDIUM`            |
+| `feeTier` | `string`        | Yes      | Fee tier index as string          |
 
 **Validation rules:**
 
-- `flashDex === RAYDIUM` → `raydium` must be defined, `meteora` ignored
-- `flashDex === METEORA` → `meteora` must be defined, `raydium` ignored
+- `dex.version === RAYDIUM` → `raydium` must be defined, `meteora` ignored
+- `dex.version === METEORA` → `meteora` must be defined, `raydium` ignored
 - `board` and `boardOwner` must both be defined or both omitted
 
 > **Board behavior:** `board` is **purely optional**. Only include it if the user explicitly provides a custom board name they created via the create-board skill. Omitting it means the token launches without any board affiliation. **Do not send `'based'` or any default string unless the user explicitly requests it.**
@@ -71,7 +78,7 @@ import { CreateSolanaFlashInput } from 'schema/flash-token/solana/sdk';
 | `discord`     | `string` | No       | Valid Discord invite URL |
 | `description` | `string` | No       | Max 789 characters       |
 
-### Raydium Configuration (when `flashDex === RAYDIUM`)
+### Raydium Configuration (when `dex.version === RAYDIUM`)
 
 | Field                   | Type      | Required | Description                     |
 | ----------------------- | --------- | -------- | ------------------------------- |
@@ -80,7 +87,7 @@ import { CreateSolanaFlashInput } from 'schema/flash-token/solana/sdk';
 | `hasInitialSwap`        | `boolean` | Yes      | Whether to perform initial swap |
 | `solanaInitialBuyHuman` | `string`  | Yes      | Initial buy amount as string    |
 
-### Meteora Configuration (when `flashDex === METEORA`)
+### Meteora Configuration (when `dex.version === METEORA`)
 
 | Field               | Type      | Required | Description                        |
 | ------------------- | --------- | -------- | ---------------------------------- |
@@ -111,7 +118,8 @@ Environment variables (see `.env`):
 ### Transaction 1 (TX1)
 
 7. **API Request** — Payload sent to `${API_URL}/sol/create-flash-tx1`:
-   - `flashDex` mapped to `1` (Meteora) or `2` (Raydium)
+   - `dex.version` set to `METEORA` or `RAYDIUM`
+   - `dex.feeTier` passed as string
    - DEX-specific fields included conditionally
 8. **Transaction Processing**:
    - Decodes base64 `transaction` from API
@@ -125,6 +133,7 @@ Environment variables (see `.env`):
 10. **API Request** — Payload sent to `${API_URL}/sol/create-flash-tx2`:
     - Includes `tx1Signature` from previous step
     - Includes `flashSeed` and `mintAddress` from TX1 response
+    - `dex.version` and `dex.feeTier` included
     - DEX-specific fields included conditionally
 11. **Transaction Processing**:
     - Decodes base64 `transaction` from API
@@ -146,7 +155,6 @@ interface CreateSolanaFlashTx1ApiResponse {
   mintAddress: string; // Token mint address
   mintSignerSecretHex: string; // 128 hex chars (first 32 bytes = ed25519 priv key)
   flashSeed: string;
-  flashDex?: number;
   meteoraTokenAccountSeed?: string;
   positionNftMintAddress?: string;
   positionNftSignerSecretHex?: string;
@@ -171,7 +179,6 @@ interface CreateSolanaFlashTxApiResponse {
   mintAddress: string;
   mintSignerSecretHex: string;
   flashSeed: string;
-  flashDex?: number;
   positionNftMintAddress?: string;
   positionNftSignerSecretHex?: string;
   tokenAccountSeedForRaydium?: string;
@@ -189,11 +196,11 @@ On success, returns:
 ```typescript
 {
   mintAddress: string;              // Token mint address
-  tx1Signature: string;            // TX1 transaction signature
-  tx2Signature: string;            // TX2 transaction signature
-  metadataUrl: string;             // IPFS metadata URL
+  tx1Signature: string;             // TX1 transaction signature
+  tx2Signature: string;             // TX2 transaction signature
+  metadataUrl: string;              // IPFS metadata URL
   meteoraTokenAccountSeed?: string; // Meteora-specific seed
-  positionNftMintAddress?: string; // Raydium position NFT address
+  positionNftMintAddress?: string;  // Raydium position NFT address
 }
 ```
 
@@ -206,7 +213,10 @@ import { createFlashTokenSolana } from './src/scripts/solana/create-flash-token'
 import { SolanaDexType } from '@enums/solana/dex.type';
 
 const result = await createFlashTokenSolana({
-  flashDex: SolanaDexType.RAYDIUM,
+  dex: {
+    version: SolanaDexType.RAYDIUM,
+    feeTier: '1',
+  },
   token: {
     name: 'Flash Token',
     symbol: 'FLASH',
@@ -236,7 +246,10 @@ console.log('TX2:', result.tx2Signature);
 
 ```typescript
 const result = await createFlashTokenSolana({
-  flashDex: SolanaDexType.METEORA,
+  dex: {
+    version: SolanaDexType.METEORA,
+    feeTier: '1',
+  },
   board: 'my-awesome-board',
   boardOwner: 'your_wallet_address',
   token: {
@@ -264,7 +277,7 @@ const result = await createFlashTokenSolana({
 | Error                                            | Cause                        | Fix                                                   |
 | ------------------------------------------------ | ---------------------------- | ----------------------------------------------------- |
 | `Invalid input arguments`                        | Zod schema validation failed | Check all required fields per chosen DEX              |
-| `Raydium or Meteora parameters must be provided` | Missing DEX-specific config  | Add `raydium` or `meteora` object matching `flashDex` |
+| `Raydium or Meteora parameters must be provided` | Missing DEX-specific config  | Add `raydium` or `meteora` object matching `dex.version` |
 | `board and boardOwner must both be defined`      | Only one of them provided    | Provide both or neither                               |
 | `Failed to create flash token Transaction 1`     | API error for TX1            | Check API availability and network                    |
 | `Failed to create flash token Transaction 2`     | API error for TX2            | Verify TX1 succeeded and params are correct           |
@@ -277,7 +290,7 @@ const result = await createFlashTokenSolana({
 | Transactions     | 1 API call + 1 on-chain tx | 2 sequential API calls + 2 on-chain txs                        |
 | Transaction type | ABI-encoded contract call  | Base64 compiled VersionedTransaction                           |
 | Signers          | Single wallet              | Wallet + mint keypair (+ position NFT keypair for Raydium TX2) |
-| DEX config       | `version` + `feeTier`      | DEX-specific objects (`raydium` or `meteora`)                  |
+| DEX config       | `version` + `feeTier`      | `dex.version` + `dex.feeTier` + DEX-specific objects          |
 | Chain ID         | 1 / 56 / 8453              | 5011 (devnet)                                                  |
 
 ## Key Differences from Solana LBP
@@ -300,7 +313,7 @@ Solana supports sandbox mode for testing. When `isSandboxMode: true` is passed:
 ```typescript
 await createFlashTokenSolana({
   isSandboxMode: true,  // Enable sandbox mode (uses testnet.based.bid)
-  flashDex: SolanaDexType.METEORA,
+  dex: { version: SolanaDexType.METEORA, feeTier: '1' },
   token: { ... },
   meteora: { ... },
 });
@@ -331,5 +344,5 @@ The script will prompt: `Do you want to proceed? (y/n):`
 3. **Ensure SOL balance** — Two transactions means double the SOL for fees
 4. **Test on devnet first** — Flash tokens are irreversible on mainnet
 5. **Use correct signers** — Wallet first, then mint keypair (and position NFT keypair for Raydium TX2)
-6. **Validate fee tiers** — Check DEX documentation for valid `feeTierIndex` values
+6. **Validate fee tiers** — Check DEX documentation for valid `feeTier` values
 7. **Use sandbox mode for testing** — Set `isSandboxMode: true` to test without real funds

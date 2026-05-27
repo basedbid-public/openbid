@@ -18,7 +18,7 @@ import { z } from 'zod';
 export const evmLbpCreateSchema = z
   .object({
     isSandboxMode: z.boolean().default(false),
-    package: z.enum(LaunchPackageType),
+    package: z.enum(LaunchPackageType).default(LaunchPackageType.BASED),
     chainId: evmChainIdSchema,
     token: z.object({
       boardTitle: z.string().optional(),

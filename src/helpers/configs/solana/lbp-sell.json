@@ -1,0 +1,7 @@
+{
+  "isSandboxMode": true,
+  "chainId": 5011,
+  "address": "MintAddress",
+  "amount": 100,
+  "slippage": 5
+}

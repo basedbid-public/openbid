@@ -1,0 +1,6 @@
+{
+  "isSandboxMode": true,
+  "chainId": 8453,
+  "target": "pool",
+  "address": "0xPoolOrBoardAddress"
+}

@@ -9,6 +9,7 @@ import {
 import { RewardTokenType } from 'enums/fee-builder/reward-token.type';
 import { evmChainIdSchema, metadataUrlSchema } from 'schema/common';
 import { v4BuyLimitsSchema } from 'schema/v4-fees/buy-limits';
+import { rewardTokenDividendsSchema } from 'schema/v4-fees/reward-token-dividends';
 import { z } from 'zod';
 
 export const evmFlashTokenCreateApiSchema = z.object({
@@ -62,12 +63,7 @@ export const evmFlashTokenCreateApiSchema = z.object({
               .object({
                 token: z.enum(RewardTokenType),
                 amount: z.number(),
-                minTokenBalanceForDividends: z.union([
-                  z.literal(0.01),
-                  z.literal(0.1),
-                  z.literal(1),
-                  z.literal(5),
-                ]),
+                minTokenBalanceForDividends: rewardTokenDividendsSchema,
               })
               .optional(),
             customWallets: z.array(

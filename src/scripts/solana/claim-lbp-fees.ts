@@ -5,7 +5,7 @@ import { ClaimFeesSolanaRequest } from 'schema/claim-fees/solana/request';
 import { validateEnvironmentSolana } from 'schema/environment';
 import { BasedBidApi, SolanaWrapper } from 'utils';
 
-export const claimLbpFeesSolana = async (args: ClaimFeesSolanaRequest) => {
+export const claimSolanaLbpFees = async (args: ClaimFeesSolanaRequest) => {
   const env = validateEnvironmentSolana();
 
   const solanaWrapper = new SolanaWrapper(

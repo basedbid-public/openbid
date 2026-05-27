@@ -12,7 +12,7 @@ import {
   sendTransaction,
 } from 'utils';
 
-export const createBoard = async (args: CreateEvmBoardSdk) => {
+export const createEvmBoard = async (args: CreateEvmBoardSdk) => {
   const env = validateEnvironment();
 
   const validated = createEvmBoardSchema.parse(args);

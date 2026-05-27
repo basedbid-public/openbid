@@ -13,6 +13,7 @@ import {
   saleTimeSchema,
 } from 'schema/common';
 import { v4BuyLimitsSchema } from 'schema/v4-fees/buy-limits';
+import { rewardTokenDividendsSchema } from 'schema/v4-fees/reward-token-dividends';
 import { z } from 'zod';
 
 export const evmLbpCreateApiSchema = z.object({
@@ -69,12 +70,7 @@ export const evmLbpCreateApiSchema = z.object({
         reward: z.object({
           token: z.enum(RewardTokenType),
           amount: z.number(),
-          minTokenBalanceForDividends: z.union([
-            z.literal(0.01),
-            z.literal(0.1),
-            z.literal(1),
-            z.literal(5),
-          ]),
+          minTokenBalanceForDividends: rewardTokenDividendsSchema,
         }),
         customWallets: z.array(
           z.object({

@@ -2,12 +2,12 @@ import { SOLANA_BASE_TOKEN_PAIR, SOLANA_DECIMALS } from 'constants/solana';
 import 'dotenv/config';
 import { ApiType, SolanaDexType } from 'enums';
 import { CreateLbpSolanaApiResponse } from 'interfaces/lbp/create/solana/api-response';
+import { SolanaVanityUpdate } from 'interfaces/solana-vanity-update';
 import { validateEnvironmentSolana } from 'schema/environment';
 import { createLbpSolanaApiPayloadSchema } from 'schema/lbp/solana/api-request';
 import { solanaFeeDistributionApiPayloadSchema } from 'schema/lbp/solana/fee-distribution';
 import { CreateSolanaLbpInput } from 'schema/lbp/solana/sdk-input';
 import { SolanaLbpValidator } from 'schema/lbp/solana/validator';
-import { SolanaChainId } from 'types/chain-id';
 import {
   BasedBidApi,
   getLaunchPackageIndex,
@@ -16,13 +16,9 @@ import {
   SolanaWrapper,
 } from 'utils';
 
-let launchedToken: {
-  chainId: SolanaChainId;
-  mintAddress: string;
-  signature: string;
-} | null = null;
+let launchedToken: SolanaVanityUpdate | null = null;
 
-export const createLbpSolana = async (args: CreateSolanaLbpInput) => {
+export const createSolanaLbp = async (args: CreateSolanaLbpInput) => {
   let launchConfirmed = false;
 
   try {

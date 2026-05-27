@@ -14,7 +14,7 @@ import {
   sendTransaction,
 } from 'utils';
 
-export const createLbp = async (args: CreateLbpEvmSdk) => {
+export const createEvmLbp = async (args: CreateLbpEvmSdk) => {
   const env = validateEnvironment();
 
   const argsValidated = evmLbpCreateSchema.safeParse(args);
@@ -62,7 +62,7 @@ export const createLbp = async (args: CreateLbpEvmSdk) => {
       metadataUrl,
     },
     sale: {
-      boardTitle: token.boardTitle,
+      boardTitle: token.boardTitle ?? '',
       marketCap: token.marketCap,
       startTime: sale.startTime,
       maxAllocationPerUser: sale.maxAllocationPerUser,

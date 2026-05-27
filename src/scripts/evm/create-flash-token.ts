@@ -17,7 +17,7 @@ import {
   sendTransaction,
 } from 'utils';
 
-export const createFlashToken = async (args: CreateFlashTokenEvmSdk) => {
+export const createEvmFlashToken = async (args: CreateFlashTokenEvmSdk) => {
   const env = validateEnvironment();
 
   const { publicClient, walletClient, account } = initRpcClients(

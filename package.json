@@ -3,7 +3,19 @@
   "private": true,
   "scripts": {
     "build": "tsc",
-    "format": "prettier --write src/"
+    "format": "prettier --write src/",
+    "evm:create-lbp": "ts-node  ./src/helpers/run.ts evm-create-lbp ./src/helpers/configs/evm/create-lbp.json",
+    "evm:create-board": "ts-node  ./src/helpers/run.ts evm-create-board ./src/helpers/configs/evm/create-board.json",
+    "evm:create-flash-token": "ts-node  ./src/helpers/run.ts evm-create-flash-token ./src/helpers/configs/evm/create-flash-token.json",
+    "evm:lbp-buy": "ts-node  ./src/helpers/run.ts evm-lbp-buy ./src/helpers/configs/evm/lbp-buy.json",
+    "evm:lbp-sell": "ts-node  ./src/helpers/run.ts evm-lbp-sell ./src/helpers/configs/evm/lbp-sell.json",
+    "evm:claim-fees": "ts-node  ./src/helpers/run.ts evm-claim-fees ./src/helpers/configs/evm/claim-fees.json",
+    "solana:create-lbp": "ts-node  ./src/helpers/run.ts solana-create-lbp ./src/helpers/configs/solana/create-lbp.json",
+    "solana:create-board": "ts-node  ./src/helpers/run.ts solana-create-board ./src/helpers/configs/solana/create-board.json",
+    "solana:create-flash-token": "ts-node  ./src/helpers/run.ts solana-create-flash-token ./src/helpers/configs/solana/create-flash-token.json",
+    "solana:lbp-buy": "ts-node  ./src/helpers/run.ts solana-lbp-buy ./src/helpers/configs/solana/lbp-buy.json",
+    "solana:lbp-sell": "ts-node  ./src/helpers/run.ts solana-lbp-sell ./src/helpers/configs/solana/lbp-sell.json",
+    "solana:claim-lbp-fees": "ts-node  ./src/helpers/run.ts solana-claim-lbp-fees ./src/helpers/configs/solana/claim-lbp-fees.json"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^0.1.0",
