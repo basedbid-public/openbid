@@ -18,6 +18,10 @@ export class BasedBidApi {
       : `https://based.bid/api`;
   }
 
+  static basedTradeUrl(isSandboxMode: boolean) {
+    return isSandboxMode ? 'https://tt.based.bid' : `https://trade.based.bid`;
+  }
+
   static async invokeApi<T>(
     apiType: ApiType,
     path: string,

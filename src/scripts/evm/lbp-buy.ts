@@ -1,4 +1,5 @@
 import tradeFacetAbi from 'constants/abi/TradeFacet.json';
+import { CHAIN_NAME_CONFIG } from 'constants/chain-config';
 import 'dotenv/config';
 import { ApiType } from 'enums';
 import { DryRunOptions } from 'helpers/run';
@@ -69,7 +70,7 @@ export const evmLbpBuy = async (args: BuyEvmSdk, dryRun?: DryRunOptions) => {
 
   const txValue = BigInt(json.value);
 
-  return await sendTransaction({
+  const result = await sendTransaction({
     publicClient,
     walletClient,
     account,
@@ -81,4 +82,22 @@ export const evmLbpBuy = async (args: BuyEvmSdk, dryRun?: DryRunOptions) => {
     errorLabel: 'Buy',
     skipConfirmation: args.isSandboxMode,
   });
+
+  console.log('\n--- RESULT ---');
+  console.log(
+    JSON.stringify(
+      {
+        ok: true,
+        type: 'buy',
+        network: CHAIN_NAME_CONFIG[argsValidated.data.chainId],
+        tokenAddress: argsValidated.data.address,
+        signature: result.transactionHash,
+        basedBidUrl: `${BasedBidApi.platformApiUrl(args.isSandboxMode)}/${CHAIN_SLUG_CONFIG[input.chainId]}/token/${json.address}`,
+      },
+      null,
+      2,
+    ),
+  );
+
+  return result;
 };

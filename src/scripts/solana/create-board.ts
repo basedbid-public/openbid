@@ -1,3 +1,4 @@
+import { SOLANA_CHAIN_NAME_CONFIG } from 'constants/solana-chain-config';
 import 'dotenv/config';
 import { ApiType } from 'enums';
 import { DryRunOptions } from 'helpers/run';
@@ -139,10 +140,29 @@ export const createSolanaBoard = async (
 
   await solanaWrapper.awaitTxConfirmation(signature);
 
-  return {
+  const result = {
     boardId: json.boardId ?? 'not returned by API',
     boardTitle: json.boardTitle ?? args.title,
     metadataUrl: json.metadataUrl ?? metadataUrl,
     signature,
   };
+
+  console.log('\n--- RESULT ---');
+  console.log(
+    JSON.stringify(
+      {
+        ok: true,
+        type: 'board',
+        network: SOLANA_CHAIN_NAME_CONFIG[argsValidated.data.chainId],
+        boardId: result.boardId,
+        signature: result.signature,
+        metadataUrl: result.metadataUrl,
+        basedBidUrl: `${BasedBidApi.platformApiUrl(args.isSandboxMode)}/b/${result.boardId}`,
+      },
+      null,
+      2,
+    ),
+  );
+
+  return result;
 };

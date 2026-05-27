@@ -1,5 +1,6 @@
 import flashLaunchV3Abi from 'constants/abi/FlashLaunchForV3Facet.json';
 import flashLaunchV4Abi from 'constants/abi/FlashLaunchForV4Facet.json';
+import { CHAIN_NAME_CONFIG, CHAIN_SLUG_CONFIG } from 'constants/chain-config';
 import 'dotenv/config';
 import { ApiType, EvmDexType } from 'enums';
 import { DryRunOptions } from 'helpers/run';
@@ -178,7 +179,7 @@ export const createEvmFlashToken = async (
     normalizeByAbi(json.args[index], input, `args[${index}]`),
   );
 
-  return await sendTransaction({
+  const result = await sendTransaction({
     publicClient,
     walletClient,
     account,
@@ -190,4 +191,23 @@ export const createEvmFlashToken = async (
     errorLabel: 'Create Flash Token',
     skipConfirmation: args.isSandboxMode,
   });
+
+  console.log('\n--- RESULT ---');
+  console.log(
+    JSON.stringify(
+      {
+        ok: true,
+        type: 'flash-token',
+        network: CHAIN_NAME_CONFIG[argsValidated.data.chainId],
+        mintAddress: json.address,
+        signature: result.transactionHash,
+        metadataUrl,
+        basedBidUrl: `${BasedBidApi.basedTradeUrl(args.isSandboxMode)}/${CHAIN_SLUG_CONFIG[argsValidated.data.chainId]}/${json.address}`,
+      },
+      null,
+      2,
+    ),
+  );
+
+  return result;
 };

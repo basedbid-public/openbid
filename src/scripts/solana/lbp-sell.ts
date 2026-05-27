@@ -1,3 +1,7 @@
+import {
+  SOLANA_CHAIN_NAME_CONFIG,
+  SOLANA_CHAIN_SLUG_CONFIG,
+} from 'constants/solana-chain-config';
 import 'dotenv/config';
 import { ApiType } from 'enums';
 import { DryRunOptions } from 'helpers/run';
@@ -85,4 +89,21 @@ export const solanaLbpSell = async (
   );
 
   await solanaWrapper.awaitTxConfirmation(signature);
+
+  console.log('\n--- RESULT ---');
+  console.log(
+    JSON.stringify(
+      {
+        ok: true,
+        type: 'sell',
+        network: SOLANA_CHAIN_NAME_CONFIG[data.chainId],
+        tokenAddress: data.address,
+        amount: data.amount,
+        signature,
+        basedBidUrl: `${BasedBidApi.platformApiUrl(data.isSandboxMode)}/${SOLANA_CHAIN_SLUG_CONFIG[data.chainId]}/token/${data.address}`,
+      },
+      null,
+      2,
+    ),
+  );
 };

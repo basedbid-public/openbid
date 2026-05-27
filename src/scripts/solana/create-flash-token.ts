@@ -1,3 +1,4 @@
+import { SOLANA_CHAIN_NAME_CONFIG } from 'constants/solana-chain-config';
 import 'dotenv/config';
 import { ApiType, SolanaDexType } from 'enums';
 import { DryRunOptions } from 'helpers/run';
@@ -283,7 +284,7 @@ export const createSolanaFlashToken = async (
       );
     }
 
-    return {
+    const result = {
       mintAddress: tx1Response.mintAddress,
       tx1Signature,
       tx2Signature,
@@ -291,8 +292,50 @@ export const createSolanaFlashToken = async (
       meteoraTokenAccountSeed: tx1Response.meteoraTokenAccountSeed,
       positionNftMintAddress: tx1Response.positionNftMintAddress,
     };
+
+    console.log('\n--- RESULT ---');
+    console.log(
+      JSON.stringify(
+        {
+          ok: true,
+          type: 'flash-token',
+          network: SOLANA_CHAIN_NAME_CONFIG[args.chainId],
+          mintAddress: result.mintAddress,
+          signature: result.tx2Signature,
+          metadataUrl: result.metadataUrl,
+        },
+        null,
+        2,
+      ),
+    );
+
+    return result;
   } catch (error) {
-    console.error('Error creating Solana flash token: ', error);
+    const err = error as Error;
+    const networkName =
+      args.chainId === 5011 ? 'solana-devnet' : 'solana-' + args.chainId;
+
+    console.log('\n--- RESULT ---');
+    console.log(
+      JSON.stringify(
+        {
+          ok: false,
+          type: 'flash-token',
+          stage: 'create-flash-token',
+          network: networkName,
+          error: err.message,
+          retryable: launchedToken === null,
+          nextSteps:
+            launchedToken !== null
+              ? [
+                  'The mint transaction may have succeeded. Try releasing the vanity address and retry.',
+                ]
+              : ['Check your configuration and try again'],
+        },
+        null,
+        2,
+      ),
+    );
 
     if (launchedToken != null && !launchConfirmed) {
       console.log('\nFlash Token launch did not complete');

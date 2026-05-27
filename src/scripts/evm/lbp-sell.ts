@@ -1,4 +1,5 @@
 import tradeFacetAbi from 'constants/abi/TradeFacet.json';
+import { CHAIN_NAME_CONFIG, CHAIN_SLUG_CONFIG } from 'constants/chain-config';
 import 'dotenv/config';
 import { ApiType } from 'enums';
 import { DryRunOptions } from 'helpers/run';
@@ -101,6 +102,29 @@ export const evmLbpSell = async (args: SellEvmSdk, dryRun?: DryRunOptions) => {
     errorLabel: 'Sell',
     skipConfirmation: args.isSandboxMode,
   });
+
+  const networkName =
+    argsValidated.data.chainId === 8453
+      ? 'base-mainnet'
+      : argsValidated.data.chainId === 1
+        ? 'ethereum-mainnet'
+        : 'chain-' + argsValidated.data.chainId;
+
+  console.log('\n--- RESULT ---');
+  console.log(
+    JSON.stringify(
+      {
+        ok: true,
+        type: 'sell',
+        network: CHAIN_NAME_CONFIG[argsValidated.data.chainId],
+        tokenAddress: argsValidated.data.address,
+        signature: sellReceipt.transactionHash,
+        basedBidUrl: `${BasedBidApi.platformApiUrl(args.isSandboxMode)}/${CHAIN_SLUG_CONFIG[argsValidated.data.chainId]}/token/${argsValidated.data.address}`,
+      },
+      null,
+      2,
+    ),
+  );
 
   return sellReceipt;
 };

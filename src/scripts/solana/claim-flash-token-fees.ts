@@ -1,12 +1,19 @@
+import { SOLANA_CHAIN_NAME_CONFIG } from 'constants/solana-chain-config';
 import 'dotenv/config';
 import { ApiType } from 'enums';
-import { ClaimSolanaFeeResponse } from 'interfaces/claim-fees/solana/api';
-import { validateEnvironmentSolana } from 'schema/environment';
-import { ClaimFeesSolanaRequest, claimFeesSolanaRequestSchema } from 'schema/claim-fees/solana/request';
-import { BasedBidApi, SolanaWrapper } from 'utils';
 import { DryRunOptions } from 'helpers/run';
+import { ClaimSolanaFeeResponse } from 'interfaces/claim-fees/solana/api';
+import {
+  ClaimFeesSolanaRequest,
+  claimFeesSolanaRequestSchema,
+} from 'schema/claim-fees/solana/request';
+import { validateEnvironmentSolana } from 'schema/environment';
+import { BasedBidApi, SolanaWrapper } from 'utils';
 
-export const claimSolanaFlashFees = async (args: ClaimFeesSolanaRequest, dryRun?: DryRunOptions) => {
+export const claimSolanaFlashFees = async (
+  args: ClaimFeesSolanaRequest,
+  dryRun?: DryRunOptions,
+) => {
   if (dryRun?.printPayload) {
     console.log('\nSolana Claim Flash Token Fees - Dry Run');
     console.log('-----------------------------------');
@@ -70,6 +77,21 @@ export const claimSolanaFlashFees = async (args: ClaimFeesSolanaRequest, dryRun?
   );
 
   await solanaWrapper.awaitTxConfirmation(signature);
+
+  console.log('\n--- RESULT ---');
+  console.log(
+    JSON.stringify(
+      {
+        ok: true,
+        type: 'fees',
+        network: SOLANA_CHAIN_NAME_CONFIG[argsValidated.data.chainId],
+        tokenAddress: argsValidated.data.address,
+        signature,
+      },
+      null,
+      2,
+    ),
+  );
 
   return signature;
 };

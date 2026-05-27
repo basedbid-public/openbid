@@ -1,3 +1,7 @@
+import {
+  SOLANA_CHAIN_NAME_CONFIG,
+  SOLANA_CHAIN_SLUG_CONFIG,
+} from 'constants/solana-chain-config';
 import 'dotenv/config';
 import { ApiType } from 'enums';
 import { DryRunOptions } from 'helpers/run';
@@ -76,4 +80,20 @@ export const claimSolanaLbpFees = async (
   );
 
   await solanaWrapper.awaitTxConfirmation(signature);
+
+  console.log('\n--- RESULT ---');
+  console.log(
+    JSON.stringify(
+      {
+        ok: true,
+        type: 'fees',
+        network: SOLANA_CHAIN_NAME_CONFIG[args.chainId],
+        tokenAddress: data.address,
+        signature,
+        basedBidUrl: `${BasedBidApi.platformApiUrl(args.isSandboxMode)}/${SOLANA_CHAIN_SLUG_CONFIG[args.chainId]}/token/${data.address}`,
+      },
+      null,
+      2,
+    ),
+  );
 };

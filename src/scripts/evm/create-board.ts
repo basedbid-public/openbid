@@ -1,4 +1,5 @@
 import subBoardFacetAbi from 'constants/abi/SubBoardFacet.json';
+import { CHAIN_NAME_CONFIG } from 'constants/chain-config';
 import 'dotenv/config';
 import { ApiType } from 'enums';
 import { DryRunOptions } from 'helpers/run';
@@ -134,7 +135,7 @@ export const createEvmBoard = async (
     normalizeByAbi(json.args[index], input, `args[${index}]`),
   );
 
-  return await sendTransaction({
+  const result = await sendTransaction({
     publicClient,
     walletClient,
     account,
@@ -146,4 +147,23 @@ export const createEvmBoard = async (
     errorLabel: 'Create Board',
     skipConfirmation: args.isSandboxMode,
   });
+
+  console.log('\n--- RESULT ---');
+  console.log(
+    JSON.stringify(
+      {
+        ok: true,
+        type: 'board',
+        network: CHAIN_NAME_CONFIG[validated.chainId],
+        boardAddress: json.address,
+        signature: result.transactionHash,
+        metadataUrl,
+        basedBidUrl: `${BasedBidApi.platformApiUrl(args.isSandboxMode)}/b/${validated.title.toLowerCase()}`,
+      },
+      null,
+      2,
+    ),
+  );
+
+  return result;
 };

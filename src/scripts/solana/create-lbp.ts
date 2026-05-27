@@ -1,4 +1,8 @@
 import { SOLANA_BASE_TOKEN_PAIR, SOLANA_DECIMALS } from 'constants/solana';
+import {
+  SOLANA_CHAIN_NAME_CONFIG,
+  SOLANA_CHAIN_SLUG_CONFIG,
+} from 'constants/solana-chain-config';
 import 'dotenv/config';
 import { ApiType, SolanaDexType } from 'enums';
 import { DryRunOptions } from 'helpers/run';
@@ -233,11 +237,30 @@ export const createSolanaLbp = async (
       );
       launchConfirmed = true;
 
-      return {
+      const result = {
         mintAddress: json.mintAddress,
         signature,
         metadataUrl: json.metadataUrl,
       };
+
+      console.log('\n--- RESULT ---');
+      console.log(
+        JSON.stringify(
+          {
+            ok: true,
+            type: 'pool',
+            network: SOLANA_CHAIN_NAME_CONFIG[args.chainId],
+            mintAddress: result.mintAddress,
+            signature: result.signature,
+            metadataUrl: result.metadataUrl,
+            basedBidUrl: `${BasedBidApi.platformApiUrl(args.isSandboxMode)}/${SOLANA_CHAIN_SLUG_CONFIG[args.chainId]}/token/${result.mintAddress}`,
+          },
+          null,
+          2,
+        ),
+      );
+
+      return result;
     }
 
     const customFeePercent = fees.customFees.reduce(
@@ -285,13 +308,60 @@ export const createSolanaLbp = async (
     );
     launchConfirmed = true;
 
-    return {
+    const result = {
       mintAddress: json.mintAddress,
       signature,
       metadataUrl: json.metadataUrl,
     };
+
+    const networkName =
+      args.chainId === 5011 ? 'solana-devnet' : 'solana-' + args.chainId;
+
+    console.log('\n--- RESULT ---');
+    console.log(
+      JSON.stringify(
+        {
+          ok: true,
+          type: 'pool',
+          network: networkName,
+          mintAddress: result.mintAddress,
+          signature: result.signature,
+          metadataUrl: result.metadataUrl,
+          basedBidUrl: `https://based.markets/pool/${args.chainId}/${result.mintAddress}`,
+        },
+        null,
+        2,
+      ),
+    );
+
+    return result;
   } catch (error) {
-    console.error('Error creating LBP on Solana: ', error);
+    const err = error as Error;
+    const networkName =
+      args.chainId === 5011 ? 'solana-devnet' : 'solana-' + args.chainId;
+
+    console.log('\n--- RESULT ---');
+    console.log(
+      JSON.stringify(
+        {
+          ok: false,
+          type: 'pool',
+          stage: 'create-lbp',
+          network: networkName,
+          error: err.message,
+          retryable: launchedToken === null,
+          nextSteps:
+            launchedToken !== null
+              ? [
+                  'The mint transaction may have succeeded. Try releasing the vanity address and retry.',
+                ]
+              : ['Check your configuration and try again'],
+        },
+        null,
+        2,
+      ),
+    );
+
     if (launchedToken != null && !launchConfirmed) {
       await BasedBidApi.invokeApi(
         ApiType.SDK,

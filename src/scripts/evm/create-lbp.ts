@@ -1,4 +1,5 @@
 import creationFacetAbi from 'constants/abi/CreationFacet.json';
+import { CHAIN_NAME_CONFIG, CHAIN_SLUG_CONFIG } from 'constants/chain-config';
 import 'dotenv/config';
 import { ApiType } from 'enums';
 import { DryRunOptions } from 'helpers/run';
@@ -157,7 +158,7 @@ export const createEvmLbp = async (
     normalizeByAbi(json.args[index], input, `args[${index}]`),
   );
 
-  return await sendTransaction({
+  const result = await sendTransaction({
     publicClient,
     walletClient,
     account,
@@ -169,4 +170,23 @@ export const createEvmLbp = async (
     errorLabel: 'Create LBP',
     skipConfirmation: args.isSandboxMode,
   });
+
+  console.log('\n--- RESULT ---');
+  console.log(
+    JSON.stringify(
+      {
+        ok: true,
+        type: 'pool',
+        network: CHAIN_NAME_CONFIG[input.chainId],
+        mintAddress: json.address,
+        signature: result.transactionHash,
+        metadataUrl,
+        basedBidUrl: `${BasedBidApi.platformApiUrl(args.isSandboxMode)}/${CHAIN_SLUG_CONFIG[input.chainId]}/token/${json.address}`,
+      },
+      null,
+      2,
+    ),
+  );
+
+  return result;
 };

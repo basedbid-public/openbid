@@ -1,4 +1,5 @@
 import collectFeeForLBPFacetAbi from 'constants/abi/CollectFeeForLBPFacet.json';
+import { CHAIN_NAME_CONFIG } from 'constants/chain-config';
 import 'dotenv/config';
 import { ApiType } from 'enums';
 import { DryRunOptions } from 'helpers/run';
@@ -86,6 +87,22 @@ export const claimEvmFees = async (
     errorLabel: 'Claim Fees',
     skipConfirmation: args.isSandboxMode,
   });
+
+  console.log('\n--- RESULT ---');
+  console.log(
+    JSON.stringify(
+      {
+        ok: true,
+        type: 'fees',
+        network: CHAIN_NAME_CONFIG[argsValidated.data.chainId],
+        target: argsValidated.data.target,
+        address: argsValidated.data.address,
+        signature: receipt.transactionHash,
+      },
+      null,
+      2,
+    ),
+  );
 
   return receipt;
 };
