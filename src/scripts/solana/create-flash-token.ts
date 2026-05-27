@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import { ApiType, SolanaDexType } from 'enums';
+import { DryRunOptions } from 'helpers/run';
 import { CreateSolanaFlashTx1ApiResponse } from 'interfaces/lbp/create/solana-flash/api';
 import { SolanaVanityUpdate } from 'interfaces/solana-vanity-update';
 import { validateEnvironmentSolana } from 'schema/environment';
@@ -14,8 +15,16 @@ import { BasedBidApi, IpfsUpload, SolanaWrapper } from 'utils';
 
 let launchedToken: SolanaVanityUpdate | null = null;
 
-export const createSolanaFlashToken = async (args: CreateSolanaFlashInput) => {
+export const createSolanaFlashToken = async (
+  args: CreateSolanaFlashInput,
+  dryRun?: DryRunOptions,
+) => {
   let launchConfirmed = false;
+
+  if (dryRun?.printPayload) {
+    console.log('\nSolana Create Flash Token - Dry Run');
+    console.log('-----------------------------------');
+  }
 
   try {
     const env = validateEnvironmentSolana();
@@ -50,11 +59,9 @@ export const createSolanaFlashToken = async (args: CreateSolanaFlashInput) => {
 
     const metadataUrl = await IpfsUpload.uploadMetadata(metadataIpfs);
 
-    // ==================== TX1 ====================
-    console.log('\nStep 1 of 3: Creating the token mint');
-    console.log(
-      'This prepares the token contract address for your Flash Token.',
-    );
+    if (dryRun?.printPayload) {
+      console.log('\nTX1 Payload for /sol/create-flash-tx1:');
+    }
 
     const tx1Payload: CreateSolanaFlashTx1Api = {
       chainId: args.chainId,
@@ -70,7 +77,6 @@ export const createSolanaFlashToken = async (args: CreateSolanaFlashInput) => {
         totalSupply: token.totalSupply,
         decimals: 9,
       },
-      // Add Raydium specific fields if applicable
       ...(input.dex.version === SolanaDexType.RAYDIUM &&
         raydium && {
           raydiumFeeTierIndex: raydium.feeTierIndex,
@@ -78,7 +84,6 @@ export const createSolanaFlashToken = async (args: CreateSolanaFlashInput) => {
           hasInitialSwap: raydium.hasInitialSwap,
           solanaInitialBuyHuman: raydium.solanaInitialBuyHuman,
         }),
-      // Add Meteora specific fields if applicable
       ...(input.dex.version === SolanaDexType.METEORA &&
         meteora && {
           baseTokenMint: 'So11111111111111111111111111111111111111112',
@@ -90,7 +95,27 @@ export const createSolanaFlashToken = async (args: CreateSolanaFlashInput) => {
         }),
     };
 
-    console.log('Requesting mint creation transaction from basedbid...');
+    if (dryRun?.printPayload) {
+      console.log(JSON.stringify(tx1Payload, null, 2));
+    }
+
+    if (dryRun?.dryRun) {
+      console.log(
+        'Skipping TX1 API call to /sol/create-flash-tx1 (dry-run mode)',
+      );
+      console.log('\n========== DRY RUN COMPLETE ==========');
+      console.log('Would have called: POST /sol/create-flash-tx1');
+      console.log('Wallet:', solanaWrapper.publicKey);
+      console.log('Token:', token.name, `(${token.symbol})`);
+      console.log('DEX:', args.dex.version);
+      console.log('========================================\n');
+      return { dryRun: true, tx1Payload, tx2Payload: null };
+    }
+
+    console.log('\nStep 1 of 3: Creating the token mint');
+    console.log(
+      'This prepares the token contract address for your Flash Token.',
+    );
 
     const tx1Response =
       await BasedBidApi.invokeApi<CreateSolanaFlashTx1ApiResponse>(
@@ -130,7 +155,6 @@ export const createSolanaFlashToken = async (args: CreateSolanaFlashInput) => {
 
     await solanaWrapper.awaitTxConfirmation(tx1Signature);
 
-    // ==================== TX2 ====================
     console.log('\nStep 2 of 3: Initializing the Flash Token market');
     console.log(
       'This connects the new token to the selected DEX trading setup.',
@@ -152,7 +176,6 @@ export const createSolanaFlashToken = async (args: CreateSolanaFlashInput) => {
         totalSupply: args.token.totalSupply,
         decimals: 9,
       },
-      // Add Raydium specific fields if applicable
       ...(args.dex.version === SolanaDexType.RAYDIUM &&
         args.raydium && {
           raydiumFeeTierIndex: args.raydium.feeTierIndex,
@@ -160,12 +183,10 @@ export const createSolanaFlashToken = async (args: CreateSolanaFlashInput) => {
           hasInitialSwap: args.raydium.hasInitialSwap,
           solanaInitialBuyHuman: args.raydium.solanaInitialBuyHuman,
         }),
-      // Add Meteora specific fields if applicable
       ...(args.dex.version === SolanaDexType.METEORA &&
         args.meteora && {
           meteoraFeeTierIndex: args.meteora.feeTierIndex,
           meteoraTokenAccountSeed: tx1Response.meteoraTokenAccountSeed,
-          finalStartPrice: args.meteora.finalStartPrice,
         }),
     };
 
@@ -191,7 +212,6 @@ export const createSolanaFlashToken = async (args: CreateSolanaFlashInput) => {
 
     const tx2Signers = [];
 
-    // For Raydium TX2 (and potentially others), there's a position NFT mint keypair signer
     if (tx2Response.positionNftSignerSecretHex) {
       const tx2PositionNftSigner = await solanaWrapper.getSignerFromPrivateKey(
         tx2Response.positionNftSignerSecretHex,

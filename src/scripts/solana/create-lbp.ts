@@ -1,6 +1,7 @@
 import { SOLANA_BASE_TOKEN_PAIR, SOLANA_DECIMALS } from 'constants/solana';
 import 'dotenv/config';
 import { ApiType, SolanaDexType } from 'enums';
+import { DryRunOptions } from 'helpers/run';
 import { CreateLbpSolanaApiResponse } from 'interfaces/lbp/create/solana/api-response';
 import { SolanaVanityUpdate } from 'interfaces/solana-vanity-update';
 import { validateEnvironmentSolana } from 'schema/environment';
@@ -18,8 +19,16 @@ import {
 
 let launchedToken: SolanaVanityUpdate | null = null;
 
-export const createSolanaLbp = async (args: CreateSolanaLbpInput) => {
+export const createSolanaLbp = async (
+  args: CreateSolanaLbpInput,
+  dryRun?: DryRunOptions,
+) => {
   let launchConfirmed = false;
+
+  if (dryRun?.printPayload) {
+    console.log('\nSolana Create LBP - Dry Run');
+    console.log('-----------------------------------');
+  }
 
   try {
     const env = validateEnvironmentSolana();
@@ -35,9 +44,6 @@ export const createSolanaLbp = async (args: CreateSolanaLbpInput) => {
     const data = input;
     const { token, board, boardOwner, dex, fees } = data;
 
-    console.log('\nStep 1 of 3: Uploading pool metadata');
-    console.log('This uploads your token image and launch details to IPFS.');
-
     let sale = data.sale;
 
     if (!sale) {
@@ -48,7 +54,25 @@ export const createSolanaLbp = async (args: CreateSolanaLbpInput) => {
       };
     }
 
-    const logoUrl = await IpfsUpload.uploadImage(token.metadata.logo);
+    if (dryRun?.printPayload) {
+      console.log('Step 1 of 3: Upload pool metadata to IPFS');
+      console.log('Token:', token.name, `(${token.symbol})`);
+      console.log('Package:', data.package);
+      console.log('Board:', board || '(default based board)');
+    }
+
+    let logoUrl = 'ipfs://placeholder-logo-url (DRY RUN)';
+
+    if (dryRun?.dryRun) {
+      console.log('Skipping IPFS logo upload (dry-run mode)');
+      console.log('Logo path:', token.metadata.logo);
+    } else {
+      logoUrl = await IpfsUpload.uploadImage(token.metadata.logo);
+    }
+
+    if (dryRun?.printPayload) {
+      console.log('Logo URL:', logoUrl);
+    }
 
     const seed = SeedGenerator.generateNumericSeed(5);
 
@@ -69,7 +93,13 @@ export const createSolanaLbp = async (args: CreateSolanaLbpInput) => {
       seed,
     };
 
-    const metadataUrl = await IpfsUpload.uploadMetadata(ipfsMetadata);
+    if (dryRun?.dryRun) {
+      console.log('Skipping IPFS metadata upload (dry-run mode)');
+      console.log('Seed:', seed);
+      console.log('Metadata to upload:', JSON.stringify(ipfsMetadata, null, 2));
+    } else {
+      await IpfsUpload.uploadMetadata(ipfsMetadata);
+    }
 
     const apiPayload = {
       chainId: args.chainId,
@@ -87,7 +117,7 @@ export const createSolanaLbp = async (args: CreateSolanaLbpInput) => {
           totalSupply: token.totalSupply,
           decimals: SOLANA_DECIMALS,
           initialBuyAmount: token.initialBuyAmount,
-          metadataUrl,
+          metadataUrl: 'ipfs://placeholder-metadata-url (DRY RUN)',
           raiseTokenDecimals: SOLANA_DECIMALS,
         },
         dex: {
@@ -121,10 +151,27 @@ export const createSolanaLbp = async (args: CreateSolanaLbpInput) => {
       },
     };
 
+    if (dryRun?.printPayload) {
+      console.log('\nAPI Payload for /sol/create-lbp:');
+      console.log(JSON.stringify(apiPayload, null, 2));
+    }
+
     const validated = createLbpSolanaApiPayloadSchema.safeParse(apiPayload);
 
     if (!validated.success) {
-      throw new Error('Invalyid API payload: ' + validated.error.message);
+      throw new Error('Invalid API payload: ' + validated.error.message);
+    }
+
+    if (dryRun?.dryRun) {
+      console.log('Skipping API call to /sol/create-lbp (dry-run mode)');
+      console.log('\n========== DRY RUN COMPLETE ==========');
+      console.log('Would have called: POST /sol/create-lbp');
+      console.log('Wallet:', solanaWrapper.publicKey);
+      console.log('Chain ID:', args.chainId);
+      console.log('Token:', token.name, `(${token.symbol})`);
+      console.log('DEX:', dex.version, 'fee tier:', dex.feeTier);
+      console.log('========================================\n');
+      return { dryRun: true, payload: apiPayload };
     }
 
     const json = await BasedBidApi.invokeApi<CreateLbpSolanaApiResponse>(
@@ -189,11 +236,9 @@ export const createSolanaLbp = async (args: CreateSolanaLbpInput) => {
       return {
         mintAddress: json.mintAddress,
         signature,
-        metadataUrl,
+        metadataUrl: json.metadataUrl,
       };
     }
-
-    // Call fee-distribution API to set Fee Builder params
 
     const customFeePercent = fees.customFees.reduce(
       (sum, fee) => sum + fee.percent,
@@ -243,7 +288,7 @@ export const createSolanaLbp = async (args: CreateSolanaLbpInput) => {
     return {
       mintAddress: json.mintAddress,
       signature,
-      metadataUrl,
+      metadataUrl: json.metadataUrl,
     };
   } catch (error) {
     console.error('Error creating LBP on Solana: ', error);

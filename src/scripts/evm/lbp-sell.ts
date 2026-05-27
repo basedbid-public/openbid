@@ -1,32 +1,74 @@
 import tradeFacetAbi from 'constants/abi/TradeFacet.json';
 import 'dotenv/config';
 import { ApiType } from 'enums';
+import { DryRunOptions } from 'helpers/run';
 import { SellEvmApiResponse } from 'interfaces';
 import { validateEnvironment } from 'schema/environment';
-import { SellEvmSdk } from 'schema/sell/evm/sdk';
+import { SellEvmSdk, sellEvmSdkSchema } from 'schema/sell/evm/sdk';
 import { BasedBidApi, initRpcClients, sendTransaction } from 'utils';
 import { erc20Abi } from 'viem';
 
-export const evmLbpSell = async (args: SellEvmSdk) => {
+export const evmLbpSell = async (args: SellEvmSdk, dryRun?: DryRunOptions) => {
+  if (dryRun?.printPayload) {
+    console.log('\nEVM LBP Sell - Dry Run');
+    console.log('-----------------------------------');
+  }
+
   const env = validateEnvironment();
+
+  const argsValidated = sellEvmSdkSchema.safeParse(args);
+  if (!argsValidated.success) {
+    throw new Error('Invalid input arguments: ' + argsValidated.error.message);
+  }
+
+  if (dryRun?.printPayload) {
+    console.log('Chain ID:', argsValidated.data.chainId);
+    console.log('Token Address:', argsValidated.data.address);
+    console.log('Amount:', argsValidated.data.amount);
+    console.log('Slippage:', argsValidated.data.slippage, '%');
+  }
+
+  const apiPayload = {
+    chainId: argsValidated.data.chainId,
+    address: argsValidated.data.address,
+    account: '0x0000000000000000000000000000000000000000',
+    slippage: argsValidated.data.slippage,
+    referrer: argsValidated.data.referrer,
+    amount: argsValidated.data.amount,
+  };
+
+  if (dryRun?.printPayload) {
+    console.log('\nAPI Payload for /lbp-sell-preview:');
+    console.log(JSON.stringify({ data: apiPayload }, null, 2));
+  }
+
+  if (dryRun?.dryRun) {
+    console.log('Skipping API call to /lbp-sell-preview (dry-run mode)');
+    console.log('\n========== DRY RUN COMPLETE ==========');
+    console.log('Would have called: POST /lbp-sell-preview');
+    console.log('Token:', argsValidated.data.address);
+    console.log('Amount:', argsValidated.data.amount, 'tokens');
+    console.log('Note: This would require 2 transactions (approve + sell)');
+    console.log('========================================\n');
+    return { dryRun: true, payload: { data: apiPayload } };
+  }
+
+  const { publicClient, walletClient, account } = initRpcClients(
+    argsValidated.data.chainId,
+    env.EVM_RPC_URL,
+    env.PRIVATE_KEY,
+  );
 
   const json = await BasedBidApi.invokeApi<SellEvmApiResponse>(
     ApiType.SDK,
     'lbp-sell-preview',
     {
-      data: args,
+      data: apiPayload,
     },
     'Failed to sell LBP on EVM',
     args.isSandboxMode,
   );
 
-  const { publicClient, walletClient, account } = initRpcClients(
-    args.chainId,
-    env.EVM_RPC_URL,
-    env.PRIVATE_KEY,
-  );
-
-  // First transaction: Approve token spending
   const approveTx = json.trx1;
   const approveReceipt = await sendTransaction({
     publicClient,
@@ -46,7 +88,6 @@ export const evmLbpSell = async (args: SellEvmSdk) => {
     approveReceipt.transactionHash,
   );
 
-  // Second transaction: Execute sell
   const sellTx = json.trx2;
   const sellReceipt = await sendTransaction({
     publicClient,

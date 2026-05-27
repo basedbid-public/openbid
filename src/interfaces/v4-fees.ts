@@ -49,5 +49,3 @@ export interface EVM_V4_FEES {
   buyLimits: V4BuyLimits;
   mevProtectionEnabled: boolean;
 }
-
-

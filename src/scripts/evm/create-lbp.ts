@@ -1,6 +1,7 @@
 import creationFacetAbi from 'constants/abi/CreationFacet.json';
 import 'dotenv/config';
 import { ApiType } from 'enums';
+import { DryRunOptions } from 'helpers/run';
 import { EvmApiResponse } from 'interfaces';
 import { validateEnvironment } from 'schema/environment';
 import { CreateLbpEvmApi, evmLbpCreateApiSchema } from 'schema/lbp/evm/api';
@@ -14,7 +15,15 @@ import {
   sendTransaction,
 } from 'utils';
 
-export const createEvmLbp = async (args: CreateLbpEvmSdk) => {
+export const createEvmLbp = async (
+  args: CreateLbpEvmSdk,
+  dryRun?: DryRunOptions,
+) => {
+  if (dryRun?.printPayload) {
+    console.log('\nEVM Create LBP - Dry Run');
+    console.log('-----------------------------------');
+  }
+
   const env = validateEnvironment();
 
   const argsValidated = evmLbpCreateSchema.safeParse(args);
@@ -31,7 +40,18 @@ export const createEvmLbp = async (args: CreateLbpEvmSdk) => {
     env.PRIVATE_KEY,
   );
 
-  const logoUrl = await IpfsUpload.uploadImage(token.metadata.logo);
+  let logoUrl = 'ipfs://placeholder-logo-url (DRY RUN)';
+  let metadataUrl = 'ipfs://placeholder-metadata-url (DRY RUN)';
+
+  if (dryRun?.dryRun) {
+    console.log('Skipping IPFS logo upload (dry-run mode)');
+  } else {
+    logoUrl = await IpfsUpload.uploadImage(token.metadata.logo);
+  }
+
+  if (dryRun?.printPayload) {
+    console.log('Logo URL:', logoUrl);
+  }
 
   const metadataIpfs = {
     name: token.name,
@@ -48,7 +68,16 @@ export const createEvmLbp = async (args: CreateLbpEvmSdk) => {
     whitelist: sale.whitelistedAddresses ?? [],
   };
 
-  const metadataUrl = await IpfsUpload.uploadMetadata(metadataIpfs);
+  if (dryRun?.dryRun) {
+    console.log('Skipping IPFS metadata upload (dry-run mode)');
+    console.log('Metadata to upload:', JSON.stringify(metadataIpfs, null, 2));
+  } else {
+    metadataUrl = await IpfsUpload.uploadMetadata(metadataIpfs);
+  }
+
+  if (dryRun?.printPayload) {
+    console.log('Metadata URL:', metadataUrl);
+  }
 
   const apiPayload: CreateLbpEvmApi = {
     isSandboxMode: input.isSandboxMode,
@@ -84,7 +113,23 @@ export const createEvmLbp = async (args: CreateLbpEvmSdk) => {
     },
   };
 
+  if (dryRun?.printPayload) {
+    console.log('\nAPI Payload for /create-lbp:');
+    console.log(JSON.stringify({ data: apiPayload }, null, 2));
+  }
+
   const validated = evmLbpCreateApiSchema.parse(apiPayload);
+
+  if (dryRun?.dryRun) {
+    console.log('Skipping API call to /create-lbp (dry-run mode)');
+    console.log('\n========== DRY RUN COMPLETE ==========');
+    console.log('Would have called: POST /create-lbp');
+    console.log('Wallet:', account.address);
+    console.log('Chain ID:', input.chainId);
+    console.log('Token:', token.name, `(${token.symbol})`);
+    console.log('========================================\n');
+    return { dryRun: true, payload: { data: apiPayload } };
+  }
 
   const json = await BasedBidApi.invokeApi<EvmApiResponse>(
     ApiType.SDK,
@@ -92,7 +137,7 @@ export const createEvmLbp = async (args: CreateLbpEvmSdk) => {
     {
       data: validated,
     },
-    'Failed to create flash token on EVM',
+    'Failed to create LBP on EVM',
     args.isSandboxMode,
   );
 
