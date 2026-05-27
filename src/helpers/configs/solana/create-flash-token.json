@@ -25,7 +25,7 @@
     "sellPoolCreator": 0,
     "buyReferral": 0,
     "graduation": 0,
-    "feeDistribution": false,
+    "feeDistribution": true,
     "dynamicFee": false,
     "customFeePercent": 0,
     "liquidityPercent": 10,
