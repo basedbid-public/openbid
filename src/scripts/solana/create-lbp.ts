@@ -57,14 +57,14 @@ export const createLbpSolana = async (args: CreateSolanaLbpInput) => {
       decimals: SOLANA_DECIMALS,
       totalSupply: token.totalSupply,
       logo: logoUrl,
-      twitter: token.metadata.twitter,
-      telegram: token.metadata.telegram,
-      website: token.metadata.website,
-      discord: token.metadata.discord,
+      twitter: token.metadata.twitter ?? '',
+      telegram: token.metadata.telegram ?? '',
+      website: token.metadata.website ?? '',
+      discord: token.metadata.discord ?? '',
       description: token.metadata.description,
       whitelist: sale.whitelistedAddresses,
-      board,
-      boardOwner,
+      ...(board && { board }),
+      ...(boardOwner && { boardOwner }),
       seed,
     };
 
@@ -78,6 +78,8 @@ export const createLbpSolana = async (args: CreateSolanaLbpInput) => {
         seed,
         advanced: true,
         package: getLaunchPackageIndex(data.package),
+        baseTokenAddress: SOLANA_BASE_TOKEN_PAIR,
+        baseTokenDecimals: SOLANA_DECIMALS,
         token: {
           name: token.name,
           symbol: token.symbol,
@@ -118,12 +120,16 @@ export const createLbpSolana = async (args: CreateSolanaLbpInput) => {
       },
     };
 
-    const validated = createLbpSolanaApiPayloadSchema.parse(apiPayload);
+    const validated = createLbpSolanaApiPayloadSchema.safeParse(apiPayload);
+
+    if (!validated.success) {
+      throw new Error('Invalyid API payload: ' + validated.error.message);
+    }
 
     const json = await BasedBidApi.invokeApi<CreateLbpSolanaApiResponse>(
       ApiType.SDK,
       'sol/create-lbp',
-      validated,
+      validated.data,
       'Failed to create LBP on Solana',
       args.isSandboxMode,
     );

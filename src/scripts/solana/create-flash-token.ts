@@ -40,13 +40,13 @@ export const createFlashTokenSolana = async (args: CreateSolanaFlashInput) => {
       decimals: token.decimals,
       totalSupply: token.totalSupply,
       logo: logoUrl,
-      twitter: token.metadata.twitter,
-      telegram: token.metadata.telegram,
-      website: token.metadata.website,
-      discord: token.metadata.discord,
+      twitter: token.metadata.twitter ?? '',
+      telegram: token.metadata.telegram ?? '',
+      website: token.metadata.website ?? '',
+      discord: token.metadata.discord ?? '',
       description: token.metadata.description,
-      board,
-      boardOwner,
+      ...(board && { board }),
+      ...(boardOwner && { boardOwner }),
     };
 
     const metadataUrl = await IpfsUpload.uploadMetadata(metadataIpfs);

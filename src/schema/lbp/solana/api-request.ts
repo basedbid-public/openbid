@@ -15,7 +15,6 @@ export const createLbpSolanaApiPayloadSchema = z.object({
   chainId: z.number().int().min(0),
   signer: z.string(),
   data: z.object({
-    isSandboxMode: z.boolean().default(false),
     seed: z.string(),
     advanced: z.literal(true),
     package: z.union([z.literal(0), z.literal(1), z.literal(2)]),
@@ -43,10 +42,6 @@ export const createLbpSolanaApiPayloadSchema = z.object({
           .literal(SOLANA_BASE_TOKEN_PAIR)
           .default(SOLANA_BASE_TOKEN_PAIR),
         baseTokenDecimals: z.literal(SOLANA_DECIMALS).default(SOLANA_DECIMALS),
-        buyReferralFeePer: numberStringSchema(0, 1),
-        sellMemeTokenOwnerFeePer: numberStringSchema(0, 1),
-        buyMemeTokenOwnerFeePer: numberStringSchema(0, 1),
-        finalizeFeePer: numberStringSchema(0, 2.5).default('0'),
         maxAllocationPerUser: numberStringSchema(0, 10).default('0'),
         referrer: z
           .string()
@@ -84,14 +79,16 @@ export const createLbpSolanaApiPayloadSchema = z.object({
     baseTokenAddress: z.literal(SOLANA_BASE_TOKEN_PAIR),
     baseTokenDecimals: z.literal(SOLANA_DECIMALS),
   }),
-  fees: z.object({
-    buyPoolCreator: z.number().min(0).max(0.01),
-    sellPoolCreator: z.number().min(0).max(0.01),
-    buyReferral: z.number().min(0).max(0.01),
-    graduation: z.number().min(0).max(0.025),
-    feeDistribution: z.boolean(),
-    dynamicFee: z.boolean(),
-  }),
+  fees: z
+    .object({
+      buyPoolCreator: z.number().min(0).max(0.01),
+      sellPoolCreator: z.number().min(0).max(0.01),
+      buyReferral: z.number().min(0).max(0.01),
+      graduation: z.number().min(0).max(0.025),
+      feeDistribution: z.boolean(),
+      dynamicFee: z.boolean(),
+    })
+    .optional(),
 });
 
 export type CreateLbpSolanaApiPayload = z.infer<

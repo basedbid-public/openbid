@@ -21,7 +21,6 @@ export const createSolanaFlashTx1ApiSchema = z
     chainId: solanaChainIdSchema,
     signer: solanaAddressSchema,
     flashDex: z.union([z.literal(1), z.literal(2)]), // 1 = Meteora, 2 = Raydium
-    isSandboxMode: z.boolean().default(false),
     token: tokenSchemaTx1,
     // Raydium specific
     raydiumFeeTierIndex: z.string().optional(),
@@ -69,7 +68,6 @@ export const createSolanaFlashTx2ApiSchema = z.object({
   chainId: solanaChainIdSchema,
   signer: solanaAddressSchema,
   flashDex: z.union([z.literal(1), z.literal(2)]),
-  isSandboxMode: z.boolean().default(false),
   tx1Signature: z.string(),
   flashSeed: z.string(),
   mintAddress: z.string(),
