@@ -23,6 +23,8 @@ let launchedToken: {
 } | null = null;
 
 export const createLbpSolana = async (args: CreateSolanaLbpInput) => {
+  let launchConfirmed = false;
+
   try {
     const env = validateEnvironmentSolana();
 
@@ -36,6 +38,9 @@ export const createLbpSolana = async (args: CreateSolanaLbpInput) => {
 
     const data = input;
     const { token, board, boardOwner, dex, fees } = data;
+
+    console.log('\nStep 1 of 3: Uploading pool metadata');
+    console.log('This uploads your token image and launch details to IPFS.');
 
     let sale = data.sale;
 
@@ -141,6 +146,11 @@ export const createLbpSolana = async (args: CreateSolanaLbpInput) => {
       lastValidBlockHeight,
     } = json;
 
+    console.log('\nStep 2 of 3: Creating the token pool on Solana devnet');
+    console.log(
+      'This creates the token mint and pool transaction for your launch.',
+    );
+
     const mintSigner =
       await solanaWrapper.getSignerFromPrivateKey(mintSignerSecretHex);
 
@@ -149,7 +159,10 @@ export const createLbpSolana = async (args: CreateSolanaLbpInput) => {
       blockhash,
       lastValidBlockHeight,
       [mintSigner.keyPair],
-      { description: 'Create LBP', skipConfirmation: args.isSandboxMode },
+      {
+        description: 'Create Solana Pool',
+        skipConfirmation: args.isSandboxMode,
+      },
     );
 
     launchedToken = {
@@ -160,16 +173,45 @@ export const createLbpSolana = async (args: CreateSolanaLbpInput) => {
 
     await solanaWrapper.awaitTxConfirmation(signature);
 
+    console.log('\nStep 3 of 3: Registering the pool with basedbid');
+    console.log('This makes the pool visible to basedbid services.');
+
     if (!fees?.feeDistribution) {
-      return;
+      await BasedBidApi.invokeApi(
+        ApiType.SDK,
+        'sol/confirm-launch',
+        {
+          chainId: args.chainId,
+          mintAddress: json.mintAddress,
+          signature,
+        },
+        'Failed to confirm launch',
+        args.isSandboxMode,
+      );
+      launchConfirmed = true;
+
+      return {
+        mintAddress: json.mintAddress,
+        signature,
+        metadataUrl,
+      };
     }
 
     // Call fee-distribution API to set Fee Builder params
 
+    const customFeePercent = fees.customFees.reduce(
+      (sum, fee) => sum + fee.percent,
+      0,
+    );
     const feeDistributionPayload = {
       chainId: args.chainId,
       address: json.mintAddress,
       ...fees,
+      customFeePercent,
+      marketingWalletAddress: fees.marketingWalletAddress ?? '',
+      feeDistributionPayoutCustomMint:
+        fees.feeDistributionPayoutCustomMint ?? '',
+      rewardToken: fees.rewardToken ?? '',
     };
 
     const solanaFeeDistributionValidated =
@@ -200,9 +242,16 @@ export const createLbpSolana = async (args: CreateSolanaLbpInput) => {
       'Failed to confirm launch',
       args.isSandboxMode,
     );
+    launchConfirmed = true;
+
+    return {
+      mintAddress: json.mintAddress,
+      signature,
+      metadataUrl,
+    };
   } catch (error) {
     console.error('Error creating LBP on Solana: ', error);
-    if (launchedToken != null) {
+    if (launchedToken != null && !launchConfirmed) {
       await BasedBidApi.invokeApi(
         ApiType.SDK,
         'sol/release-vanity',

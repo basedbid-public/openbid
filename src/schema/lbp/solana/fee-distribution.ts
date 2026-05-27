@@ -1,8 +1,9 @@
+import { solanaAddressSchema } from 'schema/common';
 import { z } from 'zod';
 
 export const solanaCustomFeeSchema = z.object({
   percent: z.number().min(0).max(100),
-  walletAddress: z.string().min(1),
+  walletAddress: solanaAddressSchema,
   name: z.string().min(1).max(100),
 });
 
@@ -17,12 +18,17 @@ export const solanaFeeDistributionApiPayloadSchema = z.object({
   marketingPercent: z.number().int().min(0).max(100),
   creatorPercent: z.number().int().min(0).max(100),
   customFeePercent: z.number().int().min(0).max(100),
-  marketingWalletAddress: z.string().min(1),
+  marketingWalletAddress: z
+    .union([solanaAddressSchema, z.literal('')])
+    .optional(),
   customFees: z.array(solanaCustomFeeSchema),
   collectQuoteThreshold: z.string(),
   collectBaseThreshold: z.string(),
   feeDistributionPayoutKind: z.enum(['SOL', 'TOKEN']),
-  feeDistributionPayoutCustomMint: z.string(),
+  feeDistributionPayoutCustomMint: z.union([
+    solanaAddressSchema,
+    z.literal(''),
+  ]),
   rewardToken: z.string(),
   minTokenBalanceForDividends: z.string(),
 });

@@ -15,9 +15,15 @@ import {
 import { SolanaRpcApiDevnet } from '@solana/kit';
 import bs58 from 'bs58';
 import { createInterface } from 'readline';
+import { printNextSteps } from './next-steps';
 
 const LAMPORTS_PER_SOL = 1_000_000_000;
 const BASE_FEE_PER_SIGNATURE = 5000;
+
+const formatElapsed = (startedAt: number): string => {
+  const elapsedSeconds = Math.floor((Date.now() - startedAt) / 1000);
+  return `${elapsedSeconds}s`;
+};
 
 const formatLamports = (lamports: bigint): string => {
   const sol = Number(lamports) / LAMPORTS_PER_SOL;
@@ -53,7 +59,12 @@ export class SolanaWrapper {
     privateKey?: string,
   ) {
     if (!privateKey) {
-      throw new Error('SOLANA_API_KEY missing');
+      printNextSteps('What To Try Next', [
+        'Run npm run wallet:solana.',
+        'Fund the printed wallet address at https://faucet.solana.com.',
+        'Rerun the same Solana command.',
+      ]);
+      throw new Error('SOLANA_PRIVATE_KEY missing');
     }
     this.privateKey = privateKey;
   }
@@ -94,18 +105,15 @@ export class SolanaWrapper {
     transaction: string,
     description: string = 'Transaction',
   ): void {
-    console.log('\n========================================');
-    console.log('       Transaction Cost Preview');
-    console.log('========================================');
-    console.log(`  Description: ${description}`);
-    console.log(`  Network:     Solana Devnet`);
-    console.log(`  RPC:         ${this.rpcUrl}`);
+    console.log('\nTransaction Cost Preview');
+    console.log('----------------------------------------');
+    console.log(`Description: ${description}`);
+    console.log(`Network:     Solana Devnet`);
+    console.log(`RPC:         ${this.rpcUrl}`);
 
     const estimatedFee = this.estimateTransactionFee(transaction);
 
-    console.log('----------------------------------------');
-    console.log(`  Estimated fee: ${formatLamports(estimatedFee)}`);
-    console.log('========================================\n');
+    console.log(`Estimated:   ${formatLamports(estimatedFee)}\n`);
   }
 
   async sendTransaction(
@@ -130,6 +138,10 @@ export class SolanaWrapper {
 
     if (!shouldProceed) {
       console.log('Transaction cancelled by user.');
+      printNextSteps('Resume When Ready', [
+        'Rerun the same command when you want to continue.',
+        'Answer y at the transaction prompt to submit on-chain.',
+      ]);
       process.exit(0);
     }
 
@@ -154,7 +166,7 @@ export class SolanaWrapper {
     const signature = getSignatureFromTransaction(signedTx);
     const wireTransaction = getBase64EncodedWireTransaction(signedTx);
 
-    console.log('Sending transaction:', signature);
+    console.log(`Sending transaction: ${signature}`);
 
     await this.rpc
       .sendTransaction(wireTransaction, {
@@ -171,12 +183,27 @@ export class SolanaWrapper {
     const POLL_INTERVAL_MS = 1000;
     const TIMEOUT_MS = 90_000;
     const startedAt = Date.now();
+    let pollCount = 0;
+
+    console.log('\nWaiting for TX confirmation...');
 
     while (true) {
       if (Date.now() - startedAt > TIMEOUT_MS) {
+        if (process.stdout.isTTY) {
+          process.stdout.write('\n');
+        }
         throw new Error(
           `Transaction ${signature} not finalized within ${TIMEOUT_MS}ms`,
         );
+      }
+
+      pollCount += 1;
+      if (process.stdout.isTTY) {
+        process.stdout.write(
+          `\rChecking status ${'.'.repeat((pollCount % 3) + 1).padEnd(3, ' ')} ${formatElapsed(startedAt)}`,
+        );
+      } else {
+        console.log(`Checking status... ${formatElapsed(startedAt)}`);
       }
 
       const { value } = await this.rpc
@@ -185,6 +212,9 @@ export class SolanaWrapper {
       const status = value[0];
 
       if (status?.err) {
+        if (process.stdout.isTTY) {
+          process.stdout.write('\n');
+        }
         throw new Error(`Transaction failed: ${JSON.stringify(status.err)}`);
       }
       if (status?.confirmationStatus === 'finalized') {
@@ -194,13 +224,16 @@ export class SolanaWrapper {
       await new Promise((r) => setTimeout(r, POLL_INTERVAL_MS));
     }
 
-    console.log('\n========================================');
-    console.log('       Transaction Confirmed!');
-    console.log('========================================');
+    if (process.stdout.isTTY) {
+      process.stdout.write('\n');
+    }
+
+    console.log('\nSUCCESS: Transaction Confirmed');
+    console.log('----------------------------------------');
     console.log(`Signature: ${signature}`);
     console.log(
       `Explorer: https://explorer.solana.com/tx/${signature}?cluster=devnet`,
     );
-    console.log('========================================\n');
+    console.log('');
   }
 }

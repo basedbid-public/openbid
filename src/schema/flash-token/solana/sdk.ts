@@ -40,6 +40,64 @@ export const createSolanaFlashInputSchema = z
         boardSeed: z.string().optional(),
       })
       .optional(),
+    fees: z
+      .object({
+        feeDistribution: z.boolean(),
+        dynamicFee: z.boolean().default(false),
+        liquidityPercent: z.number().min(0).max(50),
+        buybackPercent: z.number().min(0).max(50),
+        rewardPercent: z.number().min(0).max(50),
+        marketingPercent: z.number().min(0).max(50),
+        creatorPercent: z.number().min(0).max(50),
+        customFeePercent: z.number().min(0).max(50),
+        marketingWalletAddress: solanaAddressSchema.optional(),
+        customFees: z.array(
+          z.object({
+            percent: z.number().min(0).max(50),
+            walletAddress: solanaAddressSchema,
+            name: z.string(),
+          }),
+        ),
+        collectQuoteThreshold: z.string(),
+        collectBaseThreshold: z.string(),
+        feeDistributionPayoutKind: z.literal('SOL').default('SOL'),
+        feeDistributionPayoutCustomMint: z.string().default(''),
+        rewardToken: solanaAddressSchema.optional(),
+        minTokenBalanceForDividends: z.string(),
+      })
+      .optional()
+      .refine(
+        (data) => {
+          if (!data) {
+            return true;
+          }
+
+          if (data.marketingPercent > 0 && !data.marketingWalletAddress) {
+            return false;
+          }
+          return true;
+        },
+        {
+          message:
+            'marketingWalletAddress is required when marketingPercent is greater than 0',
+        },
+      )
+      .refine(
+        (data) => {
+          if (!data) {
+            return true;
+          }
+
+          if (data.rewardPercent > 0 && !data.rewardToken) {
+            return false;
+          }
+          return true;
+        },
+        {
+          message:
+            'rewardToken is required when rewardPercent is greater than 0',
+        },
+      ),
   })
   .refine(
     (data) => {

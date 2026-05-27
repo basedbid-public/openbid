@@ -1,4 +1,9 @@
 import { ApiType } from 'enums';
+import {
+  getOpenBidApiHeaders,
+  getSolanaApiFailureHint,
+  printNextSteps,
+} from './next-steps';
 
 export class BasedBidApi {
   static sdkApiUrl(isSandboxMode: boolean) {
@@ -26,28 +31,38 @@ export class BasedBidApi {
         : this.platformApiUrl(isSandboxMode);
     const endpoint = `${apiUrl}/${path}`;
 
+    if (process.env.OPENBID_DEBUG_PAYLOADS === 'true') {
+      console.log('\nbasedbid API payload');
+      console.log('----------------------------------------');
+      console.log(`Endpoint: ${endpoint}`);
+      console.log(JSON.stringify(payload, null, 2));
+      console.log('');
+    }
+
     const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        ...getOpenBidApiHeaders(),
       },
       body: JSON.stringify(payload),
     });
 
     if (!response.ok) {
-      console.error(await response.json());
+      const errorBody = await response.text();
+      console.error(`basedbid API request failed: ${endpoint}`);
+      console.error(errorBody);
+      printNextSteps('What To Try Next', getSolanaApiFailureHint(errorBody));
 
       throw new Error(
-        `BasedBid API Error: ${response.status} ${response.statusText}`,
+        `basedbid API Error: ${response.status} ${response.statusText}: ${errorBody}`,
       );
     }
 
     const json = (await response.json()) as T;
 
     if (!json) {
-      throw new Error(
-        `Based Bid API Error: ${errorMessage ?? 'Unknown error'}`,
-      );
+      throw new Error(`basedbid API Error: ${errorMessage ?? 'Unknown error'}`);
     }
 
     return json;

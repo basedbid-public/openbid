@@ -34,30 +34,28 @@ export const evmLbpCreateSchema = z
         .min(1000, 'Market cap must be at least $1000')
         .max(10000000, 'Market cap must be less than $10M'),
     }),
-    sale: z
-      .object({
-        startTime: saleTimeSchema(),
-        maxAllocationPerUser: z.number().min(0).max(10),
-        maxAllocationPerWhitelistedUser: z.number().min(0).max(10),
-        delayTradeTime: z.number().int().min(1).max(3600).optional(),
-        whitelistedAddresses: z.array(
-          z.string().regex(/^0x[a-fA-F0-9]{40}$/, 'Invalid EVM address'),
-        ),
-        softCap: z
-          .object({
-            amount: z.number(),
-            endTime: z
-              .number()
-              .int()
-              .min(0)
-              .refine(
-                (val) => val >= Math.floor(Date.now() / 1000),
-                'End time must be in the future',
-              ),
-          })
-          .optional(),
-      })
-      .optional(),
+    sale: z.object({
+      startTime: saleTimeSchema(),
+      maxAllocationPerUser: z.number().min(0).max(10),
+      maxAllocationPerWhitelistedUser: z.number().min(0).max(10),
+      delayTradeTime: z.number().int().min(1).max(3600).optional(),
+      whitelistedAddresses: z.array(
+        z.string().regex(/^0x[a-fA-F0-9]{40}$/, 'Invalid EVM address'),
+      ),
+      softCap: z
+        .object({
+          amount: z.number(),
+          endTime: z
+            .number()
+            .int()
+            .min(0)
+            .refine(
+              (val) => val >= Math.floor(Date.now() / 1000),
+              'End time must be in the future',
+            ),
+        })
+        .optional(),
+    }),
     dex: z
       .object({
         version: z.enum(EvmDexType),

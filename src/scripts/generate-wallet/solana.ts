@@ -2,6 +2,7 @@ import { createKeyPairSignerFromPrivateKeyBytes } from '@solana/kit';
 import bs58 from 'bs58';
 import { randomBytes } from 'crypto';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
+import { printNextSteps } from 'utils/next-steps';
 
 const SOLANA_RPC_URL = 'https://api.devnet.solana.com';
 
@@ -43,18 +44,13 @@ export const generateSolanaWallet = async () => {
   }
   console.log('Saved wallet to .env');
 
-  console.log(`
-    Next steps:
-      1. Review your .env file to ensure settings are correct
-      2. You can now use this wallet with other based.bid Solana scripts
-      3. Fund the wallet with SOL to execute transactions
-      
-      You can get devnet SOL from: https://faucet.solana.com/ to try scripts out in sandbox mode on Solana
-
-    Example usage:
-      npx ts-node src/scripts/solana/create-board.ts
-      npx ts-node src/scripts/solana/create-lbp.ts
-    `);
+  printNextSteps('Next Steps', [
+    `Fund ${address} with devnet SOL at https://faucet.solana.com`,
+    'Add a small test logo at assets/logo.jpg',
+    'Run npm run launch:solana:pool_devnet',
+    'For Flash Tokens, run npm run launch:solana:flash_devnet',
+    'For Boards, run npm run launch:solana:board_devnet',
+  ]);
 
   return {
     address,

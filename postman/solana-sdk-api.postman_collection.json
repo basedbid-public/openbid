@@ -1,0 +1,606 @@
+{
+  "info": {
+    "_postman_id": "1a988250-a808-4548-a167-b694f41bc1f9",
+    "name": "Solana SDK API",
+    "description": "BasedBid Solana SDK endpoints for creating boards, LBPs, buying, selling, and fee collection.\n\n**Base URLs**\n- Sandbox SDK: `https://cdn.based.bid/api`\n- Sandbox Platform: `https://testnet.based.bid/api`\n- Production SDK: `https://static.based.bid/api`\n- Production Platform: `https://based.bid/api`\n\n**Headers**\n- `Content-Type: application/json`\n- `x-api-key: <your-api-key>`\n\n**Endpoints**\n- `POST /sol/create-lbp` - Create LBP\n- `POST /sol/apply-sub-board` - Create Board\n- `POST /sol/lbp-buy` - Buy LBP tokens\n- `POST /sol/lbp-sell` - Sell LBP tokens\n- `POST /sol/collect-lbp-fees` - Collect LBP fees\n- `POST /sol/confirm-launch` - Confirm LBP launch\n- `POST /sol/release-vanity` - Release vanity address\n- `POST /token/fee-distribution` - Set fee distribution (Platform API)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "54841686",
+    "_collection_link": "https://go.postman.co/collection/54841686-1a988250-a808-4548-a167-b694f41bc1f9?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "IPFS - Upload Logo/Image",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+              "try {",
+              "  const json = pm.response.json();",
+              "  if (json && json.response && json.response.url) {",
+              "    pm.collectionVariables.set('logo_url', json.response.url);",
+              "    console.log('Set collection variable logo_url =', json.response.url);",
+              "  }",
+              "} catch (e) { console.warn('Could not parse JSON', e); }"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{apiKey}}"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "file",
+              "description": "Logo file (PNG/JPEG/WebP etc.). Backend returns 413 if over ~1MB.",
+              "type": "file",
+              "value": ""
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{sdkBaseUrl}}/upload",
+          "host": [
+            "{{sdkBaseUrl}}"
+          ],
+          "path": [
+            "upload"
+          ]
+        },
+        "description": "Multipart upload for image files. Field name must be `file`.\n\n**When is API key required?**\n\nThe API key is only needed when launching under a **custom board**. Passing an empty string for the board launches under the default \"based\" board (open to all). Custom boards require ownership verification.\n\n**Success response**:\n\n``` json\n{\n  \"ok\": true,\n  \"response\": { \"cid\": \"...\", \"url\": \"https://ipfs.based.bid/ipfs/...\" }\n}\n\n ```\n\nUse `response.url` as `logo` in metadata JSON."
+      },
+      "response": []
+    },
+    {
+      "name": "IPFS - Upload Metadata JSON",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "// Generate a 5-digit numeric seed (matches generateNumericSeed(5))",
+              "const seed = String(Math.floor(10000 + Math.random() * 90000));",
+              "pm.collectionVariables.set('seed', seed);",
+              "console.log('Set collection variable seed =', seed);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+              "try {",
+              "  const json = pm.response.json();",
+              "  if (json && json.response && json.response.url) {",
+              "    pm.collectionVariables.set('metadata_url', json.response.url);",
+              "    console.log('Set collection variable metadata_url =', json.response.url);",
+              "  }",
+              "} catch (e) { console.warn('Could not parse JSON', e); }"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "x-api-key",
+            "value": "{{apiKey}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Test Token\",\n  \"symbol\": \"TEST\",\n  \"decimals\": 9,\n  \"totalSupply\": \"1000000000\",\n  \"logo\": \"{{logo_url}}\",\n  \"board\": \"\",\n  \"twitter\": \"https://x.com/example\",\n  \"telegram\": \"https://t.me/example\",\n  \"website\": \"https://example.com\",\n  \"discord\": \"https://discord.gg/example\",\n  \"description\": \"Token description\",\n  \"whitelist\": [],\n  \"seed\": \"{{seed}}\"\n}"
+        },
+        "url": {
+          "raw": "{{sdkBaseUrl}}/upload/json",
+          "host": [
+            "{{sdkBaseUrl}}"
+          ],
+          "path": [
+            "upload",
+            "json"
+          ]
+        },
+        "description": "JSON metadata pinned to IPFS. The `seed` field is a numeric string generated in the pre-request script.\n\n**When is API key required?**\n\nThe API key is only needed when launching under a **custom board**. Passing an empty string for the board launches under the default \"based\" board (open to all). Custom boards require ownership verification.\n\n**Required fields**\n\n- `name` - Token name\n    \n- `symbol` - Token symbol\n    \n- `decimals` - Must be 9 for Solana\n    \n- `totalSupply` - Token supply as string\n    \n- `logo` - URL from step 1\n    \n- `seed` - Must match the `data.seed` in create-lbp request\n    \n\n**Success response**:\n\n``` json\n{\n  \"ok\": true,\n  \"response\": { \"cid\": \"...\", \"url\": \"https://ipfs.based.bid/ipfs/...\" }\n}\n\n ```"
+      },
+      "response": []
+    },
+    {
+      "name": "Create LBP",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "if (!pm.collectionVariables.get('metadata_url')) {",
+              "  console.warn('metadata_url is empty — run IPFS Upload steps first');",
+              "}",
+              "if (!pm.collectionVariables.get('seed')) {",
+              "  const seed = String(Math.floor(10000 + Math.random() * 90000));",
+              "  pm.collectionVariables.set('seed', seed);",
+              "}"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Has transaction (base64)', function () {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json).to.have.property('transaction');",
+              "});",
+              "pm.test('Has mintSignerSecretHex', function () {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json).to.have.property('mintSignerSecretHex');",
+              "});",
+              "pm.test('Has mintAddress', function () {",
+              "  const json = pm.response.json();",
+              "  if (json && json.mintAddress) {",
+              "    pm.collectionVariables.set('mint_address', json.mintAddress);",
+              "  }",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "x-api-key",
+            "value": "{{apiKey}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"chainId\": {{chainId}},\n  \"signer\": \"{{signer}}\",\n  \"data\": {\n    \"seed\": \"{{seed}}\",\n    \"advanced\": false,\n    \"package\": 0,\n    \"isXSale\": false,\n    \"hasFee\": false,\n    \"hasMarketCap\": false,\n    \"hasSoftCap\": false,\n    \"hasStartTime\": false,\n    \"hasEndTime\": false,\n    \"hasMaxAllocationPerUser\": false,\n    \"isWhitelist\": false,\n    \"token\": {\n      \"name\": \"Test Token\",\n      \"symbol\": \"TEST\",\n      \"totalSupply\": \"1000000000\",\n      \"decimals\": 9,\n      \"initialBuyAmount\": \"0\",\n      \"metadataUrl\": \"{{metadata_url}}\",\n      \"raiseTokenDecimals\": 9\n    },\n    \"dex\": {\n      \"routerId\": \"meteora\",\n      \"meteoraFeeTierIndex\": \"1\"\n    },\n    \"sale\": {\n      \"marketCap\": \"10000\",\n      \"softCap\": \"2.396026490066225166\",\n      \"startTime\": 0,\n      \"endTime\": 0,\n      \"initialBuyAmount\": \"0\",\n      \"baseTokenForPair\": \"So11111111111111111111111111111111111111112\",\n      \"baseTokenDecimals\": 9,\n      \"buyReferralFeePer\": \"0\",\n      \"sellMemeTokenOwnerFeePer\": \"0\",\n      \"buyMemeTokenOwnerFeePer\": \"0\",\n      \"finalizeFeePer\": \"0\",\n      \"maxAllocationPerUser\": \"0\",\n      \"referrer\": \"11111111111111111111111111111111\"\n    },\n    \"baseTokenAddress\": \"So11111111111111111111111111111111111111112\",\n    \"baseTokenDecimals\": 9\n  }\n}"
+        },
+        "url": {
+          "raw": "{{sdkBaseUrl}}/sol/create-lbp",
+          "host": [
+            "{{sdkBaseUrl}}"
+          ],
+          "path": [
+            "sol",
+            "create-lbp"
+          ]
+        },
+        "description": "Builds the unsigned Solana transaction for LBP creation.\n\n**When is API key required?**\n\nThe API key is only needed when launching under a **custom board**. Passing an empty string for the board launches under the default \"based\" board (open to all). Custom boards require ownership verification.\n\n**Key fields**\n\n- `signer` - Creator wallet (base58)\n    \n- `data.seed` - Must match seed in metadata JSON\n    \n- `data.token.metadataUrl` - Must be `https://ipfs.based.bid/ipfs/...`\n    \n- `data.dex.routerId` - `meteora` or `raydium`\n    \n- `data.package` - 0 = Based, 1 = Super Based, 2 = third tier\n    \n\n**Response**:\n\n``` json\n{\n  \"ok\": true,\n  \"transaction\": \"<base64 compiled VersionedTransaction>\",\n  \"mintAddress\": \"<pubkey>\",\n  \"mintSignerSecretHex\": \"<128 hex chars>\",\n  \"blockhash\": \"<recent blockhash>\",\n  \"lastValidBlockHeight\": 0\n}\n\n ```\n\n**Signing**: Wallet first, mint signer second."
+      },
+      "response": []
+    },
+    {
+      "name": "Create Board",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "// Generate board seed",
+              "const seed = String(Math.floor(100000 + Math.random() * 900000));",
+              "pm.collectionVariables.set('board_seed', seed);",
+              "console.log('Board seed:', seed);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Has transaction', function () {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json).to.have.property('transaction');",
+              "});",
+              "pm.test('Has boardId', function () {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json).to.have.property('boardId');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "x-api-key",
+            "value": "{{apiKey}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"chainId\": {{chainId}},\n  \"signer\": \"{{signer}}\",\n  \"seed\": \"{{board_seed}}\",\n  \"metaData\": \"{{metadata_url}}\",\n  \"flashLaunchFeePer\": \"0.001\",\n  \"fees\": [\n    {\n      \"launchPackage\": 0,\n      \"feePer\": \"0.001\"\n    }\n  ],\n  \"isSandboxMode\": true\n}"
+        },
+        "url": {
+          "raw": "{{sdkBaseUrl}}/sol/apply-sub-board",
+          "host": [
+            "{{sdkBaseUrl}}"
+          ],
+          "path": [
+            "sol",
+            "apply-sub-board"
+          ]
+        },
+        "description": "Creates a Board on Solana.\n\n**When is API key required?**\n\nThe API key is only needed when launching under a **custom board**. Passing an empty string for the board launches under the default \"based\" board (open to all). Custom boards require ownership verification.\n\n**Required fields**\n\n- `signer` - Creator wallet (base58)\n    \n- `seed` - Numeric seed for the board\n    \n- `metaData` - IPFS URL for board metadata\n    \n- `flashLaunchFeePer` - Fee percentage for flash launch\n    \n- `fees` - Array of fee configurations per launch package\n    \n\n**Response**:\n\n``` json\n{\n  \"ok\": true,\n  \"transaction\": \"<base64>\",\n  \"boardId\": \"<pubkey>\",\n  \"boardTitle\": \"...\",\n  \"blockhash\": \"...\",\n  \"lastValidBlockHeight\": 0\n}\n\n ```"
+      },
+      "response": []
+    },
+    {
+      "name": "LBP Buy",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Has transaction', function () {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json).to.have.property('transaction');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "x-api-key",
+            "value": "{{apiKey}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"chainId\": {{chainId}},\n  \"signer\": \"{{signer}}\",\n  \"memeMint\": \"{{mint_address}}\",\n  \"amount\": 0.01,\n  \"slippage\": 5,\n  \"referrer\": \"11111111111111111111111111111111\",\n  \"isSandboxMode\": true\n}"
+        },
+        "url": {
+          "raw": "{{sdkBaseUrl}}/sol/lbp-buy",
+          "host": [
+            "{{sdkBaseUrl}}"
+          ],
+          "path": [
+            "sol",
+            "lbp-buy"
+          ]
+        },
+        "description": "Buys tokens from an LBP on Solana.\n\n**Required fields**\n- `signer` - Buyer wallet (base58)\n- `memeMint` - LBP mint address\n- `amount` - Buy amount\n- `slippage` - Slippage: 1, 5, or 10\n- `referrer` - Referrer address (use zero address if none)\n\n**Response**:\n```json\n{\n  \"ok\": true,\n  \"transaction\": \"<base64>\",\n  \"blockhash\": \"...\",\n  \"lastValidBlockHeight\": 0\n}\n```"
+      },
+      "response": []
+    },
+    {
+      "name": "LBP Sell",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Has transaction', function () {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json).to.have.property('transaction');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "x-api-key",
+            "value": "{{apiKey}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"chainId\": {{chainId}},\n  \"signer\": \"{{signer}}\",\n  \"memeMint\": \"{{mint_address}}\",\n  \"amount\": 100,\n  \"slippage\": 5\n}"
+        },
+        "url": {
+          "raw": "{{sdkBaseUrl}}/sol/lbp-sell",
+          "host": [
+            "{{sdkBaseUrl}}"
+          ],
+          "path": [
+            "sol",
+            "lbp-sell"
+          ]
+        },
+        "description": "Sells tokens from an LBP on Solana.\n\n**Required fields**\n- `signer` - Seller wallet (base58)\n- `memeMint` - LBP mint address\n- `amount` - Amount of tokens to sell\n- `slippage` - Slippage: 1, 5, or 10\n\n**Response**:\n```json\n{\n  \"ok\": true,\n  \"transaction\": \"<base64>\",\n  \"blockhash\": \"...\",\n  \"lastValidBlockHeight\": 0\n}\n```"
+      },
+      "response": []
+    },
+    {
+      "name": "Collect LBP Fees",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Has transaction', function () {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json).to.have.property('transaction');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "x-api-key",
+            "value": "{{apiKey}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"chainId\": {{chainId}},\n  \"signer\": \"{{signer}}\",\n  \"memeMint\": \"{{mint_address}}\",\n  \"isSandboxMode\": true\n}"
+        },
+        "url": {
+          "raw": "{{sdkBaseUrl}}/sol/collect-lbp-fees",
+          "host": [
+            "{{sdkBaseUrl}}"
+          ],
+          "path": [
+            "sol",
+            "collect-lbp-fees"
+          ]
+        },
+        "description": "Collects accumulated fees from an LBP pool.\n\n**Required fields**\n- `signer` - Wallet address to receive fees\n- `memeMint` - LBP mint address\n\n**Response**:\n```json\n{\n  \"ok\": true,\n  \"transaction\": \"<base64>\",\n  \"blockhash\": \"...\",\n  \"lastValidBlockHeight\": 0\n}\n```"
+      },
+      "response": []
+    },
+    {
+      "name": "Confirm Launch",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', function () { pm.response.to.have.status(200); });"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "x-api-key",
+            "value": "{{apiKey}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"chainId\": {{chainId}},\n  \"mintAddress\": \"{{mint_address}}\",\n  \"signature\": \"YOUR_TRANSACTION_SIGNATURE\"\n}"
+        },
+        "url": {
+          "raw": "{{sdkBaseUrl}}/sol/confirm-launch",
+          "host": [
+            "{{sdkBaseUrl}}"
+          ],
+          "path": [
+            "sol",
+            "confirm-launch"
+          ]
+        },
+        "description": "Confirms the LBP or flash token launch with BasedBid after the creation transaction is confirmed.\n\n**Required fields**\n\n- `chainId` - Solana chain ID (5011)\n    \n- `mintAddress` - Mint address of the created token\n    \n- `signature` - Transaction signature of the confirmed pool creation\n    \n\n**Response**:\n\n``` json\n{\n  \"ok\": true\n}\n\n ```"
+      },
+      "response": []
+    },
+    {
+      "name": "Release Vanity",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', function () { pm.response.to.have.status(200); });"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "x-api-key",
+            "value": "{{apiKey}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"chainId\": {{chainId}},\n  \"mintAddress\": \"{{mint_address}}\",\n  \"signature\": \"YOUR_TRANSACTION_SIGNATURE\"\n}"
+        },
+        "url": {
+          "raw": "{{sdkBaseUrl}}/sol/release-vanity",
+          "host": [
+            "{{sdkBaseUrl}}"
+          ],
+          "path": [
+            "sol",
+            "release-vanity"
+          ]
+        },
+        "description": "Releases a vanity address if the LBP creation or flash token creation failed after the transaction was confirmed.\n\n**Required fields**\n\n- `chainId` - Solana chain ID\n    \n- `mintAddress` - Mint address to release\n    \n- `signature` - Transaction signature\n    \n\n**Response**:\n\n``` json\n{\n  \"ok\": true\n}\n\n ```"
+      },
+      "response": []
+    },
+    {
+      "name": "Fee Distribution (Platform API)",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "if (!pm.collectionVariables.get('mint_address')) {",
+              "  console.warn('mint_address is empty — run Create LBP first');",
+              "}"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', function () { pm.response.to.have.status(200); });"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "x-api-key",
+            "value": "{{apiKey}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"chainId\": {{chainId}},\n  \"address\": \"{{mint_address}}\",\n  \"feeDistribution\": true,\n  \"dynamicFee\": false,\n  \"liquidityPercent\": 10,\n  \"buybackPercent\": 10,\n  \"rewardPercent\": 10,\n  \"marketingPercent\": 5,\n  \"creatorPercent\": 5,\n  \"customFeePercent\": 0,\n  \"marketingWalletAddress\": \"HBq6FsSwWSnCQx2wGrDfocD9RF341dckgmUR7nMKAyXX\",\n  \"customFees\": [\n    {\n      \"percent\": 5,\n      \"walletAddress\": \"3enaUpkVRwze4zTikeJ3mD6xL5aCNS46RVsD3nPQQDW7\",\n      \"name\": \"Partner\"\n    }\n  ],\n  \"collectQuoteThreshold\": \"0\",\n  \"collectBaseThreshold\": \"0\",\n  \"feeDistributionPayoutKind\": \"SOL\",\n  \"feeDistributionPayoutCustomMint\": \"\",\n  \"rewardToken\": \"\",\n  \"minTokenBalanceForDividends\": \"0\"\n}"
+        },
+        "url": {
+          "raw": "{{platformBaseUrl}}/token/fee-distribution",
+          "host": [
+            "{{platformBaseUrl}}"
+          ],
+          "path": [
+            "token",
+            "fee-distribution"
+          ]
+        },
+        "description": "**IMPORTANT**: This endpoint uses the Platform API (different base URL).\n\nRegisters fee-distribution settings for a newly created LBP mint. This is required on Solana to adjust Fee Builder rerouting\n\n**Required fields**\n\n- `chainId` - Must match the LBP chain ID\n    \n- `address` - Mint address from create-lbp response\n    \n- Percent fields should sum reasonably (with `customFees[].percent`)\n    \n- `feeDistributionPayoutKind` - `SOL` or `TOKEN`\n    \n\n**Response**:\n\n``` json\n{\n  \"ok\": true,\n  \"transaction\": \"<base64>\",\n  \"blockhash\": \"...\",\n  \"lastValidBlockHeight\": 0\n}\n\n ```"
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "sdkBaseUrl",
+      "value": "https://cdn.based.bid/api"
+    },
+    {
+      "key": "platformBaseUrl",
+      "value": "https://testnet.based.bid/api"
+    },
+    {
+      "key": "chainId",
+      "value": "5011"
+    },
+    {
+      "key": "signer",
+      "value": "YOUR_SOLANA_WALLET_ADDRESS_BASE58"
+    },
+    {
+      "key": "apiKey",
+      "value": "your-api-key"
+    },
+    {
+      "key": "logo_url",
+      "value": ""
+    },
+    {
+      "key": "metadata_url",
+      "value": ""
+    },
+    {
+      "key": "mint_address",
+      "value": ""
+    },
+    {
+      "key": "seed",
+      "value": ""
+    }
+  ]
+}

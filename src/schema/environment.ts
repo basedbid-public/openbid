@@ -1,69 +1,58 @@
+import { getSolanaEnvironmentHint, printNextSteps } from 'utils/next-steps';
 import { z } from 'zod';
 
-const envSchema = z
-  .object({
-    PRIVATE_KEY: z
-      .string()
-      .transform((val) => val as `0x${string}`)
-      .optional(),
-    SOLANA_PRIVATE_KEY: z.string().optional(),
-    EVM_RPC_URL: z.string().min(1, 'EVM_RPC_URL must not be empty'),
-    SOLANA_RPC_URL: z.string().min(1, 'SOLANA_RPC_URL must not be empty'),
-  })
-  .superRefine((data, ctx) => {
-    if (!data.PRIVATE_KEY && !data.SOLANA_PRIVATE_KEY) {
-      ctx.addIssue({
-        code: 'custom',
-        message: 'Either PRIVATE_KEY or SOLANA_PRIVATE_KEY must be defined',
-      });
-    }
-    if (!data.EVM_RPC_URL && !data.SOLANA_RPC_URL) {
-      ctx.addIssue({
-        code: 'custom',
-        message: 'Either EVM_RPC_URL or SOLANA_RPC_URL must be defined',
-      });
-    }
-    if (
-      (data.PRIVATE_KEY && !data.EVM_RPC_URL) ||
-      (!data.PRIVATE_KEY && data.EVM_RPC_URL)
-    ) {
-      ctx.addIssue({
-        code: 'custom',
-        message:
-          'If PRIVATE_KEY is defined, EVM_RPC_URL must be defined and vice versa',
-      });
-    }
+const optionalNonEmptyString = z.preprocess(
+  (value) => (value === '' ? undefined : value),
+  z.string().min(1).optional(),
+);
 
-    if (
-      (data.SOLANA_PRIVATE_KEY && !data.EVM_RPC_URL) ||
-      (!data.SOLANA_PRIVATE_KEY && data.EVM_RPC_URL)
-    ) {
-      ctx.addIssue({
-        code: 'custom',
-        message:
-          'If SOLANA_PRIVATE_KEY is defined, SOLANA_RPC_URL must be defined and vice versa',
-      });
-    }
-  });
+const evmEnvSchema = z.object({
+  PRIVATE_KEY: optionalNonEmptyString.transform(
+    (val) => val as `0x${string}` | undefined,
+  ),
+  EVM_RPC_URL: optionalNonEmptyString,
+});
+
+const solanaEnvSchema = z.object({
+  SOLANA_PRIVATE_KEY: optionalNonEmptyString,
+  SOLANA_RPC_URL: optionalNonEmptyString,
+});
 
 export const validateEnvironment = () => {
-  const parsed = envSchema.safeParse(process.env);
+  const parsed = evmEnvSchema.safeParse(process.env);
   if (!parsed.success) {
     throw new Error(parsed.error.message);
   }
 
-  if (!parsed.data) {
-    throw new Error(`Invalid environment: ${JSON.stringify(parsed, null, 2)}`);
+  const env = parsed.data;
+  if (!env.PRIVATE_KEY || !env.EVM_RPC_URL) {
+    printNextSteps('What To Try Next', [
+      'Add PRIVATE_KEY=<0x...> and EVM_RPC_URL=<rpc-url> to .env.',
+      'Then rerun the same EVM command.',
+    ]);
+    throw new Error('PRIVATE_KEY and EVM_RPC_URL must be defined');
   }
 
-  return parsed.data;
+  return {
+    PRIVATE_KEY: env.PRIVATE_KEY,
+    EVM_RPC_URL: env.EVM_RPC_URL,
+  };
 };
 
 export const validateEnvironmentSolana = () => {
-  const env = validateEnvironment();
-  if (!env.SOLANA_PRIVATE_KEY) {
-    throw new Error('SOLANA_PRIVATE_KEY is not defined');
+  const parsed = solanaEnvSchema.safeParse(process.env);
+  if (!parsed.success) {
+    throw new Error(parsed.error.message);
   }
 
-  return env;
+  const env = parsed.data;
+  if (!env.SOLANA_PRIVATE_KEY || !env.SOLANA_RPC_URL) {
+    printNextSteps('What To Try Next', getSolanaEnvironmentHint());
+    throw new Error('SOLANA_PRIVATE_KEY and SOLANA_RPC_URL must be defined');
+  }
+
+  return {
+    SOLANA_PRIVATE_KEY: env.SOLANA_PRIVATE_KEY,
+    SOLANA_RPC_URL: env.SOLANA_RPC_URL,
+  };
 };

@@ -1,0 +1,309 @@
+{
+  "info": {
+    "_postman_id": "evm-sdk-api-v1",
+    "name": "EVM SDK API",
+    "description": "BasedBid EVM SDK endpoints for creating boards, LBPs, buying, selling, and fee collection.\n\n**Base URLs**\n- Sandbox: `https://cdn.based.bid/api`\n- Production: `https://static.based.bid/api`\n\n**Headers**\n- `Content-Type: application/json`\n- `x-api-key: <your-api-key>`\n\n**Endpoints**\n- `POST /create-lbp` - Create LBP (Liquidity Bootstrapping Pool)\n- `POST /create-board` - Create Board\n- `POST /lbp-buy-preview` - Get buy transaction preview\n- `POST /lbp-sell-preview` - Get sell transaction preview\n- `POST /collect-fee` - Collect fees from pool or board",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://cdn.based.bid/api"
+    },
+    {
+      "key": "chainId",
+      "value": "8453"
+    },
+    {
+      "key": "apiKey",
+      "value": "your-api-key"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Create LBP",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Has functionName', function () {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json).to.have.property('functionName');",
+              "});",
+              "pm.test('Has address', function () {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json).to.have.property('address');",
+              "});",
+              "pm.test('Has args', function () {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json).to.have.property('args');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "x-api-key",
+            "value": "{{apiKey}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"isSandboxMode\": true,\n  \"package\": 0,\n  \"chainId\": {{chainId}},\n  \"token\": {\n    \"name\": \"Test Token\",\n    \"symbol\": \"TEST\",\n    \"totalSupply\": 1000000,\n    \"initialBuyAmount\": 0,\n    \"metadataUrl\": \"https://ipfs.based.bid/ipfs/bafkreifj7zm3hsbghisi6vyxs56a7h6l4b2w2wc2vjpczj4q7xl2skulfq\"\n  },\n  \"sale\": {\n    \"boardTitle\": \"Test Board\",\n    \"marketCap\": 10000,\n    \"startTime\": 0,\n    \"maxAllocationPerUser\": 0,\n    \"maxAllocationPerWhitelistedUser\": 0,\n    \"delayTradeTime\": 0,\n    \"whitelistedAddresses\": []\n  },\n  \"dex\": {\n    \"version\": \"uniswap_v4\",\n    \"feeTier\": 3\n  },\n  \"fees\": {\n    \"buyPoolCreator\": 0.001,\n    \"sellPoolCreator\": 0.001,\n    \"buyReferral\": 0,\n    \"graduation\": 0.0025,\n    \"v4\": {\n      \"liquidity\": 1,\n      \"buyback\": 1,\n      \"reward\": {\n        \"token\": \"USDC\",\n        \"amount\": 1,\n        \"minTokenBalanceForDividends\": 0.01\n      },\n      \"customWallets\": [],\n      \"feeThreshold\": 0.1,\n      \"tieredFeesEnabled\": false,\n      \"dynamicFees\": {\n        \"hasHookDynamicFee\": true,\n        \"volatilityDecayPeriod\": \"medium\",\n        \"volatilityMultiplier\": \"medium\",\n        \"volatilityTrigger\": \"per_block\"\n      },\n      \"cooldownProtection\": {\n        \"cooldownDuration\": \"medium\",\n        \"penaltyFee\": \"medium\"\n      },\n      \"buyLimits\": {\n        \"protectPeriod\": 600,\n        \"maxBuyPerOrigin\": 5,\n        \"isHookWhitelist\": false\n      },\n      \"mevProtectionEnabled\": false\n    }\n  }\n}"
+        },
+        "url": "{{baseUrl}}/create-lbp",
+        "description": "Creates an LBP (Liquidity Bootstrapping Pool) on EVM.\n\n**Required fields**\n- `chainId` - EVM chain ID (e.g., 8453 for Base, 1 for Ethereum)\n- `package` - Launch package index: 0 = Based, 1 = Super Based, 2 = third tier\n- `token.name` - Token name (max 100 characters)\n- `token.symbol` - Token symbol (max 100 characters)\n- `token.totalSupply` - Must be > 0\n- `token.metadataUrl` - Must be `https://ipfs.based.bid/ipfs/...`\n- `sale.boardTitle` - Board title for the LBP\n- `sale.marketCap` - Market cap between 1 and 10,000,000\n- `dex.version` - DEX version: `uniswap_v4`\n- `dex.feeTier` - Fee tier between 1-10\n\n**Response** (`EvmApiResponse`):\n```json\n{\n  \"ok\": true,\n  \"functionName\": \"createLBP\",\n  \"address\": \"0x...\",\n  \"args\": [...],\n  \"value\": \"0\"\n}\n```"
+      },
+      "response": []
+    },
+    {
+      "name": "2. Create Board",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Has functionName', function () {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json).to.have.property('functionName');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "x-api-key",
+            "value": "{{apiKey}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"chainId\": {{chainId}},\n  \"account\": \"0xYourWalletAddress\",\n  \"title\": \"Test Board\",\n  \"description\": \"A test board description\",\n  \"logoUrl\": \"https://ipfs.based.bid/ipfs/logo-url\",\n  \"bannerUrl\": \"https://ipfs.based.bid/ipfs/banner-url\",\n  \"metaUri\": \"https://ipfs.based.bid/ipfs/metadata-url\",\n  \"fees\": [\n    {\n      \"launchPackage\": 0,\n      \"feePer\": \"0.001\"\n    }\n  ],\n  \"isSandboxMode\": true\n}"
+        },
+        "url": "{{baseUrl}}/create-board",
+        "description": "Creates a Board on EVM.\n\n**Required fields**\n- `chainId` - EVM chain ID\n- `account` - Creator wallet address\n- `title` - Board title (1-100 characters)\n- `description` - Board description (1-1000 characters)\n- `logoUrl` - IPFS URL for logo\n- `bannerUrl` - IPFS URL for banner\n- `metaUri` - IPFS URL for metadata JSON\n\n**Response** (`EvmApiResponse`):\n```json\n{\n  \"ok\": true,\n  \"functionName\": \"applySubBoard\",\n  \"address\": \"0x...\",\n  \"args\": [...],\n  \"value\": \"0\"\n}\n```"
+      },
+      "response": []
+    },
+    {
+      "name": "3. LBP Buy Preview",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Has functionName', function () {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json).to.have.property('functionName');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "x-api-key",
+            "value": "{{apiKey}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"chainId\": {{chainId}},\n  \"address\": \"0xLBPTokenAddress\",\n  \"account\": \"0xYourWalletAddress\",\n  \"slippage\": 5,\n  \"referrer\": \"0x0000000000000000000000000000000000000000\",\n  \"amount\": 0.01\n}"
+        },
+        "url": "{{baseUrl}}/lbp-buy-preview",
+        "description": "Gets the buy transaction preview for an LBP.\n\n**Required fields**\n- `chainId` - EVM chain ID\n- `address` - LBP token address\n- `account` - Buyer wallet address\n- `slippage` - Slippage tolerance: 1, 5, or 10 (percentage)\n- `referrer` - Referrer wallet address\n- `amount` - Buy amount in ETH/token terms\n\n**Response** (`EvmApiResponse`):\n```json\n{\n  \"ok\": true,\n  \"functionName\": \"buyToken\",\n  \"address\": \"0x...\",\n  \"args\": [...],\n  \"value\": \"1000000000000000\"\n}\n```"
+      },
+      "response": []
+    },
+    {
+      "name": "4. LBP Sell Preview",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Has approve transaction (trx1)', function () {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json).to.have.property('trx1');",
+              "});",
+              "pm.test('Has sell transaction (trx2)', function () {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json).to.have.property('trx2');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "x-api-key",
+            "value": "{{apiKey}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"chainId\": {{chainId}},\n  \"address\": \"0xLBPTokenAddress\",\n  \"account\": \"0xYourWalletAddress\",\n  \"slippage\": 5,\n  \"referrer\": \"0x0000000000000000000000000000000000000000\",\n  \"amount\": 100\n}"
+        },
+        "url": "{{baseUrl}}/lbp-sell-preview",
+        "description": "Gets the sell transaction preview for an LBP. Returns two transactions: 1) approve, 2) sell.\n\n**Required fields**\n- `chainId` - EVM chain ID\n- `address` - LBP token address\n- `account` - Seller wallet address\n- `slippage` - Slippage tolerance: 1, 5, or 10\n- `referrer` - Referrer wallet address\n- `amount` - Amount of tokens to sell\n\n**Response** (`SellEvmApiResponse`):\n```json\n{\n  \"ok\": true,\n  \"trx1\": { \"address\": \"0x...\", \"functionName\": \"approve\", \"args\": [...], \"value\": \"0\" },\n  \"trx2\": { \"address\": \"0x...\", \"functionName\": \"sellToken\", \"args\": [...], \"value\": \"0\" }\n}\n```"
+      },
+      "response": []
+    },
+    {
+      "name": "5. Collect Fees",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Has functionName', function () {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json).to.have.property('functionName');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "x-api-key",
+            "value": "{{apiKey}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"chainId\": {{chainId}},\n  \"account\": \"0xYourWalletAddress\",\n  \"target\": \"pool\",\n  \"address\": \"0xPoolOrBoardAddress\"\n}"
+        },
+        "url": "{{baseUrl}}/collect-fee",
+        "description": "Collects fees from an LBP pool or board.\n\n**Required fields**\n- `chainId` - EVM chain ID\n- `account` - Wallet address to receive fees\n- `target` - Either `pool` or `board`\n- `address` - Pool or board contract address\n\n**Response** (`EvmApiResponse`):\n```json\n{\n  \"ok\": true,\n  \"functionName\": \"collectFeeForLBP\",\n  \"address\": \"0x...\",\n  \"args\": [...],\n  \"value\": \"0\"\n}\n```"
+      },
+      "response": []
+    },
+    {
+      "name": "IPFS - Upload Logo/Image",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+              "try {",
+              "  const json = pm.response.json();",
+              "  if (json && json.response && json.response.url) {",
+              "    pm.collectionVariables.set('logo_url', json.response.url);",
+              "  }",
+              "} catch (e) { console.warn('Could not parse JSON', e); }"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{apiKey}}"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "file",
+              "description": "Image file (PNG/JPEG/WebP). Max ~1MB, returns 413 if over.",
+              "type": "file",
+              "src": ""
+            }
+          ]
+        },
+        "url": "{{baseUrl}}/upload",
+        "description": "Uploads an image to IPFS via BasedBid CDN.\n\n**Field name**: `file` (multipart formdata)\n\n**Success response**:\n```json\n{\n  \"ok\": true,\n  \"response\": { \"cid\": \"...\", \"url\": \"https://ipfs.based.bid/ipfs/...\" }\n}\n```\n\nUse `response.url` as `logoUrl` or `bannerUrl` in subsequent requests."
+      },
+      "response": []
+    },
+    {
+      "name": "IPFS - Upload Metadata JSON",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+              "try {",
+              "  const json = pm.response.json();",
+              "  if (json && json.response && json.response.url) {",
+              "    pm.collectionVariables.set('metadata_url', json.response.url);",
+              "  }",
+              "} catch (e) { console.warn('Could not parse JSON', e); }"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "x-api-key",
+            "value": "{{apiKey}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Test Token\",\n  \"symbol\": \"TEST\",\n  \"decimals\": 18,\n  \"totalSupply\": \"1000000000\",\n  \"logo\": \"{{logo_url}}\",\n  \"board\": \"Test Board\",\n  \"twitter\": \"https://x.com/example\",\n  \"telegram\": \"https://t.me/example\",\n  \"website\": \"https://example.com\",\n  \"discord\": \"https://discord.gg/example\",\n  \"description\": \"Token description\",\n  \"whitelist\": []\n}"
+        },
+        "url": "{{baseUrl}}/upload/json",
+        "description": "Uploads token metadata JSON to IPFS.\n\n**Required fields**\n- `name` - Token name\n- `symbol` - Token symbol\n- `logo` - Logo URL from `/upload` endpoint\n- `board` - Board title\n\n**Success response**:\n```json\n{\n  \"ok\": true,\n  \"response\": { \"cid\": \"...\", \"url\": \"https://ipfs.based.bid/ipfs/...\" }\n}\n```\n\nUse `response.url` as `metadataUrl` in token creation requests."
+      },
+      "response": []
+    }
+  ]
+}

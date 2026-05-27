@@ -8,6 +8,7 @@ import {
 } from 'schema/flash-token/solana/api';
 import { CreateSolanaFlashInput } from 'schema/flash-token/solana/sdk';
 import { SolanaFlashValidator } from 'schema/flash-token/solana/validator';
+import { solanaFeeDistributionApiPayloadSchema } from 'schema/lbp/solana/fee-distribution';
 import { SolanaChainId } from 'types/chain-id';
 import { BasedBidApi, IpfsUpload, SolanaWrapper } from 'utils';
 
@@ -18,6 +19,8 @@ let launchedToken: {
 } | null = null;
 
 export const createFlashTokenSolana = async (args: CreateSolanaFlashInput) => {
+  let launchConfirmed = false;
+
   try {
     const env = validateEnvironmentSolana();
 
@@ -32,7 +35,7 @@ export const createFlashTokenSolana = async (args: CreateSolanaFlashInput) => {
     const logoUrl = await IpfsUpload.uploadImage(args.token.metadata.logo);
 
     const data = input;
-    const { token, raydium, meteora, board, boardOwner } = data;
+    const { token, raydium, meteora, board, boardOwner, fees } = data;
 
     const metadataIpfs = {
       name: token.name,
@@ -55,7 +58,10 @@ export const createFlashTokenSolana = async (args: CreateSolanaFlashInput) => {
     const flashDex = args.flashDex === SolanaDexType.METEORA ? 1 : 2;
 
     // ==================== TX1 ====================
-    console.log('\n=== Preparing Transaction 1 ===');
+    console.log('\nStep 1 of 3: Creating the token mint');
+    console.log(
+      'This prepares the token contract address for your Flash Token.',
+    );
 
     const tx1Payload: CreateSolanaFlashTx1Api = {
       chainId: args.chainId,
@@ -88,20 +94,20 @@ export const createFlashTokenSolana = async (args: CreateSolanaFlashInput) => {
         }),
     };
 
-    console.log('Calling API for Transaction 1...');
+    console.log('Requesting mint creation transaction from basedbid...');
 
     const tx1Response =
       await BasedBidApi.invokeApi<CreateSolanaFlashTx1ApiResponse>(
         ApiType.SDK,
         'sol/create-flash-tx1',
         tx1Payload,
-        'Failed to create flash token Transaction 1',
+        'Failed to create flash token mint transaction',
         args.isSandboxMode,
       );
 
     if (!tx1Response || !tx1Response.transaction) {
       throw new Error(
-        'Based Bid API Error: Failed to create flash LBP Transaction 1',
+        'basedbid API Error: Failed to create flash token mint transaction',
       );
     }
 
@@ -115,7 +121,7 @@ export const createFlashTokenSolana = async (args: CreateSolanaFlashInput) => {
       tx1Response.lastValidBlockHeight,
       [mintSigner.keyPair],
       {
-        description: 'Create Flash Token (TX1)',
+        description: 'Create Flash Token Mint',
         skipConfirmation: args.isSandboxMode,
       },
     );
@@ -129,7 +135,10 @@ export const createFlashTokenSolana = async (args: CreateSolanaFlashInput) => {
     await solanaWrapper.awaitTxConfirmation(tx1Signature);
 
     // ==================== TX2 ====================
-    console.log('\n=== Preparing Transaction 2 ===');
+    console.log('\nStep 2 of 3: Initializing the Flash Token market');
+    console.log(
+      'This connects the new token to the selected DEX trading setup.',
+    );
 
     const tx2Payload: CreateSolanaFlashTx2Api = {
       chainId: args.chainId,
@@ -147,9 +156,10 @@ export const createFlashTokenSolana = async (args: CreateSolanaFlashInput) => {
       // Add Raydium specific fields if applicable
       ...(args.flashDex === SolanaDexType.RAYDIUM &&
         args.raydium && {
-          raydiumFeeTierIndex: '0',
-          finalStartPrice: 100,
-          hasInitialSwap: false,
+          raydiumFeeTierIndex: args.raydium.feeTierIndex,
+          finalStartPrice: args.raydium.finalStartPrice,
+          hasInitialSwap: args.raydium.hasInitialSwap,
+          solanaInitialBuyHuman: args.raydium.solanaInitialBuyHuman,
         }),
       // Add Meteora specific fields if applicable
       ...(args.flashDex === SolanaDexType.METEORA &&
@@ -159,23 +169,25 @@ export const createFlashTokenSolana = async (args: CreateSolanaFlashInput) => {
         }),
     };
 
-    console.log('Calling API for Transaction 2...');
+    console.log(
+      'Requesting market initialization transaction from basedbid...',
+    );
     const tx2Response =
       await BasedBidApi.invokeApi<CreateSolanaFlashTx1ApiResponse>(
         ApiType.SDK,
         'sol/create-flash-tx2',
         tx2Payload,
-        'Failed to create flash token Transaction 2',
+        'Failed to create flash token market transaction',
         args.isSandboxMode,
       );
 
     if (!tx2Response || !tx2Response.transaction) {
       throw new Error(
-        'Based Bid API Error: Failed to create flash LBP Transaction 2',
+        'basedbid API Error: Failed to create flash token market transaction',
       );
     }
 
-    console.log('Transaction 2 data received');
+    console.log('Market initialization transaction received.');
 
     const tx2Signers = [];
 
@@ -194,12 +206,17 @@ export const createFlashTokenSolana = async (args: CreateSolanaFlashInput) => {
       tx2Response.lastValidBlockHeight,
       tx2Signers,
       {
-        description: 'Create Flash Token (TX2)',
+        description: 'Initialize Flash Token Market',
         skipConfirmation: args.isSandboxMode,
       },
     );
 
     await solanaWrapper.awaitTxConfirmation(tx2Signature);
+
+    console.log(
+      `\nStep 3 of ${fees?.feeDistribution ? '4' : '3'}: Confirming the launch with basedbid`,
+    );
+    console.log('This makes the token visible to basedbid services.');
 
     await BasedBidApi.invokeApi(
       ApiType.SDK,
@@ -212,6 +229,39 @@ export const createFlashTokenSolana = async (args: CreateSolanaFlashInput) => {
       'Failed to confirm launch',
       args.isSandboxMode,
     );
+    launchConfirmed = true;
+
+    if (fees?.feeDistribution) {
+      console.log('\nStep 4 of 4: Applying Fee Builder settings');
+      console.log('This routes post-launch fees using basedbid Fee Builder.');
+
+      const feeDistributionPayload = {
+        chainId: args.chainId,
+        address: tx1Response.mintAddress,
+        ...fees,
+        marketingWalletAddress: fees.marketingWalletAddress ?? '',
+        feeDistributionPayoutCustomMint:
+          fees.feeDistributionPayoutCustomMint ?? '',
+        rewardToken: fees.rewardToken ?? '',
+      };
+
+      const solanaFeeDistributionValidated =
+        solanaFeeDistributionApiPayloadSchema.safeParse(feeDistributionPayload);
+      if (!solanaFeeDistributionValidated.success) {
+        throw new Error(
+          'Invalid fee distribution payload: ' +
+            solanaFeeDistributionValidated.error.message,
+        );
+      }
+
+      await BasedBidApi.invokeApi(
+        ApiType.PLATFORM,
+        'token/fee-distribution',
+        solanaFeeDistributionValidated.data,
+        'Failed to set fee distribution on Solana Flash Token',
+        args.isSandboxMode,
+      );
+    }
 
     return {
       mintAddress: tx1Response.mintAddress,
@@ -224,7 +274,17 @@ export const createFlashTokenSolana = async (args: CreateSolanaFlashInput) => {
   } catch (error) {
     console.error('Error creating Solana flash token: ', error);
 
-    if (launchedToken != null) {
+    if (launchedToken != null && !launchConfirmed) {
+      console.log('\nFlash Token launch did not complete');
+      console.log('----------------------------------------');
+      console.log(
+        'The mint transaction succeeded, but a later setup step failed.',
+      );
+      console.log(`Mint address: ${launchedToken.mintAddress}`);
+      console.log(`Mint tx:      ${launchedToken.signature}`);
+      console.log('');
+      console.log('Releasing the reserved vanity address with basedbid...');
+
       await BasedBidApi.invokeApi(
         ApiType.SDK,
         'sol/release-vanity',
@@ -236,6 +296,9 @@ export const createFlashTokenSolana = async (args: CreateSolanaFlashInput) => {
         'Failed to release vanity',
         args.isSandboxMode,
       );
+
+      console.log('Reserved vanity address released.');
+      console.log('You can safely retry the same command.\n');
     }
 
     throw error;
