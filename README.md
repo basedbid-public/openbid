@@ -151,7 +151,7 @@ Every script returns JSON with these fields:
 |----------|----------|-------------|
 | `PRIVATE_KEY` | Yes | Wallet private key (with 0x prefix for Base/Ethereum) |
 | `EVM_RPC_URL` | Yes | RPC endpoint for EVM chain |
-| `BASEDBID_API_KEY` | No | API key for custom board launches |
+| `BASEDBID_API_KEY` | Conditional | Required when launching under a custom board |
 
 ### Solana
 
@@ -159,6 +159,61 @@ Every script returns JSON with these fields:
 |----------|----------|-------------|
 | `SOLANA_PRIVATE_KEY` | Yes | Private key as base58 string |
 | `SOLANA_RPC_URL` | Yes | RPC endpoint (devnet or mainnet) |
+| `BASEDBID_API_KEY` | Conditional | Required when launching under a custom board |
+
+---
+
+## API Key Requirements
+
+### When is `BASEDBID_API_KEY` Required?
+
+The API key is **required** when launching an LBP or Flash Token **under a custom board**. The SDK automatically detects when a custom board is specified and includes the `x-api-key` header in:
+
+- BasedBid API requests (create-lbp, create-flash, confirm-launch, etc.)
+- IPFS upload requests (logo and metadata uploads)
+
+### How It Works
+
+1. **Default board (empty string)**: No API key needed
+   ```json
+   "token": { "boardTitle": "" }
+   ```
+   All API requests will use the default "based" board.
+
+2. **Custom board (non-empty string)**: API key required
+   ```json
+   "token": { "boardTitle": "my-custom-board" }
+   ```
+   Set `BASEDBID_API_KEY=your_key_here` in your `.env` file.
+
+### Setting the API Key
+
+```env
+# .env file
+BASEDBID_API_KEY=bb_live_xxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+### Operations That Use Custom Boards
+
+| Operation | Board Field | Notes |
+|-----------|-------------|-------|
+| EVM Create LBP | `token.boardTitle` | Empty = default "based" board |
+| EVM Create Flash Token | `boardTitle` | Empty = default "based" board |
+| EVM Create Board | `title` | Board creation itself doesn't need API key |
+| Solana Create LBP | `board` | Empty = default "based" board |
+| Solana Create Board | `title` | Board creation itself doesn't need API key |
+| Solana Create Flash Token | `board` or `boardOwner` | Either non-empty triggers API key requirement |
+
+### Common Error: "Board API Key Required"
+
+If you see this error:
+```
+board api key required
+```
+
+**Fix:** Add `BASEDBID_API_KEY` to your `.env` file and rerun the command.
+
+---
 
 ### Supported Chains
 
@@ -569,6 +624,23 @@ Failed to release vanity
 ```
 
 **Fix:** The mint transaction may have succeeded. Check the mint address output and contact support if needed.
+
+### Board API Key Required
+
+**Error:**
+```
+board api key required
+```
+
+**Fix:** You are launching under a custom board but `BASEDBID_API_KEY` is not set in your `.env` file.
+
+1. Add your API key to `.env`:
+   ```env
+   BASEDBID_API_KEY=bb_live_xxxxxxxxxxxxxxxxxxxxxxxx
+   ```
+2. Rerun the command
+
+**Note:** If you don't need a custom board, set `boardTitle` (EVM) or `board` (Solana) to an empty string `""` to use the default "based" board without requiring an API key.
 
 ---
 

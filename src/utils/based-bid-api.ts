@@ -28,6 +28,7 @@ export class BasedBidApi {
     payload: object,
     errorMessage: string,
     isSandboxMode: boolean,
+    apiKey?: string,
   ) {
     const apiUrl =
       apiType === ApiType.SDK
@@ -43,12 +44,18 @@ export class BasedBidApi {
       console.log('');
     }
 
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      ...getOpenBidApiHeaders(),
+    };
+
+    if (apiKey) {
+      headers['x-api-key'] = apiKey;
+    }
+
     const response = await fetch(endpoint, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...getOpenBidApiHeaders(),
-      },
+      headers,
       body: JSON.stringify(payload),
     });
 

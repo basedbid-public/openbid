@@ -101,10 +101,35 @@ import { CreateSolanaFlashInput } from 'schema/flash-token/solana/sdk';
 
 Environment variables (see `.env`):
 
-| Variable             | Description                                                   |
-| -------------------- | ------------------------------------------------------------- |
-| `SOLANA_PRIVATE_KEY` | Solana wallet private key (base58 or hex)                     |
-| `SOLANA_RPC_URL`     | Solana RPC endpoint (devnet: `https://api.devnet.solana.com`) |
+| Variable           | Required | Description |
+|--------------------|----------|-------------|
+| `SOLANA_PRIVATE_KEY` | Yes    | Solana wallet private key (base58 or hex) |
+| `SOLANA_RPC_URL`     | Yes    | Solana RPC endpoint (devnet: `https://api.devnet.solana.com`) |
+| `BASEDBID_API_KEY`   | Conditional | Required when launching under a custom board (see below) |
+
+### API Key Requirement
+
+The `BASEDBID_API_KEY` environment variable is **required** when launching under a custom board.
+
+**When is it needed?**
+- If `board` or `boardOwner` is set to a non-empty string (custom board), you must set `BASEDBID_API_KEY`
+- If both `board` and `boardOwner` are empty or omitted (default "based" board), no API key is needed
+
+**Example `.env` for custom board launch:**
+```env
+SOLANA_PRIVATE_KEY=...
+SOLANA_RPC_URL=https://api.devnet.solana.com
+BASEDBID_API_KEY=bb_live_xxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+**Example `.env` for default board launch:**
+```env
+SOLANA_PRIVATE_KEY=...
+SOLANA_RPC_URL=https://api.devnet.solana.com
+# No BASEDBID_API_KEY needed
+```
+
+The SDK automatically includes the `x-api-key` header in BasedBid API requests and IPFS uploads when a custom board is specified.
 
 ## Execution Flow
 

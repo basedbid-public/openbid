@@ -34,6 +34,7 @@ export const createEvmLbp = async (
 
   const input = argsValidated.data;
   const { token, sale, dex, fees } = input;
+  const apiKey = token.boardTitle ? process.env.BASEDBID_API_KEY : undefined;
 
   const { publicClient, walletClient, account } = initRpcClients(
     input.chainId,
@@ -47,7 +48,7 @@ export const createEvmLbp = async (
   if (dryRun?.dryRun) {
     console.log('Skipping IPFS logo upload (dry-run mode)');
   } else {
-    logoUrl = await IpfsUpload.uploadImage(token.metadata.logo);
+    logoUrl = await IpfsUpload.uploadImage(token.metadata.logo, apiKey);
   }
 
   if (dryRun?.printPayload) {
@@ -73,7 +74,7 @@ export const createEvmLbp = async (
     console.log('Skipping IPFS metadata upload (dry-run mode)');
     console.log('Metadata to upload:', JSON.stringify(metadataIpfs, null, 2));
   } else {
-    metadataUrl = await IpfsUpload.uploadMetadata(metadataIpfs);
+    metadataUrl = await IpfsUpload.uploadMetadata(metadataIpfs, apiKey);
   }
 
   if (dryRun?.printPayload) {
@@ -140,6 +141,7 @@ export const createEvmLbp = async (
     },
     'Failed to create LBP on EVM',
     args.isSandboxMode,
+    apiKey,
   );
 
   const txValue = BigInt(json.value);

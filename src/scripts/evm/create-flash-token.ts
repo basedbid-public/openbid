@@ -38,6 +38,8 @@ export const createEvmFlashToken = async (
     throw new Error('Invalid input arguments: ' + argsValidated.error.message);
   }
 
+  const apiKey = argsValidated.data.boardTitle ? process.env.BASEDBID_API_KEY : undefined;
+
   const { publicClient, walletClient, account } = initRpcClients(
     argsValidated.data.chainId,
     env.EVM_RPC_URL,
@@ -53,6 +55,7 @@ export const createEvmFlashToken = async (
   } else {
     logoUrl = await IpfsUpload.uploadImage(
       argsValidated.data.token.metadata.logo,
+      apiKey,
     );
   }
 
@@ -78,7 +81,7 @@ export const createEvmFlashToken = async (
     console.log('Skipping IPFS metadata upload (dry-run mode)');
     console.log('Metadata to upload:', JSON.stringify(metadataIpfs, null, 2));
   } else {
-    metadataUrl = await IpfsUpload.uploadMetadata(metadataIpfs);
+    metadataUrl = await IpfsUpload.uploadMetadata(metadataIpfs, apiKey);
   }
 
   if (dryRun?.printPayload) {
@@ -154,6 +157,7 @@ export const createEvmFlashToken = async (
     },
     'Failed to create flash token on EVM',
     args.isSandboxMode,
+    apiKey,
   );
 
   const txValue = BigInt(json.value);

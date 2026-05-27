@@ -34,6 +34,8 @@ export const createEvmBoard = async (
     validated.title,
   );
 
+  const apiKey = validated.title ? process.env.BASEDBID_API_KEY : undefined;
+
   let logoUrl = 'ipfs://placeholder-logo-url (DRY RUN)';
   let bannerUrl = 'ipfs://placeholder-banner-url (DRY RUN)';
   let metadataUrl = 'ipfs://placeholder-metadata-url (DRY RUN)';
@@ -42,14 +44,14 @@ export const createEvmBoard = async (
     console.log('Skipping IPFS logo upload (dry-run mode)');
     console.log('Logo path:', validated.logo);
   } else {
-    logoUrl = await IpfsUpload.uploadImage(validated.logo);
+    logoUrl = await IpfsUpload.uploadImage(validated.logo, apiKey);
   }
 
   if (dryRun?.dryRun) {
     console.log('Skipping IPFS banner upload (dry-run mode)');
     console.log('Banner path:', validated.banner);
   } else {
-    bannerUrl = await IpfsUpload.uploadImage(validated.banner);
+    bannerUrl = await IpfsUpload.uploadImage(validated.banner, apiKey);
   }
 
   if (dryRun?.printPayload) {
@@ -68,7 +70,7 @@ export const createEvmBoard = async (
     console.log('Skipping IPFS metadata upload (dry-run mode)');
     console.log('Metadata to upload:', JSON.stringify(metadataObject, null, 2));
   } else {
-    metadataUrl = await IpfsUpload.uploadMetadata(metadataObject);
+    metadataUrl = await IpfsUpload.uploadMetadata(metadataObject, apiKey);
   }
 
   if (dryRun?.printPayload) {
@@ -117,6 +119,7 @@ export const createEvmBoard = async (
     },
     'Failed to create board on EVM',
     args.isSandboxMode,
+    apiKey,
   );
 
   const txValue = BigInt(json.value);

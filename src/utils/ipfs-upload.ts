@@ -50,17 +50,21 @@ const getFetchFailureMessage = (error: unknown) => {
 };
 
 export class IpfsUpload {
-  static async uploadMetadata(params: object) {
+  static async uploadMetadata(params: object, apiKey?: string) {
     console.log('Uploading metadata to IPFS...');
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      ...getOpenBidApiHeaders(),
+    };
+    if (apiKey) {
+      headers['x-api-key'] = apiKey;
+    }
     let response: Response;
     try {
       response = await fetch('https://cdn.based.bid/api/upload/json', {
         method: 'POST',
         body: JSON.stringify(params),
-        headers: {
-          'Content-Type': 'application/json',
-          ...getOpenBidApiHeaders(),
-        },
+        headers,
       });
     } catch (error) {
       const message = getFetchFailureMessage(error);
@@ -89,7 +93,7 @@ export class IpfsUpload {
     return json.response.url;
   }
 
-  static async uploadImage(filePath: string): Promise<string> {
+  static async uploadImage(filePath: string, apiKey?: string): Promise<string> {
     console.log('Uploading image to IPFS...');
     const fileBuffer = readFileSync(filePath);
     const fileName = filePath.split('/').pop();
@@ -99,12 +103,16 @@ export class IpfsUpload {
     const formData = new FormData();
 
     formData.append('file', new Blob([fileBuffer]), fileName);
+    const headers: Record<string, string> = { ...getOpenBidApiHeaders() };
+    if (apiKey) {
+      headers['x-api-key'] = apiKey;
+    }
     let response: Response;
     try {
       response = await fetch('https://cdn.based.bid/api/upload', {
         method: 'POST',
         body: formData,
-        headers: getOpenBidApiHeaders(),
+        headers,
       });
     } catch (error) {
       const message = getFetchFailureMessage(error);

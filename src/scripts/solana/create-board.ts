@@ -39,6 +39,8 @@ export const createSolanaBoard = async (
   );
   await solanaWrapper.init();
 
+  const apiKey = argsValidated.data.title ? process.env.BASEDBID_API_KEY : undefined;
+
   let logoUrl = 'ipfs://placeholder-logo-url (DRY RUN)';
   let bannerUrl = 'ipfs://placeholder-banner-url (DRY RUN)';
   let metadataUrl = 'ipfs://placeholder-metadata-url (DRY RUN)';
@@ -51,14 +53,14 @@ export const createSolanaBoard = async (
     console.log('Skipping IPFS logo upload (dry-run mode)');
     console.log('Logo path:', argsValidated.data.logo);
   } else {
-    logoUrl = await IpfsUpload.uploadImage(argsValidated.data.logo);
+    logoUrl = await IpfsUpload.uploadImage(argsValidated.data.logo, apiKey);
   }
 
   if (dryRun?.dryRun) {
     console.log('Skipping IPFS banner upload (dry-run mode)');
     console.log('Banner path:', argsValidated.data.banner);
   } else {
-    bannerUrl = await IpfsUpload.uploadImage(argsValidated.data.banner);
+    bannerUrl = await IpfsUpload.uploadImage(argsValidated.data.banner, apiKey);
   }
 
   if (dryRun?.printPayload) {
@@ -77,7 +79,7 @@ export const createSolanaBoard = async (
     console.log('Skipping IPFS metadata upload (dry-run mode)');
     console.log('Metadata to upload:', JSON.stringify(metadataObject, null, 2));
   } else {
-    metadataUrl = await IpfsUpload.uploadMetadata(metadataObject);
+    metadataUrl = await IpfsUpload.uploadMetadata(metadataObject, apiKey);
   }
 
   if (dryRun?.printPayload) {
@@ -123,6 +125,7 @@ export const createSolanaBoard = async (
     validated,
     'Failed to create board on Solana',
     args.isSandboxMode,
+    apiKey,
   );
 
   const { transaction, blockhash, lastValidBlockHeight } = json;

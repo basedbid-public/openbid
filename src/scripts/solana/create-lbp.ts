@@ -34,6 +34,7 @@ export const createSolanaLbp = async (
     console.log('-----------------------------------');
   }
 
+  let apiKey: string | undefined;
   try {
     const env = validateEnvironmentSolana();
 
@@ -47,6 +48,7 @@ export const createSolanaLbp = async (
 
     const data = input;
     const { token, board, boardOwner, dex, fees } = data;
+    apiKey = board ? process.env.BASEDBID_API_KEY : undefined;
 
     let sale = data.sale;
 
@@ -71,7 +73,7 @@ export const createSolanaLbp = async (
       console.log('Skipping IPFS logo upload (dry-run mode)');
       console.log('Logo path:', token.metadata.logo);
     } else {
-      logoUrl = await IpfsUpload.uploadImage(token.metadata.logo);
+      logoUrl = await IpfsUpload.uploadImage(token.metadata.logo, apiKey);
     }
 
     if (dryRun?.printPayload) {
@@ -102,7 +104,7 @@ export const createSolanaLbp = async (
       console.log('Seed:', seed);
       console.log('Metadata to upload:', JSON.stringify(ipfsMetadata, null, 2));
     } else {
-      await IpfsUpload.uploadMetadata(ipfsMetadata);
+      await IpfsUpload.uploadMetadata(ipfsMetadata, apiKey);
     }
 
     const apiPayload = {
@@ -184,6 +186,7 @@ export const createSolanaLbp = async (
       validated.data,
       'Failed to create LBP on Solana',
       args.isSandboxMode,
+      apiKey,
     );
 
     const {
@@ -234,6 +237,7 @@ export const createSolanaLbp = async (
         },
         'Failed to confirm launch',
         args.isSandboxMode,
+        apiKey,
       );
       launchConfirmed = true;
 
@@ -293,6 +297,7 @@ export const createSolanaLbp = async (
       solanaFeeDistributionValidated.data,
       'Failed to set fee distribution on Solana',
       args.isSandboxMode,
+      apiKey,
     );
 
     await BasedBidApi.invokeApi(
@@ -305,6 +310,7 @@ export const createSolanaLbp = async (
       },
       'Failed to confirm launch',
       args.isSandboxMode,
+      apiKey,
     );
     launchConfirmed = true;
 
@@ -373,6 +379,7 @@ export const createSolanaLbp = async (
         },
         'Failed to release vanity',
         args.isSandboxMode,
+        apiKey,
       );
     }
     throw error;

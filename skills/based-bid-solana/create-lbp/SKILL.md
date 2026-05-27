@@ -119,10 +119,35 @@ import { CreateSolanaLbpInput } from 'schema/lbp/solana/sdk-input';
 
 Environment variables (see `.env`):
 
-| Variable | Description |
-|----------|-------------|
-| `SOLANA_PRIVATE_KEY` | Solana wallet private key (base58 or hex) |
-| `SOLANA_RPC_URL` | Solana RPC endpoint (devnet: `https://api.devnet.solana.com`) |
+| Variable           | Required | Description |
+|--------------------|----------|-------------|
+| `SOLANA_PRIVATE_KEY` | Yes    | Solana wallet private key (base58 or hex) |
+| `SOLANA_RPC_URL`     | Yes    | Solana RPC endpoint (devnet: `https://api.devnet.solana.com`) |
+| `BASEDBID_API_KEY`   | Conditional | Required when launching under a custom board (see below) |
+
+### API Key Requirement
+
+The `BASEDBID_API_KEY` environment variable is **required** when launching under a custom board.
+
+**When is it needed?**
+- If `board` is set to a non-empty string (custom board name), you must set `BASEDBID_API_KEY`
+- If `board` is empty or omitted (default "based" board), no API key is needed
+
+**Example `.env` for custom board launch:**
+```env
+SOLANA_PRIVATE_KEY=...
+SOLANA_RPC_URL=https://api.devnet.solana.com
+BASEDBID_API_KEY=bb_live_xxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+**Example `.env` for default board launch:**
+```env
+SOLANA_PRIVATE_KEY=...
+SOLANA_RPC_URL=https://api.devnet.solana.com
+# No BASEDBID_API_KEY needed
+```
+
+The SDK automatically includes the `x-api-key` header in BasedBid API requests and IPFS uploads when a custom board is specified.
 
 ## Execution Flow
 
@@ -262,6 +287,7 @@ await createLbpSolana({
 
 | Error | Cause | Fix |
 |-------|-------|-----|
+| `board api key required` | Custom board specified but no API key | Add `BASEDBID_API_KEY` to `.env` |
 | `Invalid input arguments` | Zod schema validation failed | Check all required fields and constraints |
 | `Failed to create LBP on Solana` | API error | Check API availability and network |
 | `board and boardOwner must both be defined` | Only one of them provided | Provide both or neither |

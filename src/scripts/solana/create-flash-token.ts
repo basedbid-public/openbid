@@ -38,10 +38,11 @@ export const createSolanaFlashToken = async (
     );
     await solanaWrapper.init();
 
-    const logoUrl = await IpfsUpload.uploadImage(args.token.metadata.logo);
-
     const data = input;
     const { token, raydium, meteora, board, boardOwner, fees } = data;
+    const apiKey = board || boardOwner ? process.env.BASEDBID_API_KEY : undefined;
+
+    const logoUrl = await IpfsUpload.uploadImage(args.token.metadata.logo, apiKey);
 
     const metadataIpfs = {
       name: token.name,
@@ -58,7 +59,7 @@ export const createSolanaFlashToken = async (
       ...(boardOwner && { boardOwner }),
     };
 
-    const metadataUrl = await IpfsUpload.uploadMetadata(metadataIpfs);
+    const metadataUrl = await IpfsUpload.uploadMetadata(metadataIpfs, apiKey);
 
     if (dryRun?.printPayload) {
       console.log('\nTX1 Payload for /sol/create-flash-tx1:');
