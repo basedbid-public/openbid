@@ -39,7 +39,7 @@ export const evmLbpCreateApiSchema = z.object({
       .number()
       .min(1, 'Market cap must be greater than 0')
       .max(10000000, 'Market cap must be less than 10M'),
-    startTime: saleTimeSchema,
+    startTime: saleTimeSchema(),
     maxAllocationPerUser: z.number(),
     maxAllocationPerWhitelistedUser: z.number(),
     delayTradeTime: z.number(),
@@ -49,7 +49,7 @@ export const evmLbpCreateApiSchema = z.object({
     softCap: z
       .object({
         amount: z.number(),
-        endTime: saleTimeSchema,
+        endTime: saleTimeSchema(),
       })
       .optional(),
   }),

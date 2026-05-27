@@ -1,6 +1,6 @@
-import { LbpFees } from 'interfaces/lbp/fees';
 import { EvmDexType } from 'enums/evm/dex.type';
 import { LaunchPackageType } from 'enums/launch-package.type';
+import { LbpFees } from 'interfaces/lbp/fees';
 import { ChainId } from 'types/chain-id';
 
 export interface CreateLbpEvmSdk {

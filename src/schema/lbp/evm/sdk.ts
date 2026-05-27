@@ -7,7 +7,11 @@ import {
   VolatilityMultiplierType,
   VolatilityTriggerType,
 } from 'enums/fee-builder';
-import { evmChainIdSchema, metadataInputSchema } from 'schema/common';
+import {
+  evmChainIdSchema,
+  metadataInputSchema,
+  saleTimeSchema,
+} from 'schema/common';
 import { v4BuyLimitsSchema } from 'schema/v4-fees/buy-limits';
 import { z } from 'zod';
 
@@ -17,7 +21,7 @@ export const evmLbpCreateSchema = z
     package: z.enum(LaunchPackageType),
     chainId: evmChainIdSchema,
     token: z.object({
-      boardTitle: z.string().optional().default('based'),
+      boardTitle: z.string().optional(),
       name: z.string().max(100, 'Token name must be less than 100 characters'),
       symbol: z
         .string()
@@ -30,35 +34,30 @@ export const evmLbpCreateSchema = z
         .min(1000, 'Market cap must be at least $1000')
         .max(10000000, 'Market cap must be less than $10M'),
     }),
-    sale: z.object({
-      startTime: z
-        .number()
-        .int()
-        .min(0)
-        .refine(
-          (val) => val >= Math.floor(Date.now() / 1000),
-          'Start time must be in the future',
+    sale: z
+      .object({
+        startTime: saleTimeSchema(),
+        maxAllocationPerUser: z.number().min(0).max(10),
+        maxAllocationPerWhitelistedUser: z.number().min(0).max(10),
+        delayTradeTime: z.number().int().min(1).max(3600).optional(),
+        whitelistedAddresses: z.array(
+          z.string().regex(/^0x[a-fA-F0-9]{40}$/, 'Invalid EVM address'),
         ),
-      maxAllocationPerUser: z.number().min(0).max(10),
-      maxAllocationPerWhitelistedUser: z.number().min(0).max(10),
-      delayTradeTime: z.number().int().min(1).max(3600).optional(),
-      whitelistedAddresses: z.array(
-        z.string().regex(/^0x[a-fA-F0-9]{40}$/, 'Invalid EVM address'),
-      ),
-      softCap: z
-        .object({
-          amount: z.number(),
-          endTime: z
-            .number()
-            .int()
-            .min(0)
-            .refine(
-              (val) => val >= Math.floor(Date.now() / 1000),
-              'End time must be in the future',
-            ),
-        })
-        .optional(),
-    }),
+        softCap: z
+          .object({
+            amount: z.number(),
+            endTime: z
+              .number()
+              .int()
+              .min(0)
+              .refine(
+                (val) => val >= Math.floor(Date.now() / 1000),
+                'End time must be in the future',
+              ),
+          })
+          .optional(),
+      })
+      .optional(),
     dex: z
       .object({
         version: z.enum(EvmDexType),
