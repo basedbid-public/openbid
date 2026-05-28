@@ -40,9 +40,13 @@ export const createSolanaFlashToken = async (
 
     const data = input;
     const { token, raydium, meteora, board, boardOwner, fees } = data;
-    const apiKey = board || boardOwner ? process.env.BASEDBID_API_KEY : undefined;
+    const apiKey =
+      board || boardOwner ? process.env.BASEDBID_API_KEY : undefined;
 
-    const logoUrl = await IpfsUpload.uploadImage(args.token.metadata.logo, apiKey);
+    const logoUrl = await IpfsUpload.uploadImage(
+      args.token.metadata.logo,
+      apiKey,
+    );
 
     const metadataIpfs = {
       name: token.name,
@@ -142,6 +146,7 @@ export const createSolanaFlashToken = async (
       tx1Response.transaction,
       tx1Response.blockhash,
       tx1Response.lastValidBlockHeight,
+      `${tx1Response.txCost?.totalRequired.sol} SOL`,
       [mintSigner.keyPair],
       {
         description: 'Create Flash Token Mint',
@@ -189,6 +194,7 @@ export const createSolanaFlashToken = async (
         args.meteora && {
           meteoraFeeTierIndex: args.meteora.feeTierIndex,
           meteoraTokenAccountSeed: tx1Response.meteoraTokenAccountSeed,
+          finalStartPrice: args.meteora.finalStartPrice,
         }),
     };
 
@@ -226,6 +232,7 @@ export const createSolanaFlashToken = async (
       tx2Response.transaction,
       tx2Response.blockhash,
       tx2Response.lastValidBlockHeight,
+      undefined,
       tx2Signers,
       {
         description: 'Initialize Flash Token Market',

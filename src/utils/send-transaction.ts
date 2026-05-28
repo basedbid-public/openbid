@@ -65,7 +65,7 @@ export async function sendTransaction(
     console.log(`  Function:   ${functionName}`);
     console.log(`  To:         ${address}`);
     console.log(`  Gas units:  ${gasEstimate.toString()}`);
-    console.log(`  Gas price:  ${gasPrice.toString()} wei`);
+    console.log(`  Gas price:  ${formatEther(gasPrice)}`);
     console.log(`  Gas cost:   ${formatEther(gasCostWei)}`);
     if (value > 0n) {
       console.log(`  Value:      ${formatEther(value)}`);
@@ -74,10 +74,9 @@ export async function sendTransaction(
     console.log(`  TOTAL:      ${formatEther(totalCostWei)}`);
     console.log('========================================\n');
 
-    const shouldProceed =
-      skipConfirmation ||
-      process.env.SKIP_TX_CONFIRMATION === 'true' ||
-      (await askConfirmation('Do you want to proceed? (y/n): '));
+    const shouldProceed = await askConfirmation(
+      'Do you want to proceed? (y/n): ',
+    );
 
     if (!shouldProceed) {
       console.log('Transaction cancelled by user.');

@@ -39,7 +39,9 @@ export const createSolanaBoard = async (
   );
   await solanaWrapper.init();
 
-  const apiKey = argsValidated.data.title ? process.env.BASEDBID_API_KEY : undefined;
+  const apiKey = argsValidated.data.title
+    ? process.env.BASEDBID_API_KEY
+    : undefined;
 
   let logoUrl = 'ipfs://placeholder-logo-url (DRY RUN)';
   let bannerUrl = 'ipfs://placeholder-banner-url (DRY RUN)';
@@ -128,13 +130,14 @@ export const createSolanaBoard = async (
     apiKey,
   );
 
-  const { transaction, blockhash, lastValidBlockHeight } = json;
+  const { transaction, blockhash, lastValidBlockHeight, txCost } = json;
 
   const signature = await solanaWrapper.sendTransaction(
     transaction,
     blockhash,
     lastValidBlockHeight,
-    undefined,
+    `${txCost?.totalRequired.sol} SOL`,
+    [],
     {
       description: 'Create Solana Board',
       skipConfirmation: args.isSandboxMode,

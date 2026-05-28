@@ -20,8 +20,8 @@ import {
 } from 'schema/claim-fees/evm/sdk';
 import {
   ClaimFeesSolanaRequest,
-  claimFeesSolanaRequestSchema,
-} from 'schema/claim-fees/solana/request';
+  claimSolanaFlashTokenFeesRequestSchema,
+} from 'schema/claim-fees/solana/flash-request';
 import {
   CreateFlashTokenEvmSdk,
   evmFlashTokenCreateSdkSchema,
@@ -93,7 +93,7 @@ if (extraArgs.includes('--help') || extraArgs.includes('-h')) {
 }
 
 const configContent = readFileSync(configFile, 'utf-8');
-const config = JSON.parse(configContent);
+const config = JSON.parse(configContent) as unknown;
 
 if (dryRunOptions.printPayload) {
   console.log('\n========== DRY RUN / VALIDATE MODE ==========\n');
@@ -208,13 +208,13 @@ async function run() {
       );
     case 'solana-claim-lbp-fees':
       return await validateAndRun<ClaimFeesSolanaRequest>(
-        claimFeesSolanaRequestSchema,
+        claimSolanaFlashTokenFeesRequestSchema,
         claimSolanaLbpFees,
         'Solana Claim LBP Fees',
       );
     case 'solana-claim-flash-fees':
       return await validateAndRun<ClaimFeesSolanaRequest>(
-        claimFeesSolanaRequestSchema,
+        claimSolanaFlashTokenFeesRequestSchema,
         claimSolanaFlashFees,
         'Solana Claim Flash Token Fees',
       );
@@ -230,11 +230,7 @@ async function run() {
 }
 
 run().catch((err) => {
-  if (dryRunOptions.printPayload) {
-    console.error('\nScript failed:', err.message);
-    console.log('\n========== OPERATION FAILED ==========\n');
-  } else {
-    console.error('Script failed:', err.message);
-  }
+  console.error('Script failed:', err);
+
   process.exit(1);
 });

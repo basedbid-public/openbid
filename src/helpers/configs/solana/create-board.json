@@ -12,7 +12,7 @@
       "buyFeePer": "0.75",
       "sellFeePer": "0.75",
       "finalizeFeePer": "1",
-      "flashLaunchFeePer": "50",
+      "flashLaunchFeePer": "1",
       "tradingFeeAfterLaunchPer": "50"
     },
     {
@@ -21,7 +21,7 @@
       "buyFeePer": "0.75",
       "sellFeePer": "0.75",
       "finalizeFeePer": "1",
-      "flashLaunchFeePer": "50",
+      "flashLaunchFeePer": "1",
       "tradingFeeAfterLaunchPer": "50"
     },
     {
@@ -30,7 +30,7 @@
       "buyFeePer": "0.75",
       "sellFeePer": "0.75",
       "finalizeFeePer": "1",
-      "flashLaunchFeePer": "50",
+      "flashLaunchFeePer": "1",
       "tradingFeeAfterLaunchPer": "50"
     }
   ],

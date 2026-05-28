@@ -34,6 +34,8 @@ export const createSolanaLbp = async (
     console.log('-----------------------------------');
   }
 
+  let metadataUrl = 'ipfs://placeholder-metadata-url (DRY RUN)';
+
   let apiKey: string | undefined;
   try {
     const env = validateEnvironmentSolana();
@@ -104,7 +106,7 @@ export const createSolanaLbp = async (
       console.log('Seed:', seed);
       console.log('Metadata to upload:', JSON.stringify(ipfsMetadata, null, 2));
     } else {
-      await IpfsUpload.uploadMetadata(ipfsMetadata, apiKey);
+      metadataUrl = await IpfsUpload.uploadMetadata(ipfsMetadata, apiKey);
     }
 
     const apiPayload = {
@@ -123,7 +125,7 @@ export const createSolanaLbp = async (
           totalSupply: token.totalSupply,
           decimals: SOLANA_DECIMALS,
           initialBuyAmount: token.initialBuyAmount,
-          metadataUrl: 'ipfs://placeholder-metadata-url (DRY RUN)',
+          metadataUrl,
           raiseTokenDecimals: SOLANA_DECIMALS,
         },
         dex: {
@@ -194,6 +196,7 @@ export const createSolanaLbp = async (
       mintSignerSecretHex,
       blockhash,
       lastValidBlockHeight,
+      txCost,
     } = json;
 
     console.log('\nStep 2 of 3: Creating the token pool on Solana devnet');
@@ -208,6 +211,7 @@ export const createSolanaLbp = async (
       transaction,
       blockhash,
       lastValidBlockHeight,
+      `${txCost?.totalRequired.sol} SOL`,
       [mintSigner.keyPair],
       {
         description: 'Create Solana Pool',
@@ -320,20 +324,17 @@ export const createSolanaLbp = async (
       metadataUrl: json.metadataUrl,
     };
 
-    const networkName =
-      args.chainId === 5011 ? 'solana-devnet' : 'solana-' + args.chainId;
-
     console.log('\n--- RESULT ---');
     console.log(
       JSON.stringify(
         {
           ok: true,
           type: 'pool',
-          network: networkName,
+          network: SOLANA_CHAIN_NAME_CONFIG[args.chainId],
           mintAddress: result.mintAddress,
           signature: result.signature,
           metadataUrl: result.metadataUrl,
-          basedBidUrl: `https://based.markets/pool/${args.chainId}/${result.mintAddress}`,
+          basedBidUrl: `${BasedBidApi.platformApiUrl(args.isSandboxMode)}/${SOLANA_CHAIN_SLUG_CONFIG[args.chainId]}/token/${result.mintAddress}`,
         },
         null,
         2,

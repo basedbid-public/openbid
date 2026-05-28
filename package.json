@@ -15,7 +15,8 @@
     "solana:create-flash-token": "ts-node  ./src/helpers/run.ts solana-create-flash-token ./src/helpers/configs/solana/create-flash-token.json",
     "solana:lbp-buy": "ts-node  ./src/helpers/run.ts solana-lbp-buy ./src/helpers/configs/solana/lbp-buy.json",
     "solana:lbp-sell": "ts-node  ./src/helpers/run.ts solana-lbp-sell ./src/helpers/configs/solana/lbp-sell.json",
-    "solana:claim-lbp-fees": "ts-node  ./src/helpers/run.ts solana-claim-lbp-fees ./src/helpers/configs/solana/claim-lbp-fees.json"
+    "solana:claim-lbp-fees": "ts-node  ./src/helpers/run.ts solana-claim-lbp-fees ./src/helpers/configs/solana/claim-lbp-fees.json",
+    "solana:claim-flash-fees": "ts-node  ./src/helpers/run.ts solana-claim-flash-fees ./src/helpers/configs/solana/claim-flash-token-fees.json"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^0.1.0",

@@ -9,4 +9,11 @@ export interface CreateBoardSolanaApiResponse {
   blockhash: string;
   lastValidBlockHeight: number;
   signingNote?: string;
+  txCost?: {
+    currency: string;
+    totalRequired: {
+      lamports: string;
+      sol: string;
+    };
+  };
 }

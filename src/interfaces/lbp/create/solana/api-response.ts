@@ -10,5 +10,11 @@ export interface CreateLbpSolanaApiResponse {
   lastValidBlockHeight: number;
   signingNote?: string;
   metadataUrl?: string;
-  value?: string;
+  txCost?: {
+    currency: string;
+    totalRequired: {
+      lamports: string;
+      sol: string;
+    };
+  };
 }

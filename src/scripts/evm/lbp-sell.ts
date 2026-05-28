@@ -103,13 +103,6 @@ export const evmLbpSell = async (args: SellEvmSdk, dryRun?: DryRunOptions) => {
     skipConfirmation: args.isSandboxMode,
   });
 
-  const networkName =
-    argsValidated.data.chainId === 8453
-      ? 'base-mainnet'
-      : argsValidated.data.chainId === 1
-        ? 'ethereum-mainnet'
-        : 'chain-' + argsValidated.data.chainId;
-
   console.log('\n--- RESULT ---');
   console.log(
     JSON.stringify(

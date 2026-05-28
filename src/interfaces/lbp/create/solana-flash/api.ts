@@ -9,7 +9,14 @@ export interface CreateSolanaFlashTxApiResponse {
   lastValidBlockHeight: number;
   signingNote?: string;
   metadataUrl?: string;
-  value?: string;
+
+  txCost?: {
+    currency: string;
+    totalRequired: {
+      lamports: string;
+      sol: string;
+    };
+  };
 }
 
 export interface CreateSolanaFlashTx1ApiResponse

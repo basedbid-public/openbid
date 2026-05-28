@@ -1,6 +1,6 @@
 import flashLaunchV3Abi from 'constants/abi/FlashLaunchForV3Facet.json';
 import flashLaunchV4Abi from 'constants/abi/FlashLaunchForV4Facet.json';
-import { CHAIN_NAME_CONFIG, CHAIN_SLUG_CONFIG } from 'constants/chain-config';
+import { CHAIN_NAME_CONFIG } from 'constants/chain-config';
 import 'dotenv/config';
 import { ApiType, EvmDexType } from 'enums';
 import { DryRunOptions } from 'helpers/run';
@@ -38,7 +38,9 @@ export const createEvmFlashToken = async (
     throw new Error('Invalid input arguments: ' + argsValidated.error.message);
   }
 
-  const apiKey = argsValidated.data.boardTitle ? process.env.BASEDBID_API_KEY : undefined;
+  const apiKey = argsValidated.data.boardTitle
+    ? process.env.BASEDBID_API_KEY
+    : undefined;
 
   const { publicClient, walletClient, account } = initRpcClients(
     argsValidated.data.chainId,
@@ -206,7 +208,6 @@ export const createEvmFlashToken = async (
         mintAddress: json.address,
         signature: result.transactionHash,
         metadataUrl,
-        basedBidUrl: `${BasedBidApi.basedTradeUrl(args.isSandboxMode)}/${CHAIN_SLUG_CONFIG[argsValidated.data.chainId]}/${json.address}`,
       },
       null,
       2,

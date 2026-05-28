@@ -7,14 +7,14 @@ import { ApiType } from 'enums';
 import { DryRunOptions } from 'helpers/run';
 import { ClaimSolanaFeeResponse } from 'interfaces/claim-fees/solana/api';
 import {
-  ClaimFeesSolanaRequest,
-  claimFeesSolanaRequestSchema,
-} from 'schema/claim-fees/solana/request';
+  ClaimSolanaLbpFeesRequest,
+  claimSolanaLbpFeesRequestSchema,
+} from 'schema/claim-fees/solana/lbp-request';
 import { validateEnvironmentSolana } from 'schema/environment';
 import { BasedBidApi, SolanaWrapper } from 'utils';
 
 export const claimSolanaLbpFees = async (
-  args: ClaimFeesSolanaRequest,
+  args: ClaimSolanaLbpFeesRequest,
   dryRun?: DryRunOptions,
 ) => {
   if (dryRun?.printPayload) {
@@ -24,11 +24,11 @@ export const claimSolanaLbpFees = async (
 
   const env = validateEnvironmentSolana();
 
-  const data = claimFeesSolanaRequestSchema.parse(args);
+  const data = claimSolanaLbpFeesRequestSchema.parse(args);
 
   if (dryRun?.printPayload) {
     console.log('Chain ID:', data.chainId);
-    console.log('Token Mint:', data.address);
+    console.log('Token Mint:', data.memeMint);
   }
 
   const solanaWrapper = new SolanaWrapper(
@@ -40,7 +40,7 @@ export const claimSolanaLbpFees = async (
   const apiPayload = {
     chainId: data.chainId,
     signer: solanaWrapper.publicKey,
-    memeMint: data.address,
+    memeMint: data.memeMint,
     isSandboxMode: data.isSandboxMode,
   };
 
@@ -54,7 +54,7 @@ export const claimSolanaLbpFees = async (
     console.log('Skipping API call to /sol/collect-lbp-fees (dry-run mode)');
     console.log('\n========== DRY RUN COMPLETE ==========');
     console.log('Would have called: POST /sol/collect-lbp-fees');
-    console.log('Token Mint:', data.address);
+    console.log('Token Mint:', data.memeMint);
     console.log('========================================\n');
     return { dryRun: true, payload: apiPayload };
   }
@@ -76,7 +76,11 @@ export const claimSolanaLbpFees = async (
     blockhash,
     lastValidBlockHeight,
     undefined,
-    { description: 'Claim LBP Fees', skipConfirmation: args.isSandboxMode },
+    [],
+    {
+      description: 'Claim LBP Fees',
+      skipConfirmation: args.isSandboxMode,
+    },
   );
 
   await solanaWrapper.awaitTxConfirmation(signature);
@@ -88,9 +92,9 @@ export const claimSolanaLbpFees = async (
         ok: true,
         type: 'fees',
         network: SOLANA_CHAIN_NAME_CONFIG[args.chainId],
-        tokenAddress: data.address,
+        tokenAddress: data.memeMint,
         signature,
-        basedBidUrl: `${BasedBidApi.platformApiUrl(args.isSandboxMode)}/${SOLANA_CHAIN_SLUG_CONFIG[args.chainId]}/token/${data.address}`,
+        basedBidUrl: `${BasedBidApi.platformApiUrl(args.isSandboxMode)}/${SOLANA_CHAIN_SLUG_CONFIG[args.chainId]}/token/${data.memeMint}`,
       },
       null,
       2,
