@@ -1,34 +1,35 @@
 import { SOLANA_CHAIN_NAME_CONFIG } from 'constants/solana-chain-config';
 import 'dotenv/config';
 import { ApiType } from 'enums';
-import { DryRunOptions } from 'helpers/run';
-import { ClaimSolanaFeeResponse } from 'interfaces/claim-fees/solana/api';
+import { ClaimSolanaFeeApiResponse } from 'interfaces/claim-fees';
+import { OpenbidRunOptions } from 'interfaces/common';
 import {
   ClaimSolanaFlashTokenFeesRequest,
   claimSolanaFlashTokenFeesRequestSchema,
 } from 'schema/claim-fees/solana/flash-request';
-import { validateEnvironmentSolana } from 'schema/environment';
-import { BasedBidApi, SolanaWrapper } from 'utils';
+import { BasedBidApi, LogHelper, SolanaValidator, SolanaWrapper } from 'utils';
 
 export const claimSolanaFlashFees = async (
   args: ClaimSolanaFlashTokenFeesRequest,
-  dryRun?: DryRunOptions,
+  options?: OpenbidRunOptions,
 ) => {
-  if (dryRun?.printPayload) {
-    console.log('\nSolana Claim Flash Token Fees - Dry Run');
-    console.log('-----------------------------------');
+  const { printPayload, dryRun, validate } = options ?? {};
+
+  if (printPayload) {
+    LogHelper.printSectionWithSeparator(
+      '- - - Claiming Flash Token Fees on Solana - - -',
+    );
   }
 
-  const env = validateEnvironmentSolana();
+  const { data, env } =
+    SolanaValidator.validate<ClaimSolanaFlashTokenFeesRequest>(
+      claimSolanaFlashTokenFeesRequestSchema,
+      args,
+    );
 
-  const argsValidated = claimSolanaFlashTokenFeesRequestSchema.safeParse(args);
-  if (!argsValidated.success) {
-    throw new Error('Invalid input arguments: ' + argsValidated.error.message);
-  }
-
-  if (dryRun?.printPayload) {
-    console.log('Chain ID:', argsValidated.data.chainId);
-    console.log('Flash Mint:', argsValidated.data.flashMint);
+  if (validate) {
+    console.log('Validation passed');
+    return;
   }
 
   const solanaWrapper = new SolanaWrapper(
@@ -38,26 +39,21 @@ export const claimSolanaFlashFees = async (
   await solanaWrapper.init();
 
   const apiPayload = {
-    chainId: argsValidated.data.chainId,
-    flashMint: argsValidated.data.flashMint,
+    chainId: data.chainId,
+    flashMint: data.flashMint,
     signer: solanaWrapper.publicKey,
   };
 
-  if (dryRun?.printPayload) {
-    console.log('\nAPI Payload for /sol/collect-flash-fees:');
-    console.log(JSON.stringify({ data: apiPayload }, null, 2));
+  if (printPayload) {
+    LogHelper.printApiPayload('sol/collect-flash-fees', apiPayload);
   }
 
-  if (dryRun?.dryRun) {
-    console.log('Skipping API call to /sol/collect-flash-fees (dry-run mode)');
-    console.log('\n========== DRY RUN COMPLETE ==========');
-    console.log('Would have called: POST /sol/collect-flash-fees');
-    console.log('Flash Mint:', argsValidated.data.flashMint);
-    console.log('========================================\n');
-    return { dryRun: true, payload: { data: apiPayload } };
+  if (dryRun) {
+    LogHelper.printDryRunSummary('sol/collect-flash-fees', apiPayload);
+    return { dryRun: true, payload: apiPayload };
   }
 
-  const json = await BasedBidApi.invokeApi<ClaimSolanaFeeResponse>(
+  const json = await BasedBidApi.invokeApi<ClaimSolanaFeeApiResponse>(
     ApiType.SDK,
     'sol/collect-flash-fees',
     apiPayload,
@@ -79,20 +75,12 @@ export const claimSolanaFlashFees = async (
 
   await solanaWrapper.awaitTxConfirmation(signature);
 
-  console.log('\n--- RESULT ---');
-  console.log(
-    JSON.stringify(
-      {
-        ok: true,
-        type: 'fees',
-        network: SOLANA_CHAIN_NAME_CONFIG[argsValidated.data.chainId],
-        flashMint: argsValidated.data.flashMint,
-        signature,
-      },
-      null,
-      2,
-    ),
-  );
+  LogHelper.printResult({
+    ok: true,
+    network: SOLANA_CHAIN_NAME_CONFIG[data.chainId],
+    flashMint: data.flashMint,
+    signature,
+  });
 
   return signature;
 };

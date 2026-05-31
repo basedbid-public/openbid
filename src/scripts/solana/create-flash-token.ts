@@ -1,36 +1,51 @@
 import { SOLANA_CHAIN_NAME_CONFIG } from 'constants/solana-chain-config';
 import 'dotenv/config';
 import { ApiType, SolanaDexType } from 'enums';
-import { DryRunOptions } from 'helpers/run';
-import { CreateSolanaFlashTx1ApiResponse } from 'interfaces/lbp/create/solana-flash/api';
-import { SolanaVanityUpdate } from 'interfaces/solana-vanity-update';
-import { validateEnvironmentSolana } from 'schema/environment';
+import { OpenbidRunOptions, SolanaVanityUpdateData } from 'interfaces/common';
+import { CreateSolanaFlashTx1ApiResponse } from 'interfaces/create-flash-token';
 import {
   CreateSolanaFlashTx1Api,
   CreateSolanaFlashTx2Api,
 } from 'schema/flash-token/solana/api';
-import { CreateSolanaFlashInput } from 'schema/flash-token/solana/sdk';
-import { SolanaFlashValidator } from 'schema/flash-token/solana/validator';
+import {
+  CreateSolanaFlashInput,
+  createSolanaFlashInputSchema,
+} from 'schema/flash-token/solana/sdk';
 import { solanaFeeDistributionApiPayloadSchema } from 'schema/lbp/solana/fee-distribution';
-import { BasedBidApi, IpfsUpload, SolanaWrapper } from 'utils';
+import {
+  BasedBidApi,
+  IpfsUpload,
+  LogHelper,
+  SolanaValidator,
+  SolanaWrapper,
+} from 'utils';
 
-let launchedToken: SolanaVanityUpdate | null = null;
+let launchedToken: SolanaVanityUpdateData | null = null;
 
 export const createSolanaFlashToken = async (
   args: CreateSolanaFlashInput,
-  dryRun?: DryRunOptions,
+  options?: OpenbidRunOptions,
 ) => {
   let launchConfirmed = false;
 
-  if (dryRun?.printPayload) {
-    console.log('\nSolana Create Flash Token - Dry Run');
-    console.log('-----------------------------------');
+  const { printPayload, dryRun, validate } = options ?? {};
+
+  if (printPayload) {
+    LogHelper.printSectionWithSeparator(
+      '- - - Creating Flash Token on Solana - - -',
+    );
   }
 
   try {
-    const env = validateEnvironmentSolana();
+    const { data, env } = SolanaValidator.validate<CreateSolanaFlashInput>(
+      createSolanaFlashInputSchema,
+      args,
+    );
 
-    const input = SolanaFlashValidator.validateInput(args);
+    if (validate) {
+      console.log('Validation passed');
+      return;
+    }
 
     const solanaWrapper = new SolanaWrapper(
       env.SOLANA_RPC_URL,
@@ -38,17 +53,20 @@ export const createSolanaFlashToken = async (
     );
     await solanaWrapper.init();
 
-    const data = input;
-    const { token, raydium, meteora, board, boardOwner, fees } = data;
+    const { token, raydium, meteora, board, boardOwner, fees, dex } = data;
+
     const apiKey =
       board || boardOwner ? process.env.BASEDBID_API_KEY : undefined;
 
-    const logoUrl = await IpfsUpload.uploadImage(
-      args.token.metadata.logo,
-      apiKey,
-    );
+    let logoUrl = 'https://ipfs.based.bid/ipfs/null';
+    if (dryRun) {
+      console.log('Skipping logo upload (dry-run mode)');
+      console.log('Logo path:', data.token.metadata.logo);
+    } else {
+      logoUrl = await IpfsUpload.uploadImage(data.token.metadata.logo, apiKey);
+    }
 
-    const metadataIpfs = {
+    const metadata = {
       name: token.name,
       symbol: token.symbol,
       decimals: 9,
@@ -63,10 +81,12 @@ export const createSolanaFlashToken = async (
       ...(boardOwner && { boardOwner }),
     };
 
-    const metadataUrl = await IpfsUpload.uploadMetadata(metadataIpfs, apiKey);
-
-    if (dryRun?.printPayload) {
-      console.log('\nTX1 Payload for /sol/create-flash-tx1:');
+    let metadataUrl = 'https://ipfs.based.bid/ipfs/null';
+    if (dryRun) {
+      console.log('Skipping IPFS metadata upload (dry-run mode)');
+      console.log('Metadata to upload:', JSON.stringify(metadata, null, 2));
+    } else {
+      metadataUrl = await IpfsUpload.uploadMetadata(metadata, apiKey);
     }
 
     const tx1Payload: CreateSolanaFlashTx1Api = {
@@ -83,14 +103,14 @@ export const createSolanaFlashToken = async (
         totalSupply: token.totalSupply,
         decimals: 9,
       },
-      ...(input.dex.version === SolanaDexType.RAYDIUM &&
+      ...(dex.version === SolanaDexType.RAYDIUM &&
         raydium && {
           raydiumFeeTierIndex: raydium.feeTierIndex,
           finalStartPrice: raydium.finalStartPrice,
           hasInitialSwap: raydium.hasInitialSwap,
           solanaInitialBuyHuman: raydium.solanaInitialBuyHuman,
         }),
-      ...(input.dex.version === SolanaDexType.METEORA &&
+      ...(dex.version === SolanaDexType.METEORA &&
         meteora && {
           baseTokenMint: 'So11111111111111111111111111111111111111112',
           virtualUsd: meteora.virtualUsd,
@@ -101,21 +121,13 @@ export const createSolanaFlashToken = async (
         }),
     };
 
-    if (dryRun?.printPayload) {
-      console.log(JSON.stringify(tx1Payload, null, 2));
+    if (printPayload) {
+      LogHelper.printApiPayload('sol/create-flash-tx1', tx1Payload);
     }
 
-    if (dryRun?.dryRun) {
-      console.log(
-        'Skipping TX1 API call to /sol/create-flash-tx1 (dry-run mode)',
-      );
-      console.log('\n========== DRY RUN COMPLETE ==========');
-      console.log('Would have called: POST /sol/create-flash-tx1');
-      console.log('Wallet:', solanaWrapper.publicKey);
-      console.log('Token:', token.name, `(${token.symbol})`);
-      console.log('DEX:', args.dex.version);
-      console.log('========================================\n');
-      return { dryRun: true, tx1Payload, tx2Payload: null };
+    if (dryRun) {
+      LogHelper.printDryRunSummary('sol/create-flash-tx1', tx1Payload);
+      return { dryRun: true, payload: tx1Payload };
     }
 
     console.log('\nStep 1 of 3: Creating the token mint');
@@ -301,53 +313,34 @@ export const createSolanaFlashToken = async (
       positionNftMintAddress: tx1Response.positionNftMintAddress,
     };
 
-    console.log('\n--- RESULT ---');
-    console.log(
-      JSON.stringify(
-        {
-          ok: true,
-          type: 'flash-token',
-          network: SOLANA_CHAIN_NAME_CONFIG[args.chainId],
-          mintAddress: result.mintAddress,
-          signature: result.tx2Signature,
-          metadataUrl: result.metadataUrl,
-        },
-        null,
-        2,
-      ),
-    );
+    LogHelper.printResult({
+      ok: true,
+      type: 'flash-token',
+      network: SOLANA_CHAIN_NAME_CONFIG[args.chainId],
+      mintAddress: result.mintAddress,
+      signature: result.tx2Signature,
+      metadataUrl: result.metadataUrl,
+    });
 
     return result;
   } catch (error) {
-    const err = error as Error;
-    const networkName =
-      args.chainId === 5011 ? 'solana-devnet' : 'solana-' + args.chainId;
-
-    console.log('\n--- RESULT ---');
-    console.log(
-      JSON.stringify(
-        {
-          ok: false,
-          type: 'flash-token',
-          stage: 'create-flash-token',
-          network: networkName,
-          error: err.message,
-          retryable: launchedToken === null,
-          nextSteps:
-            launchedToken !== null
-              ? [
-                  'The mint transaction may have succeeded. Try releasing the vanity address and retry.',
-                ]
-              : ['Check your configuration and try again'],
-        },
-        null,
-        2,
-      ),
-    );
+    LogHelper.printResult({
+      ok: false,
+      network: SOLANA_CHAIN_NAME_CONFIG[args.chainId],
+      error,
+      retryable: launchedToken === null,
+      nextSteps:
+        launchedToken !== null
+          ? [
+              'The mint transaction may have succeeded. Try releasing the vanity address and retry.',
+            ]
+          : ['Check your configuration and try again'],
+    });
 
     if (launchedToken != null && !launchConfirmed) {
-      console.log('\nFlash Token launch did not complete');
-      console.log('----------------------------------------');
+      LogHelper.printSectionWithSeparator(
+        'Flash Token launch did not complete',
+      );
       console.log(
         'The mint transaction succeeded, but a later setup step failed.',
       );

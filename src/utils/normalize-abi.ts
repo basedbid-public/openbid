@@ -1,4 +1,4 @@
-import { AbiInput } from 'interfaces/abi-input';
+import { AbiInput } from 'interfaces/common';
 
 export const normalizeByAbi = (
   value: unknown,

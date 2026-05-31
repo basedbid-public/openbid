@@ -4,31 +4,28 @@ import {
 } from 'constants/solana-chain-config';
 import 'dotenv/config';
 import { ApiType } from 'enums';
-import { DryRunOptions } from 'helpers/run';
-import { BuySolanaResponse } from 'interfaces/buy/solana/api-response';
-import { buySolanaApiSchema } from 'schema/buy/solana/api';
+import { OpenbidRunOptions, SolanaApiResponse } from 'interfaces/common';
 import { BuySolanaSdk, buySolanaSdkSchema } from 'schema/buy/solana/sdk';
-import { validateEnvironmentSolana } from 'schema/environment';
-import { BasedBidApi, SolanaWrapper } from 'utils';
+import { BasedBidApi, LogHelper, SolanaValidator, SolanaWrapper } from 'utils';
 
 export const solanaLbpBuy = async (
   args: BuySolanaSdk,
-  dryRun?: DryRunOptions,
+  options?: OpenbidRunOptions,
 ) => {
-  if (dryRun?.printPayload) {
-    console.log('\nSolana LBP Buy - Dry Run');
-    console.log('-----------------------------------');
+  const { printPayload, dryRun, validate } = options ?? {};
+
+  if (printPayload) {
+    LogHelper.printSectionWithSeparator('- - - Buying LBP on Solana - - -');
   }
 
-  const env = validateEnvironmentSolana();
+  const { data, env } = SolanaValidator.validate<BuySolanaSdk>(
+    buySolanaSdkSchema,
+    args,
+  );
 
-  const data = buySolanaSdkSchema.parse(args);
-
-  if (dryRun?.printPayload) {
-    console.log('Chain ID:', data.chainId);
-    console.log('Token Mint:', data.address);
-    console.log('Amount:', data.amount);
-    console.log('Slippage:', data.slippage, '%');
+  if (validate) {
+    console.log('Validation passed');
+    return;
   }
 
   const solanaWrapper = new SolanaWrapper(
@@ -47,28 +44,19 @@ export const solanaLbpBuy = async (
     isSandboxMode: data.isSandboxMode,
   };
 
-  if (dryRun?.printPayload) {
-    console.log('Signer (from wallet):', solanaWrapper.publicKey);
-    console.log('\nAPI Payload for /sol/lbp-buy:');
-    console.log(JSON.stringify(apiPayload, null, 2));
+  if (printPayload) {
+    LogHelper.printApiPayload('sol/lbp-buy', apiPayload);
   }
 
-  if (dryRun?.dryRun) {
-    console.log('Skipping API call to /sol/lbp-buy (dry-run mode)');
-    console.log('\n========== DRY RUN COMPLETE ==========');
-    console.log('Would have called: POST /sol/lbp-buy');
-    console.log('Token Mint:', data.address);
-    console.log('Amount:', data.amount);
-    console.log('========================================\n');
+  if (dryRun) {
+    LogHelper.printDryRunSummary('sol/lbp-buy', apiPayload);
     return { dryRun: true, payload: apiPayload };
   }
 
-  const validated = buySolanaApiSchema.parse(apiPayload);
-
-  const json = await BasedBidApi.invokeApi<BuySolanaResponse>(
+  const json = await BasedBidApi.invokeApi<SolanaApiResponse>(
     ApiType.SDK,
     'sol/lbp-buy',
-    validated,
+    apiPayload,
     `Failed to buy ${data.address} on Solana`,
     data.isSandboxMode,
   );
@@ -79,6 +67,7 @@ export const solanaLbpBuy = async (
     blockhash,
     lastValidBlockHeight,
     undefined,
+    [],
     {
       description: `Buy ${data.amount} tokens`,
       skipConfirmation: data.isSandboxMode,
@@ -87,20 +76,12 @@ export const solanaLbpBuy = async (
 
   await solanaWrapper.awaitTxConfirmation(signature);
 
-  console.log('\n--- RESULT ---');
-  console.log(
-    JSON.stringify(
-      {
-        ok: true,
-        type: 'buy',
-        network: SOLANA_CHAIN_NAME_CONFIG[data.chainId],
-        tokenAddress: data.address,
-        amount: data.amount,
-        signature,
-        basedBidUrl: `${BasedBidApi.platformApiUrl(data.isSandboxMode)}/${SOLANA_CHAIN_SLUG_CONFIG[data.chainId]}/token/${data.address}`,
-      },
-      null,
-      2,
-    ),
-  );
+  LogHelper.printResult({
+    ok: true,
+    network: SOLANA_CHAIN_NAME_CONFIG[data.chainId],
+    tokenAddress: data.address,
+    amount: data.amount,
+    signature,
+    basedBidUrl: `${BasedBidApi.platformApiUrl(data.isSandboxMode)}/${SOLANA_CHAIN_SLUG_CONFIG[data.chainId]}/token/${data.address}`,
+  });
 };

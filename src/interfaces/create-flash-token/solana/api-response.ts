@@ -1,15 +1,11 @@
-export interface CreateSolanaFlashTxApiResponse {
-  chainId: 5011;
-  transaction?: string;
+import { SolanaApiResponse } from 'interfaces/common';
+
+export interface CreateSolanaFlashTxApiResponse extends SolanaApiResponse {
   mintAddress: string;
   flashSeed: string;
   mintSignerSecretHex: string;
   positionNftSignerSecretHex?: string;
-  blockhash: string;
-  lastValidBlockHeight: number;
-  signingNote?: string;
   metadataUrl?: string;
-
   txCost?: {
     currency: string;
     totalRequired: {

@@ -17,7 +17,6 @@ import { rewardTokenDividendsSchema } from 'schema/v4-fees/reward-token-dividend
 import { z } from 'zod';
 
 export const evmLbpCreateApiSchema = z.object({
-  isSandboxMode: z.boolean().default(false),
   package: packageIndexSchema,
   chainId: evmChainIdSchema,
   token: z.object({

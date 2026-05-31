@@ -12,7 +12,7 @@ import { v4BuyLimitsSchema } from 'schema/v4-fees/buy-limits';
 import { rewardTokenDividendsSchema } from 'schema/v4-fees/reward-token-dividends';
 import { z } from 'zod';
 
-export const evmFlashTokenCreateSdkSchema = z.object({
+export const createEvmFlashTokenSchema = z.object({
   isSandboxMode: z.boolean().default(false),
   chainId: evmChainIdSchema,
   token: z.object({
@@ -120,6 +120,4 @@ export const evmFlashTokenCreateSdkSchema = z.object({
     .optional(),
 });
 
-export type CreateFlashTokenEvmSdk = z.infer<
-  typeof evmFlashTokenCreateSdkSchema
->;
+export type CreateFlashTokenEvmSdk = z.infer<typeof createEvmFlashTokenSchema>;

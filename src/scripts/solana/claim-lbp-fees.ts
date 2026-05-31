@@ -4,31 +4,33 @@ import {
 } from 'constants/solana-chain-config';
 import 'dotenv/config';
 import { ApiType } from 'enums';
-import { DryRunOptions } from 'helpers/run';
-import { ClaimSolanaFeeResponse } from 'interfaces/claim-fees/solana/api';
+import { ClaimSolanaFeeApiResponse } from 'interfaces/claim-fees';
+import { OpenbidRunOptions } from 'interfaces/common';
 import {
   ClaimSolanaLbpFeesRequest,
   claimSolanaLbpFeesRequestSchema,
 } from 'schema/claim-fees/solana/lbp-request';
-import { validateEnvironmentSolana } from 'schema/environment';
-import { BasedBidApi, SolanaWrapper } from 'utils';
+import { BasedBidApi, LogHelper, SolanaValidator, SolanaWrapper } from 'utils';
 
 export const claimSolanaLbpFees = async (
   args: ClaimSolanaLbpFeesRequest,
-  dryRun?: DryRunOptions,
+  options?: OpenbidRunOptions,
 ) => {
-  if (dryRun?.printPayload) {
-    console.log('\nSolana Claim LBP Fees - Dry Run');
-    console.log('-----------------------------------');
+  const { printPayload, dryRun, validate } = options ?? {};
+
+  if (printPayload) {
+    LogHelper.printSectionWithSeparator(
+      '- - - Claiming LBP Fees on Solana - - -',
+    );
   }
+  const { data, env } = SolanaValidator.validate<ClaimSolanaLbpFeesRequest>(
+    claimSolanaLbpFeesRequestSchema,
+    args,
+  );
 
-  const env = validateEnvironmentSolana();
-
-  const data = claimSolanaLbpFeesRequestSchema.parse(args);
-
-  if (dryRun?.printPayload) {
-    console.log('Chain ID:', data.chainId);
-    console.log('Token Mint:', data.memeMint);
+  if (validate) {
+    console.log('Validation passed');
+    return;
   }
 
   const solanaWrapper = new SolanaWrapper(
@@ -39,29 +41,20 @@ export const claimSolanaLbpFees = async (
 
   const apiPayload = {
     chainId: data.chainId,
-    signer: solanaWrapper.publicKey,
     memeMint: data.memeMint,
-    isSandboxMode: data.isSandboxMode,
+    signer: solanaWrapper.publicKey,
   };
 
-  if (dryRun?.printPayload) {
-    console.log('Signer (from wallet):', solanaWrapper.publicKey);
-    console.log('\nAPI Payload for /sol/collect-lbp-fees:');
-    console.log(JSON.stringify(apiPayload, null, 2));
+  if (printPayload) {
+    LogHelper.printApiPayload('sol/collect-lbp-fees', apiPayload);
   }
 
-  if (dryRun?.dryRun) {
-    console.log('Skipping API call to /sol/collect-lbp-fees (dry-run mode)');
-    console.log('\n========== DRY RUN COMPLETE ==========');
-    console.log('Would have called: POST /sol/collect-lbp-fees');
-    console.log('Token Mint:', data.memeMint);
-    console.log('========================================\n');
+  if (dryRun) {
+    LogHelper.printDryRunSummary('sol/collect-lbp-fees', apiPayload);
     return { dryRun: true, payload: apiPayload };
   }
 
-  console.log('Calling API for LBP fees collection...');
-
-  const json = await BasedBidApi.invokeApi<ClaimSolanaFeeResponse>(
+  const json = await BasedBidApi.invokeApi<ClaimSolanaFeeApiResponse>(
     ApiType.SDK,
     'sol/collect-lbp-fees',
     apiPayload,
@@ -85,19 +78,11 @@ export const claimSolanaLbpFees = async (
 
   await solanaWrapper.awaitTxConfirmation(signature);
 
-  console.log('\n--- RESULT ---');
-  console.log(
-    JSON.stringify(
-      {
-        ok: true,
-        type: 'fees',
-        network: SOLANA_CHAIN_NAME_CONFIG[args.chainId],
-        tokenAddress: data.memeMint,
-        signature,
-        basedBidUrl: `${BasedBidApi.platformApiUrl(args.isSandboxMode)}/${SOLANA_CHAIN_SLUG_CONFIG[args.chainId]}/token/${data.memeMint}`,
-      },
-      null,
-      2,
-    ),
-  );
+  LogHelper.printResult({
+    ok: true,
+    network: SOLANA_CHAIN_NAME_CONFIG[data.chainId],
+    tokenAddress: data.memeMint,
+    signature,
+    basedBidUrl: `${BasedBidApi.platformApiUrl(args.isSandboxMode)}/${SOLANA_CHAIN_SLUG_CONFIG[args.chainId]}/token/${data.memeMint}`,
+  });
 };

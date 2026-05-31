@@ -1,36 +1,39 @@
 import { SOLANA_CHAIN_NAME_CONFIG } from 'constants/solana-chain-config';
 import 'dotenv/config';
 import { ApiType } from 'enums';
-import { DryRunOptions } from 'helpers/run';
-import { CreateBoardSolanaApiResponse } from 'interfaces/board/solana/api-response';
-import { createSolanaBoardApiSchema } from 'schema/board/solana/api';
+import { OpenbidRunOptions } from 'interfaces/common';
+import { CreateSolanaBoardApiResponse } from 'interfaces/create-board';
 import {
   CreateSolanaBoardSdk,
   createSolanaBoardSdkSchema,
 } from 'schema/board/solana/sdk';
-import { validateEnvironmentSolana } from 'schema/environment';
-import { BasedBidApi, IpfsUpload, SeedGenerator, SolanaWrapper } from 'utils';
+import {
+  BasedBidApi,
+  IpfsUpload,
+  LogHelper,
+  SeedGenerator,
+  SolanaValidator,
+  SolanaWrapper,
+} from 'utils';
 
 export const createSolanaBoard = async (
   args: CreateSolanaBoardSdk,
-  dryRun?: DryRunOptions,
+  options?: OpenbidRunOptions,
 ) => {
-  if (dryRun?.printPayload) {
-    console.log('\nSolana Create Board - Dry Run');
-    console.log('-----------------------------------');
+  const { printPayload, dryRun, validate } = options ?? {};
+
+  if (printPayload) {
+    LogHelper.printSectionWithSeparator('- - - Creating Board on Solana - - -');
   }
 
-  const env = validateEnvironmentSolana();
+  const { data, env } = SolanaValidator.validate<CreateSolanaBoardSdk>(
+    createSolanaBoardSdkSchema,
+    args,
+  );
 
-  const argsValidated = createSolanaBoardSdkSchema.safeParse(args);
-  if (!argsValidated.success) {
-    throw new Error('Invalid input arguments: ' + argsValidated.error.message);
-  }
-
-  if (dryRun?.printPayload) {
-    console.log('Chain ID:', argsValidated.data.chainId);
-    console.log('Board Title:', argsValidated.data.title);
-    console.log('Description:', argsValidated.data.description);
+  if (validate) {
+    console.log('Validation passed');
+    return;
   }
 
   const solanaWrapper = new SolanaWrapper(
@@ -39,95 +42,63 @@ export const createSolanaBoard = async (
   );
   await solanaWrapper.init();
 
-  const apiKey = argsValidated.data.title
-    ? process.env.BASEDBID_API_KEY
-    : undefined;
-
-  let logoUrl = 'ipfs://placeholder-logo-url (DRY RUN)';
-  let bannerUrl = 'ipfs://placeholder-banner-url (DRY RUN)';
-  let metadataUrl = 'ipfs://placeholder-metadata-url (DRY RUN)';
-
-  if (dryRun?.printPayload) {
-    console.log('\nStep 1 of 2: Upload board branding to IPFS');
-  }
-
-  if (dryRun?.dryRun) {
-    console.log('Skipping IPFS logo upload (dry-run mode)');
-    console.log('Logo path:', argsValidated.data.logo);
+  let logoUrl = 'https://ipfs.based.bid/ipfs/null';
+  if (dryRun) {
+    console.log('Skipping logo upload (dry-run mode)');
+    console.log('Logo path:', data.logo);
   } else {
-    logoUrl = await IpfsUpload.uploadImage(argsValidated.data.logo, apiKey);
+    logoUrl = await IpfsUpload.uploadImage(data.logo);
   }
 
-  if (dryRun?.dryRun) {
-    console.log('Skipping IPFS banner upload (dry-run mode)');
-    console.log('Banner path:', argsValidated.data.banner);
+  let bannerUrl = 'https://ipfs.based.bid/ipfs/null';
+  if (dryRun) {
+    console.log('Skipping banner upload (dry-run mode)');
+    console.log('Banner path:', data.banner);
   } else {
-    bannerUrl = await IpfsUpload.uploadImage(argsValidated.data.banner, apiKey);
+    bannerUrl = await IpfsUpload.uploadImage(data.banner);
   }
 
-  if (dryRun?.printPayload) {
-    console.log('Logo URL:', logoUrl);
-    console.log('Banner URL:', bannerUrl);
-  }
-
-  const metadataObject = {
-    title: argsValidated.data.title,
-    description: argsValidated.data.description,
+  const metadata = {
+    title: data.title,
+    description: data.description,
     logo: logoUrl,
     banner: bannerUrl,
   };
 
-  if (dryRun?.dryRun) {
+  let metadataUrl = '';
+  if (dryRun) {
     console.log('Skipping IPFS metadata upload (dry-run mode)');
-    console.log('Metadata to upload:', JSON.stringify(metadataObject, null, 2));
+    console.log('Metadata to upload:', JSON.stringify(metadata, null, 2));
   } else {
-    metadataUrl = await IpfsUpload.uploadMetadata(metadataObject, apiKey);
-  }
-
-  if (dryRun?.printPayload) {
-    console.log('Metadata URL:', metadataUrl);
+    metadataUrl = await IpfsUpload.uploadMetadata(metadata);
   }
 
   const seed = SeedGenerator.generateBoardSeed();
 
   const apiPayload = {
-    chainId: argsValidated.data.chainId,
+    chainId: data.chainId,
     signer: solanaWrapper.publicKey,
     seed,
     metaData: metadataUrl,
-    flashLaunchFeePer: argsValidated.data.flashLaunchFeePer,
-    fees: argsValidated.data.fees,
-    isSandboxMode: argsValidated.data.isSandboxMode,
+    flashLaunchFeePer: data.flashLaunchFeePer,
+    fees: data.fees,
   };
 
-  if (dryRun?.printPayload) {
-    console.log('\nAPI Payload for /sol/apply-sub-board:');
-    console.log(JSON.stringify(apiPayload, null, 2));
+  if (printPayload) {
+    LogHelper.printApiPayload('sol/apply-sub-board', apiPayload);
   }
 
-  if (dryRun?.dryRun) {
-    console.log('Skipping API call to /sol/apply-sub-board (dry-run mode)');
-    console.log('\n========== DRY RUN COMPLETE ==========');
-    console.log('Would have called: POST /sol/apply-sub-board');
-    console.log('Wallet:', solanaWrapper.publicKey);
-    console.log('Board Title:', argsValidated.data.title);
-    console.log('========================================\n');
+  if (dryRun) {
+    LogHelper.printDryRunSummary('sol/apply-sub-board', apiPayload);
     return { dryRun: true, payload: apiPayload };
   }
 
-  console.log('\nStep 2 of 2: Creating the board on Solana devnet');
-  console.log('This creates your branded launchpad on basedbid.');
-  console.log('Requesting board creation transaction from basedbid...');
-
-  const validated = createSolanaBoardApiSchema.parse(apiPayload);
-
-  const json = await BasedBidApi.invokeApi<CreateBoardSolanaApiResponse>(
+  const json = await BasedBidApi.invokeApi<CreateSolanaBoardApiResponse>(
     ApiType.SDK,
     'sol/apply-sub-board',
-    validated,
+    apiPayload,
     'Failed to create board on Solana',
     args.isSandboxMode,
-    apiKey,
   );
 
   const { transaction, blockhash, lastValidBlockHeight, txCost } = json;
@@ -153,22 +124,15 @@ export const createSolanaBoard = async (
     signature,
   };
 
-  console.log('\n--- RESULT ---');
-  console.log(
-    JSON.stringify(
-      {
-        ok: true,
-        type: 'board',
-        network: SOLANA_CHAIN_NAME_CONFIG[argsValidated.data.chainId],
-        boardId: result.boardId,
-        signature: result.signature,
-        metadataUrl: result.metadataUrl,
-        basedBidUrl: `${BasedBidApi.platformApiUrl(args.isSandboxMode)}/b/${result.boardId}`,
-      },
-      null,
-      2,
-    ),
-  );
+  LogHelper.printResult({
+    ok: true,
+    type: 'board',
+    network: SOLANA_CHAIN_NAME_CONFIG[data.chainId],
+    boardId: result.boardId,
+    signature: result.signature,
+    metadataUrl: result.metadataUrl,
+    basedBidUrl: `${BasedBidApi.platformApiUrl(args.isSandboxMode)}/b/${result.boardId}`,
+  });
 
   return result;
 };

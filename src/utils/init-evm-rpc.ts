@@ -5,15 +5,11 @@ import { createWalletClient, http } from 'viem';
 import { createPublicClient } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 
-export const initRpcClients = (
+export const initEvmClients = (
   chainId: EvmChainId,
   rpcUrl: string,
-  privateKey: `0x${string}` | undefined,
+  privateKey: `0x${string}`,
 ) => {
-  if (!privateKey) {
-    throw new Error('PRIVATE_KEY is not defined');
-  }
-
   const chain = CHAIN_CONFIG[chainId];
 
   const publicClient = createPublicClient({

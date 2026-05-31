@@ -2,113 +2,93 @@ import subBoardFacetAbi from 'constants/abi/SubBoardFacet.json';
 import { CHAIN_NAME_CONFIG } from 'constants/chain-config';
 import 'dotenv/config';
 import { ApiType } from 'enums';
-import { DryRunOptions } from 'helpers/run';
-import { EvmApiResponse } from 'interfaces';
+import { EvmApiResponse, OpenbidRunOptions } from 'interfaces/common';
 import { createEvmBoardSchema, CreateEvmBoardSdk } from 'schema/board/evm/sdk';
-import { validateEnvironment } from 'schema/environment';
 import {
   BasedBidApi,
-  initRpcClients,
+  EvmValidator,
+  initEvmClients,
   IpfsUpload,
+  LogHelper,
   normalizeByAbi,
   sendTransaction,
 } from 'utils';
 
 export const createEvmBoard = async (
   args: CreateEvmBoardSdk,
-  dryRun?: DryRunOptions,
+  options?: OpenbidRunOptions,
 ) => {
-  if (dryRun?.printPayload) {
-    console.log('\nEVM Create Board - Dry Run');
-    console.log('-----------------------------------');
+  const { printPayload, dryRun, validate } = options ?? {};
+
+  if (printPayload) {
+    LogHelper.printSectionWithSeparator('- - - Creating Board on EVM - - -');
   }
 
-  const env = validateEnvironment();
-
-  const validated = createEvmBoardSchema.parse(args);
-
-  console.log(
-    'Creating board on EVM (chainId:',
-    validated.chainId,
-    '):',
-    validated.title,
+  const { data, env } = EvmValidator.validate<CreateEvmBoardSdk>(
+    createEvmBoardSchema,
+    args,
   );
 
-  const apiKey = validated.title ? process.env.BASEDBID_API_KEY : undefined;
+  if (validate) {
+    console.log('Validation passed');
+    return;
+  }
 
-  let logoUrl = 'ipfs://placeholder-logo-url (DRY RUN)';
-  let bannerUrl = 'ipfs://placeholder-banner-url (DRY RUN)';
-  let metadataUrl = 'ipfs://placeholder-metadata-url (DRY RUN)';
-
-  if (dryRun?.dryRun) {
-    console.log('Skipping IPFS logo upload (dry-run mode)');
-    console.log('Logo path:', validated.logo);
+  let logoUrl = 'https://ipfs.based.bid/ipfs/null';
+  if (dryRun) {
+    console.log('Skipping logo upload (dry-run mode)');
+    console.log('Logo path:', data.logo);
   } else {
-    logoUrl = await IpfsUpload.uploadImage(validated.logo, apiKey);
+    logoUrl = await IpfsUpload.uploadImage(data.logo);
   }
 
-  if (dryRun?.dryRun) {
-    console.log('Skipping IPFS banner upload (dry-run mode)');
-    console.log('Banner path:', validated.banner);
+  let bannerUrl = 'https://ipfs.based.bid/ipfs/null';
+  if (dryRun) {
+    console.log('Skipping banner upload (dry-run mode)');
+    console.log('Banner path:', data.banner);
   } else {
-    bannerUrl = await IpfsUpload.uploadImage(validated.banner, apiKey);
+    bannerUrl = await IpfsUpload.uploadImage(data.banner);
   }
 
-  if (dryRun?.printPayload) {
-    console.log('Logo URL:', logoUrl);
-    console.log('Banner URL:', bannerUrl);
-  }
-
-  const metadataObject = {
-    title: validated.title,
-    description: validated.description,
+  const metadata = {
+    title: data.title,
+    description: data.description,
     logo: logoUrl,
     banner: bannerUrl,
   };
 
-  if (dryRun?.dryRun) {
+  let metadataUrl = 'https://ipfs.based.bid/ipfs/null';
+  if (dryRun) {
     console.log('Skipping IPFS metadata upload (dry-run mode)');
-    console.log('Metadata to upload:', JSON.stringify(metadataObject, null, 2));
+    console.log('Metadata to upload:', JSON.stringify(metadata, null, 2));
   } else {
-    metadataUrl = await IpfsUpload.uploadMetadata(metadataObject, apiKey);
+    metadataUrl = await IpfsUpload.uploadMetadata(metadata);
   }
 
-  if (dryRun?.printPayload) {
-    console.log('Metadata URL:', metadataUrl);
-  }
-
-  const { publicClient, walletClient, account } = initRpcClients(
-    validated.chainId,
+  const { publicClient, walletClient, account } = initEvmClients(
+    data.chainId,
     env.EVM_RPC_URL,
     env.PRIVATE_KEY,
   );
 
   const apiPayload = {
-    chainId: validated.chainId,
     account: account.address,
-    title: validated.title,
-    description: validated.description,
+    chainId: data.chainId,
+    title: data.title,
+    description: data.description,
+    fees: data.fees,
     logoUrl,
     bannerUrl,
     metaUri: metadataUrl,
-    fees: validated.fees,
-    isSandboxMode: validated.isSandboxMode,
   };
 
-  if (dryRun?.printPayload) {
-    console.log('\nAPI Payload for /create-board:');
-    console.log(JSON.stringify({ data: apiPayload }, null, 2));
+  if (printPayload) {
+    LogHelper.printApiPayload('create-board', apiPayload);
   }
 
-  if (dryRun?.dryRun) {
-    console.log('Skipping API call to /create-board (dry-run mode)');
-    console.log('\n========== DRY RUN COMPLETE ==========');
-    console.log('Would have called: POST /create-board');
-    console.log('Wallet:', account.address);
-    console.log('Chain ID:', validated.chainId);
-    console.log('Board Title:', validated.title);
-    console.log('========================================\n');
-    return { dryRun: true, payload: { data: apiPayload } };
+  if (dryRun) {
+    LogHelper.printDryRunSummary('create-board', apiPayload);
+    return { dryRun: true, payload: apiPayload };
   }
 
   const json = await BasedBidApi.invokeApi<EvmApiResponse>(
@@ -119,7 +99,6 @@ export const createEvmBoard = async (
     },
     'Failed to create board on EVM',
     args.isSandboxMode,
-    apiKey,
   );
 
   const txValue = BigInt(json.value);
@@ -151,22 +130,14 @@ export const createEvmBoard = async (
     skipConfirmation: args.isSandboxMode,
   });
 
-  console.log('\n--- RESULT ---');
-  console.log(
-    JSON.stringify(
-      {
-        ok: true,
-        type: 'board',
-        network: CHAIN_NAME_CONFIG[validated.chainId],
-        boardAddress: json.address,
-        signature: result.transactionHash,
-        metadataUrl,
-        basedBidUrl: `${BasedBidApi.platformApiUrl(args.isSandboxMode)}/b/${validated.title.toLowerCase()}`,
-      },
-      null,
-      2,
-    ),
-  );
+  LogHelper.printResult({
+    ok: true,
+    network: CHAIN_NAME_CONFIG[data.chainId],
+    boardAddress: json.address,
+    signature: result.transactionHash,
+    metadataUrl,
+    basedBidUrl: `${BasedBidApi.platformApiUrl(args.isSandboxMode)}/b/${data.title.toLowerCase()}`,
+  });
 
   return result;
 };

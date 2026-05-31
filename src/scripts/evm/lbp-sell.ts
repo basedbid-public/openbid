@@ -2,65 +2,63 @@ import tradeFacetAbi from 'constants/abi/TradeFacet.json';
 import { CHAIN_NAME_CONFIG, CHAIN_SLUG_CONFIG } from 'constants/chain-config';
 import 'dotenv/config';
 import { ApiType } from 'enums';
-import { DryRunOptions } from 'helpers/run';
-import { SellEvmApiResponse } from 'interfaces';
-import { validateEnvironment } from 'schema/environment';
+import { OpenbidRunOptions } from 'interfaces/common';
+import { EvmSellApiResponse } from 'interfaces/sell';
 import { SellEvmSdk, sellEvmSdkSchema } from 'schema/sell/evm/sdk';
-import { BasedBidApi, initRpcClients, sendTransaction } from 'utils';
+import {
+  BasedBidApi,
+  EvmValidator,
+  initEvmClients,
+  LogHelper,
+  sendTransaction,
+} from 'utils';
 import { erc20Abi } from 'viem';
 
-export const evmLbpSell = async (args: SellEvmSdk, dryRun?: DryRunOptions) => {
-  if (dryRun?.printPayload) {
-    console.log('\nEVM LBP Sell - Dry Run');
-    console.log('-----------------------------------');
+export const evmLbpSell = async (
+  args: SellEvmSdk,
+  options?: OpenbidRunOptions,
+) => {
+  const { printPayload, dryRun, validate } = options ?? {};
+
+  if (printPayload) {
+    LogHelper.printSectionWithSeparator('- - - Selling LBP on EVM - - -');
   }
 
-  const env = validateEnvironment();
+  const { data, env } = EvmValidator.validate<SellEvmSdk>(
+    sellEvmSdkSchema,
+    args,
+  );
 
-  const argsValidated = sellEvmSdkSchema.safeParse(args);
-  if (!argsValidated.success) {
-    throw new Error('Invalid input arguments: ' + argsValidated.error.message);
+  if (validate) {
+    console.log('Validation passed');
+    return;
   }
 
-  if (dryRun?.printPayload) {
-    console.log('Chain ID:', argsValidated.data.chainId);
-    console.log('Token Address:', argsValidated.data.address);
-    console.log('Amount:', argsValidated.data.amount);
-    console.log('Slippage:', argsValidated.data.slippage, '%');
-  }
-
-  const apiPayload = {
-    chainId: argsValidated.data.chainId,
-    address: argsValidated.data.address,
-    account: '0x0000000000000000000000000000000000000000',
-    slippage: argsValidated.data.slippage,
-    referrer: argsValidated.data.referrer,
-    amount: argsValidated.data.amount,
-  };
-
-  if (dryRun?.printPayload) {
-    console.log('\nAPI Payload for /lbp-sell-preview:');
-    console.log(JSON.stringify({ data: apiPayload }, null, 2));
-  }
-
-  if (dryRun?.dryRun) {
-    console.log('Skipping API call to /lbp-sell-preview (dry-run mode)');
-    console.log('\n========== DRY RUN COMPLETE ==========');
-    console.log('Would have called: POST /lbp-sell-preview');
-    console.log('Token:', argsValidated.data.address);
-    console.log('Amount:', argsValidated.data.amount, 'tokens');
-    console.log('Note: This would require 2 transactions (approve + sell)');
-    console.log('========================================\n');
-    return { dryRun: true, payload: { data: apiPayload } };
-  }
-
-  const { publicClient, walletClient, account } = initRpcClients(
-    argsValidated.data.chainId,
+  const { publicClient, walletClient, account } = initEvmClients(
+    data.chainId,
     env.EVM_RPC_URL,
     env.PRIVATE_KEY,
   );
 
-  const json = await BasedBidApi.invokeApi<SellEvmApiResponse>(
+  const apiPayload = {
+    chainId: data.chainId,
+    address: data.address,
+    account: account.address,
+    slippage: data.slippage,
+    referrer: data.referrer,
+    amount: data.amount,
+  };
+
+  if (printPayload) {
+    LogHelper.printApiPayload('lbp-sell-preview', apiPayload);
+  }
+
+  if (dryRun) {
+    LogHelper.printDryRunSummary('lbp-sell-preview', apiPayload);
+    return { dryRun: true, payload: apiPayload };
+  }
+
+  const json = await BasedBidApi.invokeApi<EvmSellApiResponse>(
     ApiType.SDK,
     'lbp-sell-preview',
     {
@@ -103,21 +101,13 @@ export const evmLbpSell = async (args: SellEvmSdk, dryRun?: DryRunOptions) => {
     skipConfirmation: args.isSandboxMode,
   });
 
-  console.log('\n--- RESULT ---');
-  console.log(
-    JSON.stringify(
-      {
-        ok: true,
-        type: 'sell',
-        network: CHAIN_NAME_CONFIG[argsValidated.data.chainId],
-        tokenAddress: argsValidated.data.address,
-        signature: sellReceipt.transactionHash,
-        basedBidUrl: `${BasedBidApi.platformApiUrl(args.isSandboxMode)}/${CHAIN_SLUG_CONFIG[argsValidated.data.chainId]}/token/${argsValidated.data.address}`,
-      },
-      null,
-      2,
-    ),
-  );
+  LogHelper.printResult({
+    ok: true,
+    network: CHAIN_NAME_CONFIG[data.chainId],
+    tokenAddress: data.address,
+    signature: sellReceipt.transactionHash,
+    basedBidUrl: `${BasedBidApi.platformApiUrl(args.isSandboxMode)}/${CHAIN_SLUG_CONFIG[data.chainId]}/token/${data.address}`,
+  });
 
   return sellReceipt;
 };

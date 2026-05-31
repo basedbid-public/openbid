@@ -1,4 +1,4 @@
-export interface ClaimSolanaFeeResponse {
+export interface ClaimSolanaFeeApiResponse {
   ok: true;
   chainId: 5011 | 501;
   chainSymbol: 'tsol' | 'sol';

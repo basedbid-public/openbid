@@ -5,42 +5,47 @@ import {
 } from 'constants/solana-chain-config';
 import 'dotenv/config';
 import { ApiType, SolanaDexType } from 'enums';
-import { DryRunOptions } from 'helpers/run';
-import { CreateLbpSolanaApiResponse } from 'interfaces/lbp/create/solana/api-response';
-import { SolanaVanityUpdate } from 'interfaces/solana-vanity-update';
-import { validateEnvironmentSolana } from 'schema/environment';
-import { createLbpSolanaApiPayloadSchema } from 'schema/lbp/solana/api-request';
+import { OpenbidRunOptions, SolanaVanityUpdateData } from 'interfaces/common';
+import { CreateSolanaLbpApiResponse } from 'interfaces/create-lbp';
 import { solanaFeeDistributionApiPayloadSchema } from 'schema/lbp/solana/fee-distribution';
-import { CreateSolanaLbpInput } from 'schema/lbp/solana/sdk-input';
-import { SolanaLbpValidator } from 'schema/lbp/solana/validator';
+import {
+  CreateSolanaLbpInput,
+  createSolanaLbpInputSchema,
+} from 'schema/lbp/solana/sdk-input';
 import {
   BasedBidApi,
   getLaunchPackageIndex,
   IpfsUpload,
+  LogHelper,
   SeedGenerator,
+  SolanaValidator,
   SolanaWrapper,
 } from 'utils';
 
-let launchedToken: SolanaVanityUpdate | null = null;
+let launchedToken: SolanaVanityUpdateData | null = null;
 
 export const createSolanaLbp = async (
   args: CreateSolanaLbpInput,
-  dryRun?: DryRunOptions,
+  options?: OpenbidRunOptions,
 ) => {
   let launchConfirmed = false;
 
-  if (dryRun?.printPayload) {
-    console.log('\nSolana Create LBP - Dry Run');
-    console.log('-----------------------------------');
+  const { printPayload, dryRun, validate } = options ?? {};
+
+  if (printPayload) {
+    LogHelper.printSectionWithSeparator('- - - Creating LBP on Solana - - -');
   }
 
-  let metadataUrl = 'ipfs://placeholder-metadata-url (DRY RUN)';
-
-  let apiKey: string | undefined;
   try {
-    const env = validateEnvironmentSolana();
+    const { data, env } = SolanaValidator.validate<CreateSolanaLbpInput>(
+      createSolanaLbpInputSchema,
+      args,
+    );
 
-    const input = SolanaLbpValidator.validateInput(args);
+    if (validate) {
+      console.log('Validation passed');
+      return;
+    }
 
     const solanaWrapper = new SolanaWrapper(
       env.SOLANA_RPC_URL,
@@ -48,12 +53,10 @@ export const createSolanaLbp = async (
     );
     await solanaWrapper.init();
 
-    const data = input;
     const { token, board, boardOwner, dex, fees } = data;
-    apiKey = board ? process.env.BASEDBID_API_KEY : undefined;
+    const apiKey = board ? process.env.BASEDBID_API_KEY : undefined;
 
     let sale = data.sale;
-
     if (!sale) {
       sale = {
         marketCap: '9000',
@@ -62,29 +65,17 @@ export const createSolanaLbp = async (
       };
     }
 
-    if (dryRun?.printPayload) {
-      console.log('Step 1 of 3: Upload pool metadata to IPFS');
-      console.log('Token:', token.name, `(${token.symbol})`);
-      console.log('Package:', data.package);
-      console.log('Board:', board || '(default based board)');
-    }
-
-    let logoUrl = 'ipfs://placeholder-logo-url (DRY RUN)';
-
-    if (dryRun?.dryRun) {
-      console.log('Skipping IPFS logo upload (dry-run mode)');
-      console.log('Logo path:', token.metadata.logo);
+    let logoUrl = 'https://ipfs.based.bid/ipfs/null';
+    if (dryRun) {
+      console.log('Skipping logo upload (dry-run mode)');
+      console.log('Logo path:', data.token.metadata.logo);
     } else {
-      logoUrl = await IpfsUpload.uploadImage(token.metadata.logo, apiKey);
-    }
-
-    if (dryRun?.printPayload) {
-      console.log('Logo URL:', logoUrl);
+      logoUrl = await IpfsUpload.uploadImage(data.token.metadata.logo);
     }
 
     const seed = SeedGenerator.generateNumericSeed(5);
 
-    const ipfsMetadata = {
+    const metadata = {
       name: token.name,
       symbol: token.symbol,
       decimals: SOLANA_DECIMALS,
@@ -101,19 +92,19 @@ export const createSolanaLbp = async (
       seed,
     };
 
-    if (dryRun?.dryRun) {
-      console.log('Skipping IPFS metadata upload (dry-run mode)');
+    let metadataUrl = 'https://ipfs.based.bid/ipfs/null';
+    if (dryRun) {
+      console.log('Skipping metadata upload (dry-run mode)');
       console.log('Seed:', seed);
-      console.log('Metadata to upload:', JSON.stringify(ipfsMetadata, null, 2));
+      console.log('Metadata to upload:', JSON.stringify(metadata, null, 2));
     } else {
-      metadataUrl = await IpfsUpload.uploadMetadata(ipfsMetadata, apiKey);
+      metadataUrl = await IpfsUpload.uploadMetadata(metadata);
     }
 
     const apiPayload = {
       chainId: args.chainId,
       signer: solanaWrapper.publicKey,
       data: {
-        isSandboxMode: data.isSandboxMode,
         seed,
         advanced: true,
         package: getLaunchPackageIndex(data.package),
@@ -159,33 +150,19 @@ export const createSolanaLbp = async (
       },
     };
 
-    if (dryRun?.printPayload) {
-      console.log('\nAPI Payload for /sol/create-lbp:');
-      console.log(JSON.stringify(apiPayload, null, 2));
+    if (printPayload) {
+      LogHelper.printApiPayload('sol/create-lbp', apiPayload);
     }
 
-    const validated = createLbpSolanaApiPayloadSchema.safeParse(apiPayload);
-
-    if (!validated.success) {
-      throw new Error('Invalid API payload: ' + validated.error.message);
-    }
-
-    if (dryRun?.dryRun) {
-      console.log('Skipping API call to /sol/create-lbp (dry-run mode)');
-      console.log('\n========== DRY RUN COMPLETE ==========');
-      console.log('Would have called: POST /sol/create-lbp');
-      console.log('Wallet:', solanaWrapper.publicKey);
-      console.log('Chain ID:', args.chainId);
-      console.log('Token:', token.name, `(${token.symbol})`);
-      console.log('DEX:', dex.version, 'fee tier:', dex.feeTier);
-      console.log('========================================\n');
+    if (dryRun) {
+      LogHelper.printDryRunSummary('sol/create-lbp', apiPayload);
       return { dryRun: true, payload: apiPayload };
     }
 
-    const json = await BasedBidApi.invokeApi<CreateLbpSolanaApiResponse>(
+    const json = await BasedBidApi.invokeApi<CreateSolanaLbpApiResponse>(
       ApiType.SDK,
       'sol/create-lbp',
-      validated.data,
+      apiPayload,
       'Failed to create LBP on Solana',
       args.isSandboxMode,
       apiKey,
@@ -251,22 +228,15 @@ export const createSolanaLbp = async (
         metadataUrl: json.metadataUrl,
       };
 
-      console.log('\n--- RESULT ---');
-      console.log(
-        JSON.stringify(
-          {
-            ok: true,
-            type: 'pool',
-            network: SOLANA_CHAIN_NAME_CONFIG[args.chainId],
-            mintAddress: result.mintAddress,
-            signature: result.signature,
-            metadataUrl: result.metadataUrl,
-            basedBidUrl: `${BasedBidApi.platformApiUrl(args.isSandboxMode)}/${SOLANA_CHAIN_SLUG_CONFIG[args.chainId]}/token/${result.mintAddress}`,
-          },
-          null,
-          2,
-        ),
-      );
+      LogHelper.printResult({
+        ok: true,
+        type: 'pool',
+        network: SOLANA_CHAIN_NAME_CONFIG[args.chainId],
+        mintAddress: result.mintAddress,
+        signature: result.signature,
+        metadataUrl: result.metadataUrl,
+        basedBidUrl: `${BasedBidApi.platformApiUrl(args.isSandboxMode)}/${SOLANA_CHAIN_SLUG_CONFIG[args.chainId]}/token/${result.mintAddress}`,
+      });
 
       return result;
     }
@@ -324,50 +294,32 @@ export const createSolanaLbp = async (
       metadataUrl: json.metadataUrl,
     };
 
-    console.log('\n--- RESULT ---');
-    console.log(
-      JSON.stringify(
-        {
-          ok: true,
-          type: 'pool',
-          network: SOLANA_CHAIN_NAME_CONFIG[args.chainId],
-          mintAddress: result.mintAddress,
-          signature: result.signature,
-          metadataUrl: result.metadataUrl,
-          basedBidUrl: `${BasedBidApi.platformApiUrl(args.isSandboxMode)}/${SOLANA_CHAIN_SLUG_CONFIG[args.chainId]}/token/${result.mintAddress}`,
-        },
-        null,
-        2,
-      ),
-    );
+    LogHelper.printResult({
+      ok: true,
+      type: 'pool',
+      network: SOLANA_CHAIN_NAME_CONFIG[args.chainId],
+      mintAddress: result.mintAddress,
+      signature: result.signature,
+      metadataUrl: result.metadataUrl,
+      basedBidUrl: `${BasedBidApi.platformApiUrl(args.isSandboxMode)}/${SOLANA_CHAIN_SLUG_CONFIG[args.chainId]}/token/${result.mintAddress}`,
+    });
 
     return result;
   } catch (error) {
-    const err = error as Error;
-    const networkName =
-      args.chainId === 5011 ? 'solana-devnet' : 'solana-' + args.chainId;
-
-    console.log('\n--- RESULT ---');
-    console.log(
-      JSON.stringify(
-        {
-          ok: false,
-          type: 'pool',
-          stage: 'create-lbp',
-          network: networkName,
-          error: err.message,
-          retryable: launchedToken === null,
-          nextSteps:
-            launchedToken !== null
-              ? [
-                  'The mint transaction may have succeeded. Try releasing the vanity address and retry.',
-                ]
-              : ['Check your configuration and try again'],
-        },
-        null,
-        2,
-      ),
-    );
+    LogHelper.printResult({
+      ok: false,
+      type: 'pool',
+      stage: 'create-lbp',
+      network: SOLANA_CHAIN_NAME_CONFIG[args.chainId],
+      error,
+      retryable: launchedToken === null,
+      nextSteps:
+        launchedToken !== null
+          ? [
+              'The mint transaction may have succeeded. Try releasing the vanity address and retry.',
+            ]
+          : ['Check your configuration and try again'],
+    });
 
     if (launchedToken != null && !launchConfirmed) {
       await BasedBidApi.invokeApi(
@@ -380,7 +332,6 @@ export const createSolanaLbp = async (
         },
         'Failed to release vanity',
         args.isSandboxMode,
-        apiKey,
       );
     }
     throw error;

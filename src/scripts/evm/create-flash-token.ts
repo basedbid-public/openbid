@@ -3,94 +3,83 @@ import flashLaunchV4Abi from 'constants/abi/FlashLaunchForV4Facet.json';
 import { CHAIN_NAME_CONFIG } from 'constants/chain-config';
 import 'dotenv/config';
 import { ApiType, EvmDexType } from 'enums';
-import { DryRunOptions } from 'helpers/run';
-import { EvmApiResponse } from 'interfaces';
-import { validateEnvironment } from 'schema/environment';
+import { EvmApiResponse, OpenbidRunOptions } from 'interfaces/common';
+import { CreateFlashTokenEvmApi } from 'schema/flash-token/evm/api';
 import {
-  CreateFlashTokenEvmApi,
-  evmFlashTokenCreateApiSchema,
-} from 'schema/flash-token/evm/api';
-import {
+  createEvmFlashTokenSchema,
   CreateFlashTokenEvmSdk,
-  evmFlashTokenCreateSdkSchema,
 } from 'schema/flash-token/evm/sdk';
 import {
   BasedBidApi,
-  initRpcClients,
+  EvmValidator,
+  initEvmClients,
   IpfsUpload,
+  LogHelper,
   normalizeByAbi,
   sendTransaction,
 } from 'utils';
 
 export const createEvmFlashToken = async (
   args: CreateFlashTokenEvmSdk,
-  dryRun?: DryRunOptions,
+  options?: OpenbidRunOptions,
 ) => {
-  if (dryRun?.printPayload) {
-    console.log('\nEVM Create Flash Token - Dry Run');
-    console.log('-----------------------------------');
+  const { printPayload, dryRun, validate } = options ?? {};
+
+  if (printPayload) {
+    LogHelper.printSectionWithSeparator(
+      '- - - Creating Flash Token on EVM - - -',
+    );
   }
 
-  const env = validateEnvironment();
+  const { data, env } = EvmValidator.validate<CreateFlashTokenEvmSdk>(
+    createEvmFlashTokenSchema,
+    args,
+  );
 
-  const argsValidated = evmFlashTokenCreateSdkSchema.safeParse(args);
-  if (!argsValidated.success) {
-    throw new Error('Invalid input arguments: ' + argsValidated.error.message);
+  if (validate) {
+    console.log('Validation passed');
+    return;
   }
 
-  const apiKey = argsValidated.data.boardTitle
-    ? process.env.BASEDBID_API_KEY
-    : undefined;
+  let logoUrl = 'https://ipfs.based.bid/ipfs/null';
+  if (dryRun) {
+    console.log('Skipping logo upload (dry-run mode)');
+    console.log('Logo path:', data.token.metadata.logo);
+  } else {
+    logoUrl = await IpfsUpload.uploadImage(data.token.metadata.logo);
+  }
 
-  const { publicClient, walletClient, account } = initRpcClients(
-    argsValidated.data.chainId,
+  const { publicClient, walletClient, account } = initEvmClients(
+    data.chainId,
     env.EVM_RPC_URL,
     env.PRIVATE_KEY,
   );
 
-  let logoUrl = 'ipfs://placeholder-logo-url (DRY RUN)';
-  let metadataUrl = 'ipfs://placeholder-metadata-url (DRY RUN)';
-
-  if (dryRun?.dryRun) {
-    console.log('Skipping IPFS logo upload (dry-run mode)');
-    console.log('Logo path:', argsValidated.data.token.metadata.logo);
-  } else {
-    logoUrl = await IpfsUpload.uploadImage(
-      argsValidated.data.token.metadata.logo,
-      apiKey,
-    );
-  }
-
-  if (dryRun?.printPayload) {
-    console.log('Logo URL:', logoUrl);
-  }
-
-  const metadataIpfs = {
-    name: argsValidated.data.token.name,
-    symbol: argsValidated.data.token.symbol,
+  const metadata = {
+    name: data.token.name,
+    symbol: data.token.symbol,
     decimals: 18,
-    totalSupply: argsValidated.data.token.totalSupply,
+    totalSupply: data.token.totalSupply,
     logo: logoUrl,
-    board: argsValidated.data.boardTitle,
-    twitter: argsValidated.data.token.metadata.twitter,
-    telegram: argsValidated.data.token.metadata.telegram,
-    website: argsValidated.data.token.metadata.website,
-    discord: argsValidated.data.token.metadata.discord,
-    description: argsValidated.data.token.metadata.description,
+    board: data.boardTitle,
+    twitter: data.token.metadata.twitter,
+    telegram: data.token.metadata.telegram,
+    website: data.token.metadata.website,
+    discord: data.token.metadata.discord,
+    description: data.token.metadata.description,
   };
 
-  if (dryRun?.dryRun) {
+  const apiKey = data.boardTitle ? process.env.BASEDBID_API_KEY : undefined;
+
+  let metadataUrl = '';
+  if (dryRun) {
     console.log('Skipping IPFS metadata upload (dry-run mode)');
-    console.log('Metadata to upload:', JSON.stringify(metadataIpfs, null, 2));
+    console.log('Metadata to upload:', JSON.stringify(metadata, null, 2));
   } else {
-    metadataUrl = await IpfsUpload.uploadMetadata(metadataIpfs, apiKey);
+    metadataUrl = await IpfsUpload.uploadMetadata(metadata, apiKey);
   }
 
-  if (dryRun?.printPayload) {
-    console.log('Metadata URL:', metadataUrl);
-  }
-
-  let sale = argsValidated.data.sale;
+  let sale = data.sale;
   if (!sale) {
     sale = {
       marketCap: 10_000,
@@ -99,63 +88,45 @@ export const createEvmFlashToken = async (
     };
   }
 
-  if (dryRun?.printPayload) {
-    console.log('Sale config:', JSON.stringify(sale, null, 2));
-  }
-
   const apiPayload: CreateFlashTokenEvmApi = {
-    isSandboxMode: argsValidated.data.isSandboxMode,
-    chainId: argsValidated.data.chainId,
+    isSandboxMode: data.isSandboxMode,
+    chainId: data.chainId,
     token: {
-      name: argsValidated.data.token.name,
-      symbol: argsValidated.data.token.symbol,
-      totalSupply: argsValidated.data.token.totalSupply,
-      initialBuyAmount: argsValidated.data.token.initialBuyAmount,
+      name: data.token.name,
+      symbol: data.token.symbol,
+      totalSupply: data.token.totalSupply,
+      initialBuyAmount: data.token.initialBuyAmount,
       metadataUrl,
     },
     sale: {
-      boardTitle: argsValidated.data.boardTitle,
+      boardTitle: data.boardTitle,
       marketCap: sale.marketCap,
       maxTxAmountPercent: sale.maxTxAmountPercent,
       protectBlocks: sale.protectBlocks,
     },
     dex: {
-      version: argsValidated.data.dex.version,
-      feeTier: argsValidated.data.dex.feeTier,
+      version: data.dex.version,
+      feeTier: data.dex.feeTier,
     },
     fees: {
-      v4: argsValidated.data.fees?.v4,
+      v4: data.fees?.v4,
     },
   };
 
-  if (dryRun?.printPayload) {
-    console.log('\nAPI Payload for /create-flash:');
-    console.log(JSON.stringify({ data: apiPayload }, null, 2));
+  if (printPayload) {
+    LogHelper.printApiPayload('create-flash', apiPayload);
   }
 
-  const payload = evmFlashTokenCreateApiSchema.parse(apiPayload);
-
-  if (dryRun?.dryRun) {
-    console.log('Skipping API call to /create-flash (dry-run mode)');
-    console.log('\n========== DRY RUN COMPLETE ==========');
-    console.log('Would have called: POST /create-flash');
-    console.log('Wallet:', account.address);
-    console.log('Chain ID:', argsValidated.data.chainId);
-    console.log(
-      'Token:',
-      argsValidated.data.token.name,
-      `(${argsValidated.data.token.symbol})`,
-    );
-    console.log('DEX:', argsValidated.data.dex.version, 'v4');
-    console.log('========================================\n');
-    return { dryRun: true, payload: { data: apiPayload } };
+  if (dryRun) {
+    LogHelper.printDryRunSummary('create-board', apiPayload);
+    return { dryRun: true, payload: apiPayload };
   }
 
   const json = await BasedBidApi.invokeApi<EvmApiResponse>(
     ApiType.SDK,
     'create-flash',
     {
-      data: payload,
+      data: apiPayload,
     },
     'Failed to create flash token on EVM',
     args.isSandboxMode,
@@ -167,7 +138,7 @@ export const createEvmFlashToken = async (
   const flashLaunchAbi = [
     EvmDexType.UNISWAP_V4,
     EvmDexType.PANCAKESWAP_V4,
-  ].includes(argsValidated.data.dex.version)
+  ].includes(data.dex.version)
     ? flashLaunchV4Abi
     : flashLaunchV3Abi;
 
@@ -198,21 +169,13 @@ export const createEvmFlashToken = async (
     skipConfirmation: args.isSandboxMode,
   });
 
-  console.log('\n--- RESULT ---');
-  console.log(
-    JSON.stringify(
-      {
-        ok: true,
-        type: 'flash-token',
-        network: CHAIN_NAME_CONFIG[argsValidated.data.chainId],
-        mintAddress: json.address,
-        signature: result.transactionHash,
-        metadataUrl,
-      },
-      null,
-      2,
-    ),
-  );
+  LogHelper.printResult({
+    ok: true,
+    network: CHAIN_NAME_CONFIG[data.chainId],
+    mintAddress: json.address,
+    signature: result.transactionHash,
+    metadataUrl,
+  });
 
   return result;
 };

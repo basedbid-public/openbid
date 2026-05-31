@@ -1,9 +1,5 @@
 import { ApiType } from 'enums';
-import {
-  getOpenBidApiHeaders,
-  getSolanaApiFailureHint,
-  printNextSteps,
-} from './next-steps';
+import { getSolanaApiFailureHint, printNextSteps } from './next-steps';
 
 export class BasedBidApi {
   static sdkApiUrl(isSandboxMode: boolean) {
@@ -36,22 +32,10 @@ export class BasedBidApi {
         : this.platformApiUrl(isSandboxMode);
     const endpoint = `${apiUrl}/${path}`;
 
-    if (process.env.OPENBID_DEBUG_PAYLOADS === 'true') {
-      console.log('\nbasedbid API payload');
-      console.log('----------------------------------------');
-      console.log(`Endpoint: ${endpoint}`);
-      console.log(JSON.stringify(payload, null, 2));
-      console.log('');
-    }
-
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      ...getOpenBidApiHeaders(),
+      ...(apiKey && { 'x-api-key': apiKey }),
     };
-
-    if (apiKey) {
-      headers['x-api-key'] = apiKey;
-    }
 
     const response = await fetch(endpoint, {
       method: 'POST',

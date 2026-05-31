@@ -68,18 +68,6 @@ export function getOpenBidApiKey() {
   return process.env.OPENBID_API_KEY ?? process.env.BOARD_API_KEY;
 }
 
-export function getOpenBidApiHeaders(): Record<string, string> {
-  const apiKey = getOpenBidApiKey();
-  if (!apiKey) {
-    return {};
-  }
-
-  return {
-    Authorization: `Bearer ${apiKey}`,
-    'X-API-Key': apiKey,
-  };
-}
-
 export function getSolanaApiFailureHint(errorBody: string) {
   const normalizedError = errorBody.toLowerCase();
 

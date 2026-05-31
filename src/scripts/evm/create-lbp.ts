@@ -2,142 +2,129 @@ import creationFacetAbi from 'constants/abi/CreationFacet.json';
 import { CHAIN_NAME_CONFIG, CHAIN_SLUG_CONFIG } from 'constants/chain-config';
 import 'dotenv/config';
 import { ApiType } from 'enums';
-import { DryRunOptions } from 'helpers/run';
-import { EvmApiResponse } from 'interfaces';
-import { validateEnvironment } from 'schema/environment';
+import { EvmApiResponse, OpenbidRunOptions } from 'interfaces/common';
 import { CreateLbpEvmApi, evmLbpCreateApiSchema } from 'schema/lbp/evm/api';
-import { CreateLbpEvmSdk, evmLbpCreateSchema } from 'schema/lbp/evm/sdk';
+import { CreateLbpEvmSdk } from 'schema/lbp/evm/sdk';
 import {
   BasedBidApi,
+  EvmValidator,
   getLaunchPackageIndex,
-  initRpcClients,
+  initEvmClients,
   IpfsUpload,
+  LogHelper,
   normalizeByAbi,
   sendTransaction,
 } from 'utils';
 
 export const createEvmLbp = async (
   args: CreateLbpEvmSdk,
-  dryRun?: DryRunOptions,
+  options?: OpenbidRunOptions,
 ) => {
-  if (dryRun?.printPayload) {
-    console.log('\nEVM Create LBP - Dry Run');
-    console.log('-----------------------------------');
+  const { printPayload, dryRun, validate } = options ?? {};
+
+  if (printPayload) {
+    LogHelper.printSectionWithSeparator('- - - Creating LBP on EVM - - -');
   }
 
-  const env = validateEnvironment();
+  const { data, env } = EvmValidator.validate<CreateLbpEvmSdk>(
+    evmLbpCreateApiSchema,
+    args,
+  );
 
-  const argsValidated = evmLbpCreateSchema.safeParse(args);
-  if (!argsValidated.success) {
-    throw new Error('Invalid input arguments: ' + argsValidated.error.message);
+  if (validate) {
+    console.log('Validation passed');
+    return;
   }
 
-  const input = argsValidated.data;
-  const { token, sale, dex, fees } = input;
-  const apiKey = token.boardTitle ? process.env.BASEDBID_API_KEY : undefined;
-
-  const { publicClient, walletClient, account } = initRpcClients(
-    input.chainId,
+  const { publicClient, walletClient, account } = initEvmClients(
+    data.chainId,
     env.EVM_RPC_URL,
     env.PRIVATE_KEY,
   );
 
-  let logoUrl = 'ipfs://placeholder-logo-url (DRY RUN)';
-  let metadataUrl = 'ipfs://placeholder-metadata-url (DRY RUN)';
+  const apiKey = data.token.boardTitle
+    ? process.env.BASEDBID_API_KEY
+    : undefined;
 
-  if (dryRun?.dryRun) {
-    console.log('Skipping IPFS logo upload (dry-run mode)');
+  let logoUrl = 'https://ipfs.based.bid/ipfs/null';
+  if (dryRun) {
+    console.log('Skipping logo upload (dry-run mode)');
+    console.log('Logo path:', data.token.metadata.logo);
   } else {
-    logoUrl = await IpfsUpload.uploadImage(token.metadata.logo, apiKey);
+    logoUrl = await IpfsUpload.uploadImage(data.token.metadata.logo, apiKey);
   }
 
-  if (dryRun?.printPayload) {
-    console.log('Logo URL:', logoUrl);
-  }
-
-  const metadataIpfs = {
-    name: token.name,
-    symbol: token.symbol,
+  const metadata = {
+    name: data.token.name,
+    symbol: data.token.symbol,
     decimals: 18,
-    totalSupply: token.totalSupply,
+    totalSupply: data.token.totalSupply,
     logo: logoUrl,
-    board: token.boardTitle,
-    twitter: token.metadata.twitter ?? '',
-    telegram: token.metadata.telegram ?? '',
-    website: token.metadata.website ?? '',
-    discord: token.metadata.discord ?? '',
-    description: token.metadata.description ?? '',
-    whitelist: sale.whitelistedAddresses ?? [],
+    board: data.token.boardTitle,
+    twitter: data.token.metadata.twitter ?? '',
+    telegram: data.token.metadata.telegram ?? '',
+    website: data.token.metadata.website ?? '',
+    discord: data.token.metadata.discord ?? '',
+    description: data.token.metadata.description ?? '',
+    whitelist: data.sale.whitelistedAddresses ?? [],
   };
 
-  if (dryRun?.dryRun) {
+  let metadataUrl = '';
+  if (dryRun) {
     console.log('Skipping IPFS metadata upload (dry-run mode)');
-    console.log('Metadata to upload:', JSON.stringify(metadataIpfs, null, 2));
+    console.log('Metadata to upload:', JSON.stringify(metadata, null, 2));
   } else {
-    metadataUrl = await IpfsUpload.uploadMetadata(metadataIpfs, apiKey);
-  }
-
-  if (dryRun?.printPayload) {
-    console.log('Metadata URL:', metadataUrl);
+    metadataUrl = await IpfsUpload.uploadMetadata(metadata, apiKey);
   }
 
   const apiPayload: CreateLbpEvmApi = {
-    isSandboxMode: input.isSandboxMode,
-    package: getLaunchPackageIndex(input.package),
-    chainId: input.chainId,
+    package: getLaunchPackageIndex(data.package),
+    chainId: data.chainId,
     token: {
-      name: token.name,
-      symbol: token.symbol,
-      totalSupply: token.totalSupply,
-      initialBuyAmount: token.initialBuyAmount,
+      name: data.token.name,
+      symbol: data.token.symbol,
+      totalSupply: data.token.totalSupply,
+      initialBuyAmount: data.token.initialBuyAmount,
       metadataUrl,
     },
     sale: {
-      boardTitle: token.boardTitle ?? '',
-      marketCap: token.marketCap,
-      startTime: sale.startTime,
-      maxAllocationPerUser: sale.maxAllocationPerUser,
-      maxAllocationPerWhitelistedUser: sale.maxAllocationPerWhitelistedUser,
-      delayTradeTime: sale.delayTradeTime ?? 0,
-      whitelistedAddresses: sale.whitelistedAddresses,
-      ...(sale.softCap && { softCap: sale.softCap }),
+      boardTitle: data.token.boardTitle ?? '',
+      marketCap: data.token.marketCap,
+      startTime: data.sale.startTime,
+      maxAllocationPerUser: data.sale.maxAllocationPerUser,
+      maxAllocationPerWhitelistedUser:
+        data.sale.maxAllocationPerWhitelistedUser,
+      delayTradeTime: data.sale.delayTradeTime ?? 0,
+      whitelistedAddresses: data.sale.whitelistedAddresses,
+      ...(data.sale.softCap && { softCap: data.sale.softCap }),
     },
     dex: {
-      version: dex.version,
-      feeTier: dex.feeTier,
+      version: data.dex.version,
+      feeTier: data.dex.feeTier,
     },
     fees: {
-      buyPoolCreator: fees.buyPoolCreator,
-      sellPoolCreator: fees.sellPoolCreator,
-      buyReferral: fees.buyReferral,
-      graduation: fees.graduation,
-      v4: fees.v4,
+      buyPoolCreator: data.fees.buyPoolCreator,
+      sellPoolCreator: data.fees.sellPoolCreator,
+      buyReferral: data.fees.buyReferral,
+      graduation: data.fees.graduation,
+      v4: data.fees.v4,
     },
   };
 
-  if (dryRun?.printPayload) {
-    console.log('\nAPI Payload for /create-lbp:');
-    console.log(JSON.stringify({ data: apiPayload }, null, 2));
+  if (printPayload) {
+    LogHelper.printApiPayload('create-lbp', metadata);
   }
 
-  const validated = evmLbpCreateApiSchema.parse(apiPayload);
-
-  if (dryRun?.dryRun) {
-    console.log('Skipping API call to /create-lbp (dry-run mode)');
-    console.log('\n========== DRY RUN COMPLETE ==========');
-    console.log('Would have called: POST /create-lbp');
-    console.log('Wallet:', account.address);
-    console.log('Chain ID:', input.chainId);
-    console.log('Token:', token.name, `(${token.symbol})`);
-    console.log('========================================\n');
-    return { dryRun: true, payload: { data: apiPayload } };
+  if (dryRun) {
+    LogHelper.printDryRunSummary('create-board', apiPayload);
+    return { dryRun: true, payload: apiPayload };
   }
 
   const json = await BasedBidApi.invokeApi<EvmApiResponse>(
     ApiType.SDK,
     'create-lbp',
     {
-      data: validated,
+      data: apiPayload,
     },
     'Failed to create LBP on EVM',
     args.isSandboxMode,
@@ -173,22 +160,14 @@ export const createEvmLbp = async (
     skipConfirmation: args.isSandboxMode,
   });
 
-  console.log('\n--- RESULT ---');
-  console.log(
-    JSON.stringify(
-      {
-        ok: true,
-        type: 'pool',
-        network: CHAIN_NAME_CONFIG[input.chainId],
-        mintAddress: json.address,
-        signature: result.transactionHash,
-        metadataUrl,
-        basedBidUrl: `${BasedBidApi.platformApiUrl(args.isSandboxMode)}/${CHAIN_SLUG_CONFIG[input.chainId]}/token/${json.address}`,
-      },
-      null,
-      2,
-    ),
-  );
+  LogHelper.printResult({
+    ok: true,
+    network: CHAIN_NAME_CONFIG[data.chainId],
+    mintAddress: json.address,
+    signature: result.transactionHash,
+    metadataUrl,
+    basedBidUrl: `${BasedBidApi.platformApiUrl(args.isSandboxMode)}/${CHAIN_SLUG_CONFIG[data.chainId]}/token/${json.address}`,
+  });
 
   return result;
 };

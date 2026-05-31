@@ -1,4 +1,4 @@
-export interface IpfsUploadResponse {
+export interface IpfsUploadApiResponse {
   ok: boolean;
   response: {
     cid: string;

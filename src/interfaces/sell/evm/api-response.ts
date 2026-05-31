@@ -1,5 +1,3 @@
-import { SellRequest } from './request';
-
 export interface SellTransaction {
   functionName: string;
   address: string;
@@ -7,12 +5,7 @@ export interface SellTransaction {
   value: string;
 }
 
-export interface SellEvmApiResponse {
+export interface EvmSellApiResponse {
   trx1: SellTransaction;
   trx2: SellTransaction;
-  chain: {
-    id: number;
-    symbol: string;
-  };
-  data: SellRequest;
 }

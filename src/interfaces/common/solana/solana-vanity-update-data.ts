@@ -1,6 +1,6 @@
 import { SolanaChainId } from 'types/chain-id';
 
-export interface SolanaVanityUpdate {
+export interface SolanaVanityUpdateData {
   chainId: SolanaChainId;
   mintAddress: string;
   signature: string;
