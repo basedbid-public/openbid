@@ -51,7 +51,7 @@ export const createSolanaLbp = async (
       env.SOLANA_RPC_URL,
       env.SOLANA_PRIVATE_KEY,
     );
-    await solanaWrapper.init();
+    await solanaWrapper.init(data.chainId);
 
     const { token, board, boardOwner, dex, fees } = data;
     const apiKey = board ? process.env.BASEDBID_API_KEY : undefined;

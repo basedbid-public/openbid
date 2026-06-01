@@ -40,7 +40,6 @@ export async function sendTransaction(
     receiptTimeoutMs = 120_000,
     explorerTxUrl,
     errorLabel = 'Transaction',
-    skipConfirmation = false,
   } = params;
 
   try {

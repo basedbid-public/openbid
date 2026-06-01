@@ -33,7 +33,7 @@ export const solanaLbpSell = async (
     env.SOLANA_RPC_URL,
     env.SOLANA_PRIVATE_KEY,
   );
-  await solanaWrapper.init();
+  await solanaWrapper.init(data.chainId);
 
   const apiPayload: SellSolanaApi = {
     chainId: data.chainId,

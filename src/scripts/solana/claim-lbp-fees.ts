@@ -37,7 +37,7 @@ export const claimSolanaLbpFees = async (
     env.SOLANA_RPC_URL,
     env.SOLANA_PRIVATE_KEY,
   );
-  await solanaWrapper.init();
+  await solanaWrapper.init(data.chainId);
 
   const apiPayload = {
     chainId: data.chainId,

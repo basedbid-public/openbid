@@ -51,7 +51,7 @@ export const createSolanaFlashToken = async (
       env.SOLANA_RPC_URL,
       env.SOLANA_PRIVATE_KEY,
     );
-    await solanaWrapper.init();
+    await solanaWrapper.init(data.chainId);
 
     const { token, raydium, meteora, board, boardOwner, fees, dex } = data;
 

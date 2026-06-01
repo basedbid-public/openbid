@@ -21,7 +21,7 @@ export const initEvmClients = (
 
   const walletClient = createWalletClient({
     chain,
-    transport: http(rpcUrl),
+    transport: http(`https://cdn.based.bid/api/rpc/evm?chainId=${chainId}`),
     account,
   });
 

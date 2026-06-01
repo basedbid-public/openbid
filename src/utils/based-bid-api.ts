@@ -1,5 +1,9 @@
 import { ApiType } from 'enums';
-import { getSolanaApiFailureHint, printNextSteps } from './next-steps';
+import {
+  getSolanaApiFailureHint,
+  getSolanaEnvironmentHint,
+  printNextSteps,
+} from './next-steps';
 
 export class BasedBidApi {
   static sdkApiUrl(isSandboxMode: boolean) {
@@ -11,12 +15,14 @@ export class BasedBidApi {
   static platformApiUrl(isSandboxMode: boolean) {
     return isSandboxMode
       ? 'https://testnet.based.bid/api'
-      : `https://based.bid/api`;
+      : `https://www.based.bid/api`;
   }
 
   static basedTradeUrl(isSandboxMode: boolean) {
     return isSandboxMode ? 'https://tt.based.bid' : `https://trade.based.bid`;
   }
+
+  static rpcApiUrl = 'https://cdn.based.bid/api/rpc';
 
   static async invokeApi<T>(
     apiType: ApiType,
@@ -45,6 +51,14 @@ export class BasedBidApi {
 
     if (!response.ok) {
       const errorBody = await response.text();
+      const normalizedError = errorBody.toLowerCase();
+
+      if (normalizedError.includes('insufficient lamports')) {
+        console.error('\nERROR: Insufficient balance on wallet.');
+        printNextSteps('What To Try Next', getSolanaEnvironmentHint());
+        throw new Error('Insufficient balance on wallet');
+      }
+
       console.error(`basedbid API request failed: ${endpoint}`);
       console.error(errorBody);
       printNextSteps('What To Try Next', getSolanaApiFailureHint(errorBody));
