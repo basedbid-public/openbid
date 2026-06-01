@@ -27,6 +27,7 @@ export const evmLbpSell = async (
   const { data, env } = EvmValidator.validate<SellEvmSdk>(
     sellEvmSdkSchema,
     args,
+    options,
   );
 
   if (validate) {

@@ -28,6 +28,7 @@ export const claimEvmFees = async (
   const { data, env } = EvmValidator.validate<ClaimEvmFeesSdk>(
     claimEvmFeesSdkSchema,
     args,
+    options,
   );
 
   if (validate) {

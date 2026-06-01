@@ -29,6 +29,7 @@ export const createSolanaBoard = async (
   const { data, env } = SolanaValidator.validate<CreateSolanaBoardSdk>(
     createSolanaBoardSdkSchema,
     args,
+    options,
   );
 
   if (validate) {

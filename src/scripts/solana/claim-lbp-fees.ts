@@ -26,6 +26,7 @@ export const claimSolanaLbpFees = async (
   const { data, env } = SolanaValidator.validate<ClaimSolanaLbpFeesRequest>(
     claimSolanaLbpFeesRequestSchema,
     args,
+    options,
   );
 
   if (validate) {

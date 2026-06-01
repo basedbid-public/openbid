@@ -34,6 +34,7 @@ export const createEvmFlashToken = async (
   const { data, env } = EvmValidator.validate<CreateFlashTokenEvmSdk>(
     createEvmFlashTokenSchema,
     args,
+    options,
   );
 
   if (validate) {

@@ -25,6 +25,7 @@ export const claimSolanaFlashFees = async (
     SolanaValidator.validate<ClaimSolanaFlashTokenFeesRequest>(
       claimSolanaFlashTokenFeesRequestSchema,
       args,
+      options,
     );
 
   if (validate) {

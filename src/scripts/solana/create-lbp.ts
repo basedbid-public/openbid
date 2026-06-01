@@ -40,6 +40,7 @@ export const createSolanaLbp = async (
     const { data, env } = SolanaValidator.validate<CreateSolanaLbpInput>(
       createSolanaLbpInputSchema,
       args,
+      options,
     );
 
     if (validate) {

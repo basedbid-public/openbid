@@ -108,8 +108,8 @@ npm run solana:claim-lbp-fees -- <operation> <config-file> [--dry-run] [--valida
 
 | Flag         | What it does                                                                                              |
 | ------------ | --------------------------------------------------------------------------------------------------------- |
-| `--dry-run`  | Validates env + schema, prints API payloads, skips all execution (no IPFS, no API calls, no transactions) |
-| `--validate` | Validates schema only, prints config summary, skips all operations                                        |
+| `--dry-run`  | Validates schema, prints API payloads using a placeholder wallet if `.env` is missing, skips all execution (no IPFS, no API calls, no transactions) |
+| `--validate` | Validates schema only, prints config summary, skips all operations (no wallet env required) |
 
 ### Structured Output
 

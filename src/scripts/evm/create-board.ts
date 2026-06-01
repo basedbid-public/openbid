@@ -27,6 +27,7 @@ export const createEvmBoard = async (
   const { data, env } = EvmValidator.validate<CreateEvmBoardSdk>(
     createEvmBoardSchema,
     args,
+    options,
   );
 
   if (validate) {

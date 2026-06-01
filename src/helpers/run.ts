@@ -36,7 +36,7 @@ import {
 
 const [, , operation, configFile, ...extraArgs] = process.argv;
 
-const dryRunOptions: OpenbidRunOptions = {
+const runOptions: OpenbidRunOptions = {
   dryRun: extraArgs.includes('--dry-run'),
   validate: extraArgs.includes('--validate'),
   printPayload:
@@ -66,10 +66,10 @@ if (extraArgs.includes('--help') || extraArgs.includes('-h')) {
   console.log('');
   console.log('Flags:');
   console.log(
-    '  --dry-run   Validate env + schema, print API payloads, skip actual execution',
+    '  --dry-run   Validate schema, print API payloads, skip actual execution (placeholder wallet if .env missing)',
   );
   console.log(
-    '  --validate  Validate schema only, print config summary, skip all operations',
+    '  --validate  Validate schema only, print config summary, skip all operations (no wallet env required)',
   );
   console.log('  --help      Show this help message');
   process.exit(0);
@@ -78,11 +78,11 @@ if (extraArgs.includes('--help') || extraArgs.includes('-h')) {
 const configContent = readFileSync(configFile, 'utf-8');
 const config = JSON.parse(configContent) as unknown;
 
-if (dryRunOptions.printPayload) {
+if (runOptions.printPayload) {
   console.log('\n========== DRY RUN / VALIDATE MODE ==========\n');
   console.log('Operation:', operation);
   console.log('Config file:', configFile);
-  console.log('Options:', dryRunOptions);
+  console.log('Options:', runOptions);
   console.log('\n---------- Loaded Config ----------');
   console.log(JSON.stringify(config, null, 2));
   console.log('\n');
@@ -91,49 +91,46 @@ if (dryRunOptions.printPayload) {
 async function run() {
   switch (operation) {
     case 'evm-create-lbp':
-      return await createEvmLbp(config as CreateLbpEvmSdk, dryRunOptions);
+      return await createEvmLbp(config as CreateLbpEvmSdk, runOptions);
     case 'evm-create-flash-token':
       return await createEvmFlashToken(
         config as CreateFlashTokenEvmSdk,
-        dryRunOptions,
+        runOptions,
       );
     case 'evm-create-board':
-      return await createEvmBoard(config as CreateEvmBoardSdk, dryRunOptions);
+      return await createEvmBoard(config as CreateEvmBoardSdk, runOptions);
 
     case 'evm-lbp-buy':
-      return await evmLbpBuy(config as BuyEvmSdk, dryRunOptions);
+      return await evmLbpBuy(config as BuyEvmSdk, runOptions);
     case 'evm-lbp-sell':
-      return await evmLbpSell(config as SellEvmSdk, dryRunOptions);
+      return await evmLbpSell(config as SellEvmSdk, runOptions);
     case 'evm-claim-fees':
-      return await claimEvmFees(config as ClaimEvmFeesSdk, dryRunOptions);
+      return await claimEvmFees(config as ClaimEvmFeesSdk, runOptions);
     case 'solana-create-lbp':
-      return await createSolanaLbp(
-        config as CreateSolanaLbpInput,
-        dryRunOptions,
-      );
+      return await createSolanaLbp(config as CreateSolanaLbpInput, runOptions);
     case 'solana-create-board':
       return await createSolanaBoard(
         config as CreateSolanaBoardSdk,
-        dryRunOptions,
+        runOptions,
       );
     case 'solana-create-flash-token':
       return await createSolanaFlashToken(
         config as CreateSolanaFlashInput,
-        dryRunOptions,
+        runOptions,
       );
     case 'solana-lbp-buy':
-      return await solanaLbpBuy(config as BuySolanaSdk, dryRunOptions);
+      return await solanaLbpBuy(config as BuySolanaSdk, runOptions);
     case 'solana-lbp-sell':
-      return await solanaLbpSell(config as SellSolanaSdk, dryRunOptions);
+      return await solanaLbpSell(config as SellSolanaSdk, runOptions);
     case 'solana-claim-lbp-fees':
       return await claimSolanaLbpFees(
         config as ClaimSolanaLbpFeesRequest,
-        dryRunOptions,
+        runOptions,
       );
     case 'solana-claim-flash-fees':
       return await claimSolanaFlashFees(
         config as ClaimSolanaFlashTokenFeesRequest,
-        dryRunOptions,
+        runOptions,
       );
     default:
       console.error(`\nUnknown operation: ${operation}`);

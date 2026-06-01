@@ -21,6 +21,7 @@ export const solanaLbpBuy = async (
   const { data, env } = SolanaValidator.validate<BuySolanaSdk>(
     buySolanaSdkSchema,
     args,
+    options,
   );
 
   if (validate) {

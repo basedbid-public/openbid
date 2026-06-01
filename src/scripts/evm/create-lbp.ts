@@ -29,6 +29,7 @@ export const createEvmLbp = async (
   const { data, env } = EvmValidator.validate<CreateLbpEvmSdk>(
     evmLbpCreateApiSchema,
     args,
+    options,
   );
 
   if (validate) {

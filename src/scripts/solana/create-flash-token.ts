@@ -40,6 +40,7 @@ export const createSolanaFlashToken = async (
     const { data, env } = SolanaValidator.validate<CreateSolanaFlashInput>(
       createSolanaFlashInputSchema,
       args,
+      options,
     );
 
     if (validate) {

@@ -22,7 +22,11 @@ export const evmLbpBuy = async (
     LogHelper.printSectionWithSeparator('- - - Buying LBP on EVM - - -');
   }
 
-  const { data, env } = EvmValidator.validate<BuyEvmSdk>(buyEvmSdkSchema, args);
+  const { data, env } = EvmValidator.validate<BuyEvmSdk>(
+    buyEvmSdkSchema,
+    args,
+    options,
+  );
 
   if (validate) {
     console.log('Validation passed');
