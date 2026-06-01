@@ -5,6 +5,7 @@
 Creates a Liquidity Bootstrapping Pool (LBP) / meme token launch on the **Solana** based.bid platform. This skill handles token metadata preparation, IPFS uploads, transaction building via the BasedBid API, signing with both the user wallet and a mint keypair, and optional fee-distribution registration.
 
 Unlike the EVM flow, the Solana LBP creation involves:
+
 - Generating a random numeric `seed` (embedded in metadata)
 - Receiving a base64-encoded compiled transaction from the API
 - Signing with **wallet first, then mint keypair** (order matters)
@@ -32,15 +33,15 @@ import { CreateSolanaLbpInput } from 'schema/lbp/solana/sdk-input';
 
 ### Top-Level Fields
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `package` | `LaunchPackageType` | Yes | `BASED` (0), `SUPER_BASED` (1), or `ULTRA_BASED` (2) |
-| `board` | `string` | No | **Optional.** Custom board title. Only include if user explicitly wants a custom board. |
-| `boardOwner` | `string` | No | Board owner Solana address (required if `board` is set) |
-| `token` | `object` | Yes | Token configuration (see below) |
-| `sale` | `object` | No | Sale configuration (see below) |
-| `dex` | `object` | Yes | DEX configuration (see below) |
-| `fees` | `object` | No | Fee distribution configuration (see below) |
+| Parameter    | Type                | Required | Description                                                                             |
+| ------------ | ------------------- | -------- | --------------------------------------------------------------------------------------- |
+| `package`    | `LaunchPackageType` | Yes      | `BASED` (0), `SUPER_BASED` (1), or `ULTRA_BASED` (2)                                    |
+| `board`      | `string`            | No       | **Optional.** Custom board title. Only include if user explicitly wants a custom board. |
+| `boardOwner` | `string`            | No       | Board owner Solana address (required if `board` is set)                                 |
+| `token`      | `object`            | Yes      | Token configuration (see below)                                                         |
+| `sale`       | `object`            | No       | Sale configuration (see below)                                                          |
+| `dex`        | `object`            | Yes      | DEX configuration (see below)                                                           |
+| `fees`       | `object`            | No       | Fee distribution configuration (see below)                                              |
 
 **Validation rule:** `board` and `boardOwner` must both be defined or both omitted.
 
@@ -48,70 +49,70 @@ import { CreateSolanaLbpInput } from 'schema/lbp/solana/sdk-input';
 
 ### Token Configuration
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `name` | `string` | Yes | Token name (max 100 chars) |
-| `symbol` | `string` | Yes | Token symbol (max 100 chars) |
-| `totalSupply` | `string` | Yes | Total supply as numeric string |
-| `decimals` | `number` | No | Defaults to `9` (Solana standard) |
-| `initialBuyAmount` | `string` | Yes | Initial buy amount as numeric string (e.g. `'0'`) |
-| `metadata` | `object` | Yes | Metadata (see below) |
+| Field              | Type     | Required | Description                                       |
+| ------------------ | -------- | -------- | ------------------------------------------------- |
+| `name`             | `string` | Yes      | Token name (max 100 chars)                        |
+| `symbol`           | `string` | Yes      | Token symbol (max 100 chars)                      |
+| `totalSupply`      | `string` | Yes      | Total supply as numeric string                    |
+| `decimals`         | `number` | No       | Defaults to `9` (Solana standard)                 |
+| `initialBuyAmount` | `string` | Yes      | Initial buy amount as numeric string (e.g. `'0'`) |
+| `metadata`         | `object` | Yes      | Metadata (see below)                              |
 
 ### Token Metadata
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `logo` | `string` | Yes | File path to logo image |
-| `twitter` | `string` | No | Valid Twitter/X URL (`https://x.com/...`) |
-| `telegram` | `string` | No | Valid Telegram URL (`https://t.me/...`) |
-| `website` | `string` | No | Valid website URL |
-| `discord` | `string` | No | Valid Discord invite URL |
-| `description` | `string` | No | Max 789 characters |
+| Field         | Type     | Required | Description                               |
+| ------------- | -------- | -------- | ----------------------------------------- |
+| `logo`        | `string` | Yes      | File path to logo image                   |
+| `twitter`     | `string` | No       | Valid Twitter/X URL (`https://x.com/...`) |
+| `telegram`    | `string` | No       | Valid Telegram URL (`https://t.me/...`)   |
+| `website`     | `string` | No       | Valid website URL                         |
+| `discord`     | `string` | No       | Valid Discord invite URL                  |
+| `description` | `string` | No       | Max 789 characters                        |
 
 ### Sale Configuration (optional)
 
-| Field | Type | Required | Default | Description |
-|-------|------|----------|---------|-------------|
-| `marketCap` | `string` | No | `'9000'` | Market cap as numeric string |
-| `startTime` | `number` | Yes* | — | Unix timestamp (seconds) |
-| `maxAllocationPerUser` | `string` | No | `'0'` | Max allocation per user |
-| `softCap` | `string` | No | — | Soft cap amount (requires `endTime`) |
-| `endTime` | `number` | No | — | Unix timestamp (required if `softCap` set) |
-| `referrer` | `string` | No | zero address | Referrer Solana address |
-| `whitelistedAddresses` | `string[]` | No | `[]` | Whitelisted wallet addresses |
+| Field                  | Type       | Required | Default      | Description                                |
+| ---------------------- | ---------- | -------- | ------------ | ------------------------------------------ |
+| `marketCap`            | `string`   | No       | `'9000'`     | Market cap as numeric string               |
+| `startTime`            | `number`   | Yes\*    | —            | Unix timestamp (seconds)                   |
+| `maxAllocationPerUser` | `string`   | No       | `'0'`        | Max allocation per user                    |
+| `softCap`              | `string`   | No       | —            | Soft cap amount (requires `endTime`)       |
+| `endTime`              | `number`   | No       | —            | Unix timestamp (required if `softCap` set) |
+| `referrer`             | `string`   | No       | zero address | Referrer Solana address                    |
+| `whitelistedAddresses` | `string[]` | No       | `[]`         | Whitelisted wallet addresses               |
 
 **Validation:** `softCap` and `endTime` must both be defined together or both omitted.
 
 ### DEX Configuration
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `version` | `SolanaDexType` | Yes | `METEORA` or `RAYDIUM` |
-| `feeTier` | `string` | Yes | Fee tier index as string |
+| Field     | Type            | Required | Description              |
+| --------- | --------------- | -------- | ------------------------ |
+| `version` | `SolanaDexType` | Yes      | `METEORA` or `RAYDIUM`   |
+| `feeTier` | `string`        | Yes      | Fee tier index as string |
 
 ### Fees Configuration (optional)
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `buyPoolCreator` | `number` | No | Buy fee for pool creator (max 1%) |
-| `sellPoolCreator` | `number` | No | Sell fee for pool creator (max 1%) |
-| `buyReferral` | `number` | No | Buy referral fee (max 1%) |
-| `graduation` | `number` | No | Graduation fee (max 2.5%) |
-| `feeDistribution` | `boolean` | No | Enable fee distribution |
-| `dynamicFee` | `boolean` | No | Enable dynamic fees |
-| `liquidityPercent` | `number` | No | Liquidity allocation % |
-| `buybackPercent` | `number` | No | Buyback allocation % |
-| `rewardPercent` | `number` | No | Reward allocation % |
-| `marketingPercent` | `number` | No | Marketing allocation % |
-| `creatorPercent` | `number` | No | Creator allocation % |
-| `marketingWalletAddress` | `string` | No | Required if `marketingPercent > 0` |
-| `customFees` | `array` | No | Custom fee splits `{ percent, walletAddress, name }` |
-| `collectQuoteThreshold` | `string` | No | Collection threshold |
-| `collectBaseThreshold` | `string` | No | Collection threshold |
-| `feeDistributionPayoutKind` | `string` | No | `'SOL'` or `'TOKEN'` |
-| `feeDistributionPayoutCustomMint` | `string` | No | Custom payout mint address |
-| `rewardToken` | `string` | No | Reward token mint (required if `rewardPercent > 0`) |
-| `minTokenBalanceForDividends` | `string` | No | Min balance for dividends |
+| Field                             | Type      | Required | Description                                          |
+| --------------------------------- | --------- | -------- | ---------------------------------------------------- |
+| `buyPoolCreator`                  | `number`  | No       | Buy fee for pool creator (max 1%)                    |
+| `sellPoolCreator`                 | `number`  | No       | Sell fee for pool creator (max 1%)                   |
+| `buyReferral`                     | `number`  | No       | Buy referral fee (max 1%)                            |
+| `graduation`                      | `number`  | No       | Graduation fee (max 2.5%)                            |
+| `feeDistribution`                 | `boolean` | No       | Enable fee distribution                              |
+| `dynamicFee`                      | `boolean` | No       | Enable dynamic fees                                  |
+| `liquidityPercent`                | `number`  | No       | Liquidity allocation %                               |
+| `buybackPercent`                  | `number`  | No       | Buyback allocation %                                 |
+| `rewardPercent`                   | `number`  | No       | Reward allocation %                                  |
+| `marketingPercent`                | `number`  | No       | Marketing allocation %                               |
+| `creatorPercent`                  | `number`  | No       | Creator allocation %                                 |
+| `marketingWalletAddress`          | `string`  | No       | Required if `marketingPercent > 0`                   |
+| `customFees`                      | `array`   | No       | Custom fee splits `{ percent, walletAddress, name }` |
+| `collectQuoteThreshold`           | `string`  | No       | Collection threshold                                 |
+| `collectBaseThreshold`            | `string`  | No       | Collection threshold                                 |
+| `feeDistributionPayoutKind`       | `string`  | No       | `'SOL'` or `'TOKEN'`                                 |
+| `feeDistributionPayoutCustomMint` | `string`  | No       | Custom payout mint address                           |
+| `rewardToken`                     | `string`  | No       | Reward token mint (required if `rewardPercent > 0`)  |
+| `minTokenBalanceForDividends`     | `string`  | No       | Min balance for dividends                            |
 
 **Validation:** `liquidityPercent + buybackPercent + rewardPercent + marketingPercent + creatorPercent + sum(customFees.percent)` must equal `50`.
 
@@ -119,9 +120,9 @@ import { CreateSolanaLbpInput } from 'schema/lbp/solana/sdk-input';
 
 Environment variables (see `.env`):
 
-| Variable           | Required | Description |
-|--------------------|----------|-------------|
-| `SOLANA_PRIVATE_KEY` | Yes    | Solana wallet private key (base58 or hex) |
+| Variable             | Required    | Description                                              |
+| -------------------- | ----------- | -------------------------------------------------------- |
+| `SOLANA_PRIVATE_KEY` | Yes         | Solana wallet private key (base58 or hex)                |
 | `BASEDBID_API_KEY`   | Conditional | Required when launching under a custom board (see below) |
 
 On-chain operations use the BasedBid RPC proxy (`https://cdn.based.bid/api/rpc/solana/...`) for the `chainId` in your config. No RPC URL is required in `.env`.
@@ -131,16 +132,19 @@ On-chain operations use the BasedBid RPC proxy (`https://cdn.based.bid/api/rpc/s
 The `BASEDBID_API_KEY` environment variable is **required** when launching under a custom board.
 
 **When is it needed?**
+
 - If `board` is set to a non-empty string (custom board name), you must set `BASEDBID_API_KEY`
 - If `board` is empty or omitted (default "based" board), no API key is needed
 
 **Example `.env` for custom board launch:**
+
 ```env
 SOLANA_PRIVATE_KEY=...
 BASEDBID_API_KEY=bb_live_xxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
 **Example `.env` for default board launch:**
+
 ```env
 SOLANA_PRIVATE_KEY=...
 # No BASEDBID_API_KEY needed
@@ -177,11 +181,11 @@ The `/sol/create-lbp` endpoint returns a `CreateLbpSolanaApiResponse`:
 ```typescript
 interface CreateLbpSolanaApiResponse {
   ok: boolean;
-  chainId: number;              // 5011 (devnet)
-  chainSymbol: string;          // "SOL"
-  transaction: string;          // base64-encoded compiled VersionedTransaction
-  mintAddress: string;          // Token mint address
-  mintSignerSecretHex: string;  // 128 hex chars (first 32 bytes = ed25519 priv key)
+  chainId: number; // 5011 (devnet)
+  chainSymbol: string; // "SOL"
+  transaction: string; // base64-encoded compiled VersionedTransaction
+  mintAddress: string; // Token mint address
+  mintSignerSecretHex: string; // 128 hex chars (first 32 bytes = ed25519 priv key)
   lookupTableAddresses?: string[];
   blockhash: string;
   lastValidBlockHeight: number;
@@ -214,7 +218,7 @@ await createLbpSolana({
     totalSupply: '100000000',
     initialBuyAmount: '0',
     metadata: {
-      logo: './assets/logo.png',
+      logo: './assets/placeholder.png',
       twitter: 'https://x.com/mytoken',
       telegram: 'https://t.me/mytoken',
       website: 'https://mytoken.com',
@@ -239,7 +243,7 @@ await createLbpSolana({
     totalSupply: '1000000000',
     initialBuyAmount: '1000',
     metadata: {
-      logo: './assets/logo.png',
+      logo: './assets/placeholder.png',
       description: 'A premium Solana token',
     },
   },
@@ -284,28 +288,28 @@ await createLbpSolana({
 
 ## Error Handling
 
-| Error | Cause | Fix |
-|-------|-------|-----|
-| `board api key required` | Custom board specified but no API key | Add `BASEDBID_API_KEY` to `.env` |
-| `Invalid input arguments` | Zod schema validation failed | Check all required fields and constraints |
-| `Failed to create LBP on Solana` | API error | Check API availability and network |
-| `board and boardOwner must both be defined` | Only one of them provided | Provide both or neither |
-| `endTime is required when softCap is defined` | Missing `endTime` with `softCap` | Add `endTime` or remove `softCap` |
-| `marketingWalletAddress is required` | `marketingPercent > 0` but no wallet | Add `marketingWalletAddress` |
-| `rewardToken is required` | `rewardPercent > 0` but no token | Add `rewardToken` |
-| `percentages must equal 50` | Fee percents don't sum to 50 | Adjust percentages |
-| `Transaction failed` | On-chain failure | Check wallet has SOL for fees, verify params |
+| Error                                         | Cause                                 | Fix                                          |
+| --------------------------------------------- | ------------------------------------- | -------------------------------------------- |
+| `board api key required`                      | Custom board specified but no API key | Add `BASEDBID_API_KEY` to `.env`             |
+| `Invalid input arguments`                     | Zod schema validation failed          | Check all required fields and constraints    |
+| `Failed to create LBP on Solana`              | API error                             | Check API availability and network           |
+| `board and boardOwner must both be defined`   | Only one of them provided             | Provide both or neither                      |
+| `endTime is required when softCap is defined` | Missing `endTime` with `softCap`      | Add `endTime` or remove `softCap`            |
+| `marketingWalletAddress is required`          | `marketingPercent > 0` but no wallet  | Add `marketingWalletAddress`                 |
+| `rewardToken is required`                     | `rewardPercent > 0` but no token      | Add `rewardToken`                            |
+| `percentages must equal 50`                   | Fee percents don't sum to 50          | Adjust percentages                           |
+| `Transaction failed`                          | On-chain failure                      | Check wallet has SOL for fees, verify params |
 
 ## Key Differences from EVM LBP
 
-| Aspect | EVM | Solana |
-|--------|-----|--------|
-| Chain ID | 1 / 56 / 8453 | 5011 (devnet) |
-| Transaction type | ABI-encoded contract call | Base64 compiled VersionedTransaction |
-| Signers | Single wallet | Wallet + mint keypair (order matters!) |
-| Seed | N/A | 5-digit numeric seed in metadata |
-| Fee distribution | Included in create payload | Separate API endpoint after creation |
-| DEX config | `version` + `feeTier` | `routerId` + `meteoraFeeTierIndex` / `raydiumFeeTierIndex` |
+| Aspect           | EVM                        | Solana                                                     |
+| ---------------- | -------------------------- | ---------------------------------------------------------- |
+| Chain ID         | 1 / 56 / 8453              | 5011 (devnet)                                              |
+| Transaction type | ABI-encoded contract call  | Base64 compiled VersionedTransaction                       |
+| Signers          | Single wallet              | Wallet + mint keypair (order matters!)                     |
+| Seed             | N/A                        | 5-digit numeric seed in metadata                           |
+| Fee distribution | Included in create payload | Separate API endpoint after creation                       |
+| DEX config       | `version` + `feeTier`      | `routerId` + `meteoraFeeTierIndex` / `raydiumFeeTierIndex` |
 
 ## Sandbox Mode
 

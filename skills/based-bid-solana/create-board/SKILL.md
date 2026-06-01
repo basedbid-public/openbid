@@ -172,8 +172,8 @@ async function main() {
     const board = await createBoardSolana({
       title: 'Solana Gems',
       description: 'Discover the next generation of Solana tokens',
-      logo: './assets/board-logo.png',
-      banner: './assets/board-banner.png',
+      logo: './assets/placeholder.png',
+      banner: './assets/placeholder_banner.png',
     });
 
     console.log(`✅ Board created successfully!`);
@@ -199,7 +199,7 @@ Solana supports sandbox mode for testing. When `isSandboxMode: true` is passed:
 
 ```typescript
 await createBoardSolana({
-  isSandboxMode: true,  // Enable sandbox mode (uses testnet.based.bid)
+  isSandboxMode: true, // Enable sandbox mode (uses testnet.based.bid)
   title: 'Test Board',
   description: 'A test board for sandbox',
   logo: './path/to/logo.png',

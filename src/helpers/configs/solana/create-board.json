@@ -3,8 +3,8 @@
   "chainId": 5011,
   "title": "My Board",
   "description": "A test board description",
-  "logo": "./assets/logo.png",
-  "banner": "./assets/banner.png",
+  "logo": "./assets/placeholder.png",
+  "banner": "./assets/placeholder_banner.png",
   "fees": [
     {
       "listingFee": "0",

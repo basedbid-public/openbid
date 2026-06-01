@@ -1,14 +1,14 @@
 {
-  "isSandboxMode": true,
+  "isSandboxMode": false,
   "package": "based",
-  "chainId": 5011,
+  "chainId": 501,
   "token": {
     "name": "Flash Token",
     "symbol": "FLASH",
     "totalSupply": "1000000000",
     "initialBuyAmount": "0",
     "metadata": {
-      "logo": "./assets/images.jpeg",
+      "logo": "./assets/placeholder.png",
       "twitter": "",
       "telegram": "",
       "website": "",

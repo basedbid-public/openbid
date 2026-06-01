@@ -177,8 +177,8 @@ const board = await createBoard({
   title: 'Meme Masters',
   description:
     'The best place to launch your meme tokens! Join our community of meme coin creators.',
-  logo: './assets/meme-masters-logo.png',
-  banner: './assets/meme-masters-banner.png', // Optional banner
+  logo: './assets/placeholder.png',
+  banner: './assets/placeholder_banner.png', // Optional banner
 });
 
 console.log('Board created:', board.boardTitle);
@@ -193,8 +193,8 @@ const board = await createBoard({
   title: 'DeFi Launchpad Pro',
   description:
     'Professional token launches for serious DeFi projects. We provide the tools and community you need to succeed.',
-  logo: './assets/defi-logo.jpg',
-  banner: './assets/defi-banner.jpg',
+  logo: './assets/placeholder.png',
+  banner: './assets/placeholder_banner.png',
 });
 ```
 
@@ -317,7 +317,7 @@ await createBoard({
   title: 'Test Board',
   description: 'Testing board creation',
   logo: './path/to/logo.png',
-  isSandboxMode: true,  // Accepted but no effect on EVM (always uses mainnet)
+  isSandboxMode: true, // Accepted but no effect on EVM (always uses mainnet)
 });
 ```
 

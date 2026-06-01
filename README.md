@@ -106,16 +106,17 @@ npm run solana:claim-lbp-fees -- <operation> <config-file> [--dry-run] [--valida
 
 ### Flag Behavior
 
-| Flag | What it does |
-|------|--------------|
-| `--dry-run` | Validates env + schema, prints API payloads, skips all execution (no IPFS, no API calls, no transactions) |
-| `--validate` | Validates schema only, prints config summary, skips all operations |
+| Flag         | What it does                                                                                              |
+| ------------ | --------------------------------------------------------------------------------------------------------- |
+| `--dry-run`  | Validates env + schema, prints API payloads, skips all execution (no IPFS, no API calls, no transactions) |
+| `--validate` | Validates schema only, prints config summary, skips all operations                                        |
 
 ### Structured Output
 
 Every script returns JSON with these fields:
 
 **Success:**
+
 ```json
 {
   "ok": true,
@@ -129,6 +130,7 @@ Every script returns JSON with these fields:
 ```
 
 **Failure:**
+
 ```json
 {
   "ok": false,
@@ -147,17 +149,17 @@ Every script returns JSON with these fields:
 
 ### EVM Chains (Ethereum, Base, BSC)
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `PRIVATE_KEY` | Yes | Wallet private key (with 0x prefix for Base/Ethereum) |
-| `BASEDBID_API_KEY` | Conditional | Required when launching under a custom board |
+| Variable           | Required    | Description                                           |
+| ------------------ | ----------- | ----------------------------------------------------- |
+| `PRIVATE_KEY`      | Yes         | Wallet private key (with 0x prefix for Base/Ethereum) |
+| `BASEDBID_API_KEY` | Conditional | Required when launching under a custom board          |
 
 ### Solana
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `SOLANA_PRIVATE_KEY` | Yes | Private key as base58 string |
-| `BASEDBID_API_KEY` | Conditional | Required when launching under a custom board |
+| Variable             | Required    | Description                                  |
+| -------------------- | ----------- | -------------------------------------------- |
+| `SOLANA_PRIVATE_KEY` | Yes         | Private key as base58 string                 |
+| `BASEDBID_API_KEY`   | Conditional | Required when launching under a custom board |
 
 ---
 
@@ -173,9 +175,11 @@ The API key is **required** when launching an LBP or Flash Token **under a custo
 ### How It Works
 
 1. **Default board (empty string)**: No API key needed
+
    ```json
    "token": { "boardTitle": "" }
    ```
+
    All API requests will use the default "based" board.
 
 2. **Custom board (non-empty string)**: API key required
@@ -193,18 +197,19 @@ BASEDBID_API_KEY=bb_live_xxxxxxxxxxxxxxxxxxxxxxxx
 
 ### Operations That Use Custom Boards
 
-| Operation | Board Field | Notes |
-|-----------|-------------|-------|
-| EVM Create LBP | `token.boardTitle` | Empty = default "based" board |
-| EVM Create Flash Token | `boardTitle` | Empty = default "based" board |
-| EVM Create Board | `title` | Board creation itself doesn't need API key |
-| Solana Create LBP | `board` | Empty = default "based" board |
-| Solana Create Board | `title` | Board creation itself doesn't need API key |
+| Operation                 | Board Field             | Notes                                         |
+| ------------------------- | ----------------------- | --------------------------------------------- |
+| EVM Create LBP            | `token.boardTitle`      | Empty = default "based" board                 |
+| EVM Create Flash Token    | `boardTitle`            | Empty = default "based" board                 |
+| EVM Create Board          | `title`                 | Board creation itself doesn't need API key    |
+| Solana Create LBP         | `board`                 | Empty = default "based" board                 |
+| Solana Create Board       | `title`                 | Board creation itself doesn't need API key    |
 | Solana Create Flash Token | `board` or `boardOwner` | Either non-empty triggers API key requirement |
 
 ### Common Error: "Board API Key Required"
 
 If you see this error:
+
 ```
 board api key required
 ```
@@ -246,7 +251,7 @@ board api key required
     "totalSupply": 1000000,
     "initialBuyAmount": 0,
     "metadata": {
-      "logo": "./assets/logo.png"
+      "logo": "./assets/placeholder.png"
     },
     "marketCap": 10000
   },
@@ -278,11 +283,9 @@ board api key required
   "chainId": 8453,
   "title": "My Board",
   "description": "A test board description",
-  "logo": "./assets/logo.png",
-  "banner": "./assets/banner.png",
-  "fees": [
-    { "launchPackage": "based", "feePer": "0.001" }
-  ]
+  "logo": "./assets/placeholder.png",
+  "banner": "./assets/placeholder_banner.png",
+  "fees": [{ "launchPackage": "based", "feePer": "0.001" }]
 }
 ```
 
@@ -299,7 +302,7 @@ board api key required
     "totalSupply": 1000000,
     "initialBuyAmount": 0,
     "metadata": {
-      "logo": "./assets/logo.png"
+      "logo": "./assets/placeholder.png"
     }
   },
   "dex": {
@@ -366,7 +369,7 @@ board api key required
     "totalSupply": "1000000000",
     "initialBuyAmount": "0",
     "metadata": {
-      "logo": "./assets/logo.png"
+      "logo": "./assets/placeholder.png"
     }
   },
   "sale": {
@@ -405,7 +408,7 @@ board api key required
     "totalSupply": "1000000000",
     "decimals": 9,
     "metadata": {
-      "logo": "./assets/logo.png"
+      "logo": "./assets/placeholder.png"
     }
   },
   "meteora": {
@@ -470,6 +473,7 @@ npm run evm:create-lbp -- evm-create-lbp ./src/helpers/configs/evm/create-lbp.js
 ```
 
 Output:
+
 ```
 Schema validation passed for EVM Create LBP
 
@@ -485,6 +489,7 @@ npm run evm:create-lbp -- evm-create-lbp ./src/helpers/configs/evm/create-lbp.js
 ```
 
 Output shows:
+
 - Loaded config
 - IPFS URLs that would be uploaded
 - Full API payload JSON
@@ -539,12 +544,14 @@ console.log('API Response:', JSON.stringify(result, null, 2));
 ### Schema Validation Failed
 
 **Error:**
+
 ```
 Schema validation failed for EVM Create LBP:
 Expected number, received string
 ```
 
 **Fix:** Check your config JSON - numbers may be strings in JSON. Parse values appropriately:
+
 ```json
 "totalSupply": 1000000    // not "1000000"
 ```
@@ -552,11 +559,13 @@ Expected number, received string
 ### Private Key Not Found
 
 **Error:**
+
 ```
 Private key not found in environment
 ```
 
 **Fix:** Ensure `.env` file exists and `PRIVATE_KEY` is set:
+
 ```env
 PRIVATE_KEY=0xyour_private_key_here
 ```
@@ -564,11 +573,13 @@ PRIVATE_KEY=0xyour_private_key_here
 ### RPC Connection Failed
 
 **Error:**
+
 ```
 Failed to connect to RPC endpoint
 ```
 
 **Fix:**
+
 - Check your internet connection
 - Confirm `chainId` in your config matches the network you intend (EVM: 1, 56, 8453; Solana: 5011 devnet, 1399811149 mainnet)
 - Retry later; the SDK uses `https://cdn.based.bid/api/rpc` and does not require a custom RPC URL in `.env`
@@ -576,6 +587,7 @@ Failed to connect to RPC endpoint
 ### Insufficient Balance
 
 **Error:**
+
 ```
 insufficient funds for gas
 ```
@@ -585,17 +597,20 @@ insufficient funds for gas
 ### Invalid Chain ID
 
 **Error:**
+
 ```
 Invalid chain ID
 ```
 
 **Fix:** Use supported chain IDs only:
+
 - EVM: 1 (Ethereum), 56 (BSC), 8453 (Base)
 - Solana: 5011 (Devnet), 1399811149 (Mainnet)
 
 ### IPFS Upload Failed
 
 **Error:**
+
 ```
 Failed to upload to IPFS
 ```
@@ -605,11 +620,13 @@ Failed to upload to IPFS
 ### Transaction Failed
 
 **Error:**
+
 ```
 Transaction reverted
 ```
 
 **Fix:** Check the transaction on-chain explorer for more details. Common causes:
+
 - Token already launched
 - Invalid parameters
 - Network congestion (try again)
@@ -617,6 +634,7 @@ Transaction reverted
 ### Vanity Address Release Failed
 
 **Error:**
+
 ```
 Failed to release vanity
 ```
@@ -626,6 +644,7 @@ Failed to release vanity
 ### Board API Key Required
 
 **Error:**
+
 ```
 board api key required
 ```
@@ -647,12 +666,14 @@ board api key required
 When reporting issues, include:
 
 ### 1. The Error Message
+
 ```
 Schema validation failed for Solana Create LBP:
 Expected number, received string at "dex.feeTier"
 ```
 
 ### 2. Your Config (redact private keys)
+
 ```json
 {
   "chainId": 5011,
@@ -662,6 +683,7 @@ Expected number, received string at "dex.feeTier"
 ```
 
 ### 3. The Structured Output
+
 ```json
 {
   "ok": false,
@@ -674,6 +696,7 @@ Expected number, received string at "dex.feeTier"
 ```
 
 ### 4. What You Tried
+
 - Ran with `--validate` first: yes/no
 - Ran with `--dry-run` first: yes/no
 
@@ -749,11 +772,11 @@ npm run evm:create-lbp -- --help
 
 ### Launch Packages
 
-| Package | Value | Description |
-|---------|-------|-------------|
-| `based` | 0 | Basic launch, free |
-| `super_based` | 1 | Team posts sale alerts |
-| `ultra_based` | 2 | Team posts sale + buy alerts |
+| Package       | Value | Description                  |
+| ------------- | ----- | ---------------------------- |
+| `based`       | 0     | Basic launch, free           |
+| `super_based` | 1     | Team posts sale alerts       |
+| `ultra_based` | 2     | Team posts sale + buy alerts |
 
 ### DEX Versions
 
@@ -773,12 +796,12 @@ npm run evm:create-lbp -- --help
 
 ### Fee Tiers
 
-| Chain | Version | Range |
-|-------|---------|-------|
-| EVM V3 | Uniswap/PancakeSwap | 1% only |
-| EVM V4 | Uniswap/PancakeSwap | 1-10% |
-| Solana Raydium | Raydium | 1-10% |
-| Solana Meteora | Meteora | Configurable |
+| Chain          | Version             | Range        |
+| -------------- | ------------------- | ------------ |
+| EVM V3         | Uniswap/PancakeSwap | 1% only      |
+| EVM V4         | Uniswap/PancakeSwap | 1-10%        |
+| Solana Raydium | Raydium             | 1-10%        |
+| Solana Meteora | Meteora             | Configurable |
 
 ---
 
@@ -786,13 +809,13 @@ npm run evm:create-lbp -- --help
 
 Detailed skill documentation is available in the `skills/` directory:
 
-| Skill | Description |
-|-------|-------------|
-| [Create Board](skills/based-bid-create-board/SKILL.md) | Create custom whitelabel launchpads |
-| [Create LBP](skills/based-bid-create-lbp/SKILL.md) | Launch tokens with LBPs |
+| Skill                                                              | Description                            |
+| ------------------------------------------------------------------ | -------------------------------------- |
+| [Create Board](skills/based-bid-create-board/SKILL.md)             | Create custom whitelabel launchpads    |
+| [Create LBP](skills/based-bid-create-lbp/SKILL.md)                 | Launch tokens with LBPs                |
 | [Create Flash Token](skills/based-bid-create-flash-token/SKILL.md) | Instant token launches with protection |
-| [Buy](skills/based-bid-buy/SKILL.md) | Purchase tokens from LBPs |
-| [Sell](skills/based-bid-sell/SKILL.md) | Sell tokens (2-step: approve + sell) |
+| [Buy](skills/based-bid-buy/SKILL.md)                               | Purchase tokens from LBPs              |
+| [Sell](skills/based-bid-sell/SKILL.md)                             | Sell tokens (2-step: approve + sell)   |
 
 ---
 

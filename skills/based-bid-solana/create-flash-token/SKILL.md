@@ -33,21 +33,21 @@ import { CreateSolanaFlashInput } from 'schema/flash-token/solana/sdk';
 
 ### Top-Level Fields
 
-| Parameter | Type       | Required | Description                                   |
-| --------- | ---------- | -------- | --------------------------------------------- |
-| `dex`     | `object`   | Yes      | DEX configuration (`version` + `feeTier`)     |
-| `board`   | `string`   | No       | **Optional.** Custom board title. Only include if user explicitly wants a custom board. |
-| `boardOwner` | `string` | No       | Board owner address (required if `board` set) |
-| `token`   | `object`   | Yes      | Token configuration (see below)               |
-| `raydium` | `object`   | Yes\*    | Raydium-specific config (see below)           |
-| `meteora` | `object`   | Yes\*    | Meteora-specific config (see below)           |
+| Parameter    | Type     | Required | Description                                                                             |
+| ------------ | -------- | -------- | --------------------------------------------------------------------------------------- |
+| `dex`        | `object` | Yes      | DEX configuration (`version` + `feeTier`)                                               |
+| `board`      | `string` | No       | **Optional.** Custom board title. Only include if user explicitly wants a custom board. |
+| `boardOwner` | `string` | No       | Board owner address (required if `board` set)                                           |
+| `token`      | `object` | Yes      | Token configuration (see below)                                                         |
+| `raydium`    | `object` | Yes\*    | Raydium-specific config (see below)                                                     |
+| `meteora`    | `object` | Yes\*    | Meteora-specific config (see below)                                                     |
 
 **DEX Configuration:**
 
-| Field   | Type            | Required | Description                       |
-| ------- | --------------- | -------- | --------------------------------- |
-| `version` | `SolanaDexType` | Yes      | `METEORA` or `RAYDIUM`            |
-| `feeTier` | `string`        | Yes      | Fee tier index as string          |
+| Field     | Type            | Required | Description              |
+| --------- | --------------- | -------- | ------------------------ |
+| `version` | `SolanaDexType` | Yes      | `METEORA` or `RAYDIUM`   |
+| `feeTier` | `string`        | Yes      | Fee tier index as string |
 
 **Validation rules:**
 
@@ -101,9 +101,9 @@ import { CreateSolanaFlashInput } from 'schema/flash-token/solana/sdk';
 
 Environment variables (see `.env`):
 
-| Variable           | Required | Description |
-|--------------------|----------|-------------|
-| `SOLANA_PRIVATE_KEY` | Yes    | Solana wallet private key (base58 or hex) |
+| Variable             | Required    | Description                                              |
+| -------------------- | ----------- | -------------------------------------------------------- |
+| `SOLANA_PRIVATE_KEY` | Yes         | Solana wallet private key (base58 or hex)                |
 | `BASEDBID_API_KEY`   | Conditional | Required when launching under a custom board (see below) |
 
 On-chain operations use the BasedBid RPC proxy (`https://cdn.based.bid/api/rpc/solana/...`) for the `chainId` in your config. No RPC URL is required in `.env`.
@@ -113,16 +113,19 @@ On-chain operations use the BasedBid RPC proxy (`https://cdn.based.bid/api/rpc/s
 The `BASEDBID_API_KEY` environment variable is **required** when launching under a custom board.
 
 **When is it needed?**
+
 - If `board` or `boardOwner` is set to a non-empty string (custom board), you must set `BASEDBID_API_KEY`
 - If both `board` and `boardOwner` are empty or omitted (default "based" board), no API key is needed
 
 **Example `.env` for custom board launch:**
+
 ```env
 SOLANA_PRIVATE_KEY=...
 BASEDBID_API_KEY=bb_live_xxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
 **Example `.env` for default board launch:**
+
 ```env
 SOLANA_PRIVATE_KEY=...
 # No BASEDBID_API_KEY needed
@@ -247,7 +250,7 @@ const result = await createFlashTokenSolana({
     totalSupply: '1000000000',
     decimals: 9,
     metadata: {
-      logo: './assets/logo.png',
+      logo: './assets/placeholder.png',
       twitter: 'https://x.com/flash-token',
       telegram: 'https://t.me/flash-token',
       description: 'The fastest token on Solana',
@@ -282,7 +285,7 @@ const result = await createFlashTokenSolana({
     totalSupply: '500000000',
     decimals: 9,
     metadata: {
-      logo: './assets/logo.png',
+      logo: './assets/placeholder.png',
       description: 'A Meteora flash token',
     },
   },
@@ -298,14 +301,14 @@ const result = await createFlashTokenSolana({
 
 ## Error Handling
 
-| Error                                            | Cause                        | Fix                                                   |
-| ------------------------------------------------ | ---------------------------- | ----------------------------------------------------- |
-| `Invalid input arguments`                        | Zod schema validation failed | Check all required fields per chosen DEX              |
+| Error                                            | Cause                        | Fix                                                      |
+| ------------------------------------------------ | ---------------------------- | -------------------------------------------------------- |
+| `Invalid input arguments`                        | Zod schema validation failed | Check all required fields per chosen DEX                 |
 | `Raydium or Meteora parameters must be provided` | Missing DEX-specific config  | Add `raydium` or `meteora` object matching `dex.version` |
-| `board and boardOwner must both be defined`      | Only one of them provided    | Provide both or neither                               |
-| `Failed to create flash token Transaction 1`     | API error for TX1            | Check API availability and network                    |
-| `Failed to create flash token Transaction 2`     | API error for TX2            | Verify TX1 succeeded and params are correct           |
-| `Transaction failed`                             | On-chain failure             | Check wallet has SOL, verify DEX-specific params      |
+| `board and boardOwner must both be defined`      | Only one of them provided    | Provide both or neither                                  |
+| `Failed to create flash token Transaction 1`     | API error for TX1            | Check API availability and network                       |
+| `Failed to create flash token Transaction 2`     | API error for TX2            | Verify TX1 succeeded and params are correct              |
+| `Transaction failed`                             | On-chain failure             | Check wallet has SOL, verify DEX-specific params         |
 
 ## Key Differences from EVM Flash Token
 
@@ -314,7 +317,7 @@ const result = await createFlashTokenSolana({
 | Transactions     | 1 API call + 1 on-chain tx | 2 sequential API calls + 2 on-chain txs                        |
 | Transaction type | ABI-encoded contract call  | Base64 compiled VersionedTransaction                           |
 | Signers          | Single wallet              | Wallet + mint keypair (+ position NFT keypair for Raydium TX2) |
-| DEX config       | `version` + `feeTier`      | `dex.version` + `dex.feeTier` + DEX-specific objects          |
+| DEX config       | `version` + `feeTier`      | `dex.version` + `dex.feeTier` + DEX-specific objects           |
 | Chain ID         | 1 / 56 / 8453              | 5011 (devnet)                                                  |
 
 ## Key Differences from Solana LBP
