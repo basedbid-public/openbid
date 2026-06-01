@@ -40,16 +40,17 @@ The script automatically updates your `.env` file:
 
 ```env
 PRIVATE_KEY=0x...
-EVM_RPC_URL=https://...
 ```
+
+On-chain scripts use the BasedBid RPC proxy for the `chainId` in each config file; no RPC URL is written to `.env`.
 
 ## Supported Chains
 
-| Chain | Chain ID | RPC URL |
-|-------|----------|---------|
-| Ethereum | 1 | `https://eth.llamarpc.com` |
-| BSC | 56 | `https://bsc-dataseed.binance.org` |
-| Base | 8453 | `https://mainnet.base.org` |
+| Chain | Chain ID |
+|-------|----------|
+| Ethereum | 1 |
+| BSC | 56 |
+| Base | 8453 |
 
 ## Example Usage
 
@@ -73,7 +74,6 @@ Generated wallet:
 
   Saved to .env:
     PRIVATE_KEY=0x...8f5a6e
-    EVM_RPC_URL=https://mainnet.base.org
 
 ========================================
 ```

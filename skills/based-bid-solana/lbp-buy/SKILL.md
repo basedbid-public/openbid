@@ -50,13 +50,12 @@ Environment variables (see `.env`):
 | Variable | Description |
 |----------|-------------|
 | `SOLANA_PRIVATE_KEY` | Solana wallet private key (base58 or hex) |
-| `SOLANA_RPC_URL` | Solana RPC endpoint (devnet: `https://api.devnet.solana.com`) |
 
 ## Execution Flow
 
-1. **Environment Validation** - Validates `SOLANA_PRIVATE_KEY` and `SOLANA_RPC_URL`
+1. **Environment Validation** - Validates `SOLANA_PRIVATE_KEY`
 2. **Input Validation** - Schema validation via `buySolanaSdkSchema.parse(args)`
-3. **Solana Wrapper Init** - Creates RPC connection and signer from `SOLANA_PRIVATE_KEY`
+3. **Solana Wrapper Init** - Creates RPC connection (BasedBid proxy) and signer from `SOLANA_PRIVATE_KEY`
 4. **API Request** - Payload sent to `${API_URL}/sol/lbp-buy`:
    ```typescript
    {
@@ -137,7 +136,7 @@ await buySolana({
 
 | Error | Cause | Fix |
 |-------|-------|-----|
-| `Invalid environment` | Missing env variables | Check `.env` has `SOLANA_PRIVATE_KEY` and `SOLANA_RPC_URL` |
+| `Invalid environment` | Missing env variables | Check `.env` has `SOLANA_PRIVATE_KEY` |
 | `Failed to buy ... on Solana` | API error | Check token address and API availability |
 | `Transaction failed` | On-chain failure | Check wallet has SOL, verify slippage, pool status |
 

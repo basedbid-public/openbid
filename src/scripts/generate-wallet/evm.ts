@@ -3,19 +3,11 @@ import { evmChainIdSchema } from 'schema/common';
 import { EvmChainId } from 'types/chain-id';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 
-const DEFAULT_RPC_URLS: Record<EvmChainId, string> = {
-  1: 'https://eth.llamarpc.com',
-  56: 'https://bsc-dataseed.binance.org',
-  8453: 'https://mainnet.base.org',
-};
-
 export const generateEvmWallet = (data: EvmChainId) => {
   const parsedChainId = evmChainIdSchema.safeParse(data);
   if (!parsedChainId.success) {
     throw new Error('Invalid chain ID');
   }
-
-  const chainId = parsedChainId.data;
 
   const privateKey = generatePrivateKey();
   const account = privateKeyToAccount(privateKey);
@@ -24,27 +16,22 @@ export const generateEvmWallet = (data: EvmChainId) => {
 
   const envPath = '.env';
   const privateKeyLine = `PRIVATE_KEY=${privateKey}`;
-  const rpcUrlLine = `EVM_RPC_URL=${DEFAULT_RPC_URLS[chainId]}`;
 
   if (existsSync(envPath)) {
     const envContent = readFileSync(envPath, 'utf-8');
     const lines = envContent.split('\n');
     const filteredLines = lines.filter((line) => {
       const key = line.split('=')[0];
-      return key !== 'PRIVATE_KEY' && key !== 'EVM_RPC_URL';
+      return key !== 'PRIVATE_KEY';
     });
-    const newContent = [...filteredLines, privateKeyLine, rpcUrlLine].join(
-      '\n',
-    );
+    const newContent = [...filteredLines, privateKeyLine].join('\n');
     writeFileSync(envPath, newContent + '\n');
   } else {
     const envContent = [
       privateKeyLine,
-      rpcUrlLine,
       '',
       '# Solana (optional)',
       'SOLANA_PRIVATE_KEY=',
-      'SOLANA_RPC_URL=',
     ].join('\n');
     writeFileSync(envPath, envContent + '\n');
   }
@@ -69,6 +56,5 @@ export const generateEvmWallet = (data: EvmChainId) => {
     address: account.address,
     privateKey,
     chainId: data,
-    rpcUrl: DEFAULT_RPC_URLS[data],
   };
 };

@@ -74,10 +74,9 @@ The account address is used to:
 
 The script reads configuration from environment variables (see `.env`):
 
-| Variable      | Description                                                                                 |
-| ------------- | ------------------------------------------------------------------------------------------- |
-| `PRIVATE_KEY` | Wallet private key for signing transactions and deriving the account address                |
-| `RPC_URL`     | (Optional) RPC endpoint - currently not used for board creation but may be needed in future |
+| Variable      | Description                                                                  |
+| ------------- | ---------------------------------------------------------------------------- |
+| `PRIVATE_KEY` | Wallet private key for signing transactions and deriving the account address |
 
 Additional components:
 
@@ -154,7 +153,6 @@ Common errors:
 | Error                                    | Cause                         | Fix                                        |
 | ---------------------------------------- | ----------------------------- | ------------------------------------------ |
 | `PRIVATE_KEY must not be empty`          | Missing or empty private key  | Add `PRIVATE_KEY` to `.env` file           |
-| `RPC_URL must not be empty`              | Missing or empty RPC URL      | Add `RPC_URL` to `.env` file               |
 | `Invalid environment`                    | Invalid environment variables | Check `.env` configuration                 |
 | `Invalid chainId`                        | Unsupported chain ID          | Use 1 (Ethereum), 56 (BSC), or 8453 (Base) |
 | `Title is required`                      | Empty title                   | Provide a non-empty title                  |

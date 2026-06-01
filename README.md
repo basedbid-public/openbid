@@ -35,15 +35,15 @@ Create a `.env` file:
 ```env
 # EVM (Ethereum, Base, BSC)
 PRIVATE_KEY=your_wallet_private_key
-EVM_RPC_URL=https://mainnet.base.org  # or your RPC endpoint
 
 # Solana
-SOLANA_RPC_URL=https://api.devnet.solana.com
 SOLANA_PRIVATE_KEY=your_solana_private_key_as_base58
 
 # Optional
 BASEDBID_API_KEY=your_api_key_if_needed
 ```
+
+On-chain reads and writes use the BasedBid RPC proxy (`https://cdn.based.bid/api/rpc`) for the chain selected in your config (`chainId`). No RPC URL is required in `.env`.
 
 ### 3. Run Your First LBP
 
@@ -150,7 +150,6 @@ Every script returns JSON with these fields:
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `PRIVATE_KEY` | Yes | Wallet private key (with 0x prefix for Base/Ethereum) |
-| `EVM_RPC_URL` | Yes | RPC endpoint for EVM chain |
 | `BASEDBID_API_KEY` | Conditional | Required when launching under a custom board |
 
 ### Solana
@@ -158,7 +157,6 @@ Every script returns JSON with these fields:
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `SOLANA_PRIVATE_KEY` | Yes | Private key as base58 string |
-| `SOLANA_RPC_URL` | Yes | RPC endpoint (devnet or mainnet) |
 | `BASEDBID_API_KEY` | Conditional | Required when launching under a custom board |
 
 ---
@@ -571,9 +569,9 @@ Failed to connect to RPC endpoint
 ```
 
 **Fix:**
-- Check your `EVM_RPC_URL` or `SOLANA_RPC_URL`
-- Try a different RPC endpoint (Infura, Alchemy, etc.)
 - Check your internet connection
+- Confirm `chainId` in your config matches the network you intend (EVM: 1, 56, 8453; Solana: 5011 devnet, 1399811149 mainnet)
+- Retry later; the SDK uses `https://cdn.based.bid/api/rpc` and does not require a custom RPC URL in `.env`
 
 ### Insufficient Balance
 
@@ -678,7 +676,6 @@ Expected number, received string at "dex.feeTier"
 ### 4. What You Tried
 - Ran with `--validate` first: yes/no
 - Ran with `--dry-run` first: yes/no
-- Tried with different RPC: yes/no
 
 ---
 

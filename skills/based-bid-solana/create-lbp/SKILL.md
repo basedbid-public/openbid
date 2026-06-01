@@ -122,8 +122,9 @@ Environment variables (see `.env`):
 | Variable           | Required | Description |
 |--------------------|----------|-------------|
 | `SOLANA_PRIVATE_KEY` | Yes    | Solana wallet private key (base58 or hex) |
-| `SOLANA_RPC_URL`     | Yes    | Solana RPC endpoint (devnet: `https://api.devnet.solana.com`) |
 | `BASEDBID_API_KEY`   | Conditional | Required when launching under a custom board (see below) |
+
+On-chain operations use the BasedBid RPC proxy (`https://cdn.based.bid/api/rpc/solana/...`) for the `chainId` in your config. No RPC URL is required in `.env`.
 
 ### API Key Requirement
 
@@ -136,14 +137,12 @@ The `BASEDBID_API_KEY` environment variable is **required** when launching under
 **Example `.env` for custom board launch:**
 ```env
 SOLANA_PRIVATE_KEY=...
-SOLANA_RPC_URL=https://api.devnet.solana.com
 BASEDBID_API_KEY=bb_live_xxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
 **Example `.env` for default board launch:**
 ```env
 SOLANA_PRIVATE_KEY=...
-SOLANA_RPC_URL=https://api.devnet.solana.com
 # No BASEDBID_API_KEY needed
 ```
 
@@ -151,9 +150,9 @@ The SDK automatically includes the `x-api-key` header in BasedBid API requests a
 
 ## Execution Flow
 
-1. **Environment Validation** - Validates `SOLANA_PRIVATE_KEY` and `SOLANA_RPC_URL`
+1. **Environment Validation** - Validates `SOLANA_PRIVATE_KEY`
 2. **Input Validation** - `SolanaLbpValidator.validateInput(args)` with Zod schema
-3. **Solana Wrapper Init** - Creates RPC connection and signer from `SOLANA_PRIVATE_KEY`
+3. **Solana Wrapper Init** - Creates RPC connection (BasedBid proxy) and signer from `SOLANA_PRIVATE_KEY`
 4. **Logo Upload** - Uploads logo to IPFS via `IpfsUpload.uploadImage()`
 5. **Seed Generation** - Generates a 5-digit numeric seed for metadata uniqueness
 6. **Metadata Preparation** - Builds metadata JSON with token info, social links, whitelist, and seed. `board` and `boardOwner` are only included if the user explicitly provided them.

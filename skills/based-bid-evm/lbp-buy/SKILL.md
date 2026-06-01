@@ -54,11 +54,10 @@ The script reads configuration from environment variables (see `.env`):
 | Variable      | Description                                                                                      |
 | ------------- | ------------------------------------------------------------------------------------------------ |
 | `PRIVATE_KEY` | Wallet private key for signing transactions                                                      |
-| `RPC_URL`     | RPC endpoint for blockchain communication (chain-agnostic URL that works on any supported chain) |
 
 ## Execution Flow
 
-1. **Environment Validation** - Validates required environment variables (`PRIVATE_KEY`, `RPC_URL`)
+1. **Environment Validation** - Validates required environment variables (`PRIVATE_KEY`)
 2. **Input Validation** - Schema validation via `buyEvmSdkSchema` (Zod) from `schema/buy/evm/sdk`
 3. **API Request** - Payload sent to `${API_URL}/lbp-buy-preview` which returns:
    - Contract function name to call
@@ -66,7 +65,7 @@ The script reads configuration from environment variables (see `.env`):
    - ABI-encoded arguments
    - Transaction value
    - Chain information
-4. **RPC Initialization** - Creates public and wallet clients using `initRpcClients`
+4. **Client Initialization** - Creates public and wallet clients using `initEvmClients` (BasedBid RPC proxy for the config `chainId`)
 5. **Transaction** - Signed and sent via `sendTransaction` utility
    - Gas estimation
    - Transaction submission
@@ -128,7 +127,7 @@ Common errors:
 
 | Error                    | Cause                                                                 | Fix                                                            |
 | ------------------------ | --------------------------------------------------------------------- | -------------------------------------------------------------- |
-| `Invalid environment`    | Missing or invalid `.env` variables                                   | Check `PRIVATE_KEY` and `RPC_URL` are set correctly            |
+| `Invalid environment`    | Missing or invalid `.env` variables                                   | Check `PRIVATE_KEY` is set correctly                           |
 | `Invalid EVM address`    | Malformed address in request                                          | Ensure all addresses are 42-character hex strings (0x...)      |
 | `Buy LBP request failed` | API server error                                                      | Check API availability and network connectivity                |
 | `Transaction reverted`   | On-chain failure (insufficient funds, slippage exceeded, pool paused) | Check wallet balance, increase slippage, or verify pool status |
@@ -186,7 +185,7 @@ The buy skill automatically handles different chains:
 | BSC      | 56       | bscscan.com    |
 | Base     | 8453     | basescan.org   |
 
-The `chainId` parameter determines which network the transaction is executed on. Ensure your `RPC_URL` supports the target chain.
+The `chainId` parameter determines which network the transaction is executed on. The SDK routes RPC through `https://cdn.based.bid/api/rpc/evm` for that chain.
 
 ## Gas Estimation
 

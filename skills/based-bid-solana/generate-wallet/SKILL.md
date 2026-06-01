@@ -32,14 +32,9 @@ The script automatically updates your `.env` file:
 
 ```env
 SOLANA_PRIVATE_KEY=...
-SOLANA_RPC_URL=https://api.devnet.solana.com
 ```
 
-## Network
-
-| Network | RPC URL |
-|---------|---------|
-| Solana Devnet | `https://api.devnet.solana.com` |
+On-chain scripts use the BasedBid RPC proxy (`https://cdn.based.bid/api/rpc/solana/...`) for the `chainId` in each config file; no RPC URL is written to `.env`.
 
 ## Example Usage
 
@@ -63,7 +58,6 @@ Generated wallet:
 
   Saved to .env:
     SOLANA_PRIVATE_KEY=4fq...K2h
-    SOLANA_RPC_URL=https://api.devnet.solana.com
 
 ========================================
 ```

@@ -63,16 +63,15 @@ The script reads configuration from environment variables (see `.env`):
 | Variable      | Description                                                                                      |
 | ------------- | ------------------------------------------------------------------------------------------------ |
 | `PRIVATE_KEY` | Wallet private key for signing transactions                                                      |
-| `RPC_URL`     | RPC endpoint for blockchain communication (chain-agnostic URL that works on any supported chain) |
 
 ## Execution Flow
 
-1. **Environment Validation** - Validates required environment variables (`PRIVATE_KEY`, `RPC_URL`)
+1. **Environment Validation** - Validates required environment variables (`PRIVATE_KEY`)
 2. **Input Validation** - Schema validation via `sellEvmSdkSchema` (Zod) from `schema/sell/evm/sdk`
 3. **API Request** - Payload sent to `${API_URL}/lbp-sell-preview` which returns two transactions:
    - `trx1`: ERC20 approve transaction data
    - `trx2`: TradeFacet sell transaction data
-4. **RPC Initialization** - Creates public and wallet clients using `initRpcClients`
+4. **Client Initialization** - Creates public and wallet clients using `initEvmClients` (BasedBid RPC proxy for the config `chainId`)
 5. **First Transaction - Approve** - Sends ERC20 approve transaction via `sendTransaction`
 6. **Second Transaction - Sell** - Sends TradeFacet sell transaction via `sendTransaction`
 
@@ -146,7 +145,7 @@ Common errors:
 
 | Error                          | Cause                                                    | Fix                                                       |
 | ------------------------------ | -------------------------------------------------------- | --------------------------------------------------------- |
-| `Invalid environment`          | Missing or invalid `.env` variables                      | Check `PRIVATE_KEY` and `RPC_URL` are set correctly       |
+| `Invalid environment`          | Missing or invalid `.env` variables                      | Check `PRIVATE_KEY` is set correctly                      |
 | `Invalid EVM address`          | Malformed address in request                             | Ensure all addresses are 42-character hex strings (0x...) |
 | `Sell LBP request failed`      | API server error                                         | Check API availability and network connectivity           |
 | `Approve transaction reverted` | Insufficient token balance or already approved           | Check your token balance                                  |
@@ -208,7 +207,7 @@ The sell skill automatically handles different chains:
 | BSC      | 56       | bscscan.com    |
 | Base     | 8453     | basescan.org   |
 
-The `chainId` parameter determines which network the transaction is executed on. Ensure your `RPC_URL` supports the target chain.
+The `chainId` parameter determines which network the transaction is executed on. The SDK routes RPC through `https://cdn.based.bid/api/rpc/evm` for that chain.
 
 ## Gas Estimation
 

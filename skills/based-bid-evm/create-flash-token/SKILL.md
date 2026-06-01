@@ -54,9 +54,10 @@ The script reads configuration from environment variables (see `.env`):
 
 | Variable           | Required | Description                                                                                                                               |
 | ------------------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `PRIVATE_KEY`      | Yes      | Wallet private key for signing transactions                                                                                               |
-| `EVM_RPC_URL`      | Yes      | RPC endpoint for blockchain communication (this should be a chain-agnostic URL and should work on any supported chain - ETH, BNB or Base) |
-| `BASEDBID_API_KEY` | No       | Required only when launching under a custom board (see below)                                                                            |
+| `PRIVATE_KEY`      | Yes      | Wallet private key for signing transactions                                 |
+| `BASEDBID_API_KEY` | No       | Required only when launching under a custom board (see below)               |
+
+On-chain operations use the BasedBid RPC proxy (`https://cdn.based.bid/api/rpc/evm`) for the `chainId` in your config. No RPC URL is required in `.env`.
 
 ### API Key Requirement
 
@@ -69,14 +70,12 @@ The `BASEDBID_API_KEY` environment variable is **required** when launching under
 **Example `.env` for custom board launch:**
 ```env
 PRIVATE_KEY=0x...
-EVM_RPC_URL=https://mainnet.base.org
 BASEDBID_API_KEY=bb_live_xxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
 **Example `.env` for default board launch:**
 ```env
 PRIVATE_KEY=0x...
-EVM_RPC_URL=https://mainnet.base.org
 # No BASEDBID_API_KEY needed
 ```
 

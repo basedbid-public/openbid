@@ -24,6 +24,15 @@ export class BasedBidApi {
 
   static rpcApiUrl = 'https://cdn.based.bid/api/rpc';
 
+  static evmRpcUrl(chainId: number) {
+    return `${this.rpcApiUrl}/evm?chainId=${chainId}`;
+  }
+
+  static solanaRpcUrl(chainId: number) {
+    const cluster = chainId === 501 ? 'mainnet' : 'devnet';
+    return `${this.rpcApiUrl}/solana/${cluster}`;
+  }
+
   static async invokeApi<T>(
     apiType: ApiType,
     path: string,

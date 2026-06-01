@@ -51,7 +51,6 @@ export const createEvmFlashToken = async (
 
   const { publicClient, walletClient, account } = initEvmClients(
     data.chainId,
-    env.EVM_RPC_URL,
     env.PRIVATE_KEY,
   );
 

@@ -26,7 +26,6 @@ Before using this skill, ensure:
 
 1. Environment variables are configured in `.env`:
    - `SOLANA_PRIVATE_KEY`: Your Solana wallet private key (base58 or hex format)
-   - `RPC_URL`: Solana RPC endpoint URL
 2. Logo image file exists and is accessible
 3. (Optional) Banner image file if you want a banner
 

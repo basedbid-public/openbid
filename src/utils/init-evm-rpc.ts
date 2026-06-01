@@ -5,12 +5,14 @@ import { createWalletClient, http } from 'viem';
 import { createPublicClient } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 
+import { BasedBidApi } from './based-bid-api';
+
 export const initEvmClients = (
   chainId: EvmChainId,
-  rpcUrl: string,
   privateKey: `0x${string}`,
 ) => {
   const chain = CHAIN_CONFIG[chainId];
+  const rpcUrl = BasedBidApi.evmRpcUrl(chainId);
 
   const publicClient = createPublicClient({
     chain,
@@ -21,7 +23,7 @@ export const initEvmClients = (
 
   const walletClient = createWalletClient({
     chain,
-    transport: http(`https://cdn.based.bid/api/rpc/evm?chainId=${chainId}`),
+    transport: http(rpcUrl),
     account,
   });
 

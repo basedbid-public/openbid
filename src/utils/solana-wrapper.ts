@@ -21,13 +21,11 @@ import { printNextSteps } from './next-steps';
 export class SolanaWrapper {
   private rpc!: Rpc<SolanaRpcApiDevnet>;
   private keyPairSigner!: KeyPairSigner;
+  private rpcUrl = '';
 
   private privateKey: string;
 
-  constructor(
-    private rpcUrl: string,
-    privateKey?: string,
-  ) {
+  constructor(privateKey?: string) {
     if (!privateKey) {
       printNextSteps('What To Try Next', [
         'Run npm run wallet:solana.',
@@ -42,11 +40,8 @@ export class SolanaWrapper {
   async init(chainId: number) {
     const decoded = bs58.decode(this.privateKey).slice(0, 32);
     this.keyPairSigner = await createKeyPairSignerFromPrivateKeyBytes(decoded);
-    this.rpc = createSolanaRpc(
-      BasedBidApi.rpcApiUrl +
-        '/solana/' +
-        (chainId === 501 ? 'mainnet' : 'devnet'),
-    );
+    this.rpcUrl = BasedBidApi.solanaRpcUrl(chainId);
+    this.rpc = createSolanaRpc(this.rpcUrl);
   }
 
   get publicKey() {

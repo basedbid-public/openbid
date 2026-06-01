@@ -44,12 +44,11 @@ Environment variables (see `.env`):
 | Variable | Description |
 |----------|-------------|
 | `SOLANA_PRIVATE_KEY` | Solana wallet private key (base58 or hex) |
-| `SOLANA_RPC_URL` | Solana RPC endpoint |
 
 ## Execution Flow
 
-1. **Environment Validation** - Validates `SOLANA_PRIVATE_KEY` and `SOLANA_RPC_URL`
-2. **Solana Wrapper Init** - Creates RPC connection and signer from `SOLANA_PRIVATE_KEY`
+1. **Environment Validation** - Validates `SOLANA_PRIVATE_KEY`
+2. **Solana Wrapper Init** - Creates RPC connection (BasedBid proxy) and signer from `SOLANA_PRIVATE_KEY`
 3. **API Request** - Payload sent to `https://cdn.based.bid/api/sol/collect-lbp-fees`:
    ```typescript
    {

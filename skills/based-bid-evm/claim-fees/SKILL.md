@@ -48,12 +48,11 @@ Environment variables (see `.env`):
 | Variable      | Description                                                |
 | ------------- | ---------------------------------------------------------- |
 | `PRIVATE_KEY` | Wallet private key for signing transactions                |
-| `EVM_RPC_URL` | RPC endpoint for blockchain communication (chain-agnostic) |
 
 ## Execution Flow
 
-1. **Environment Validation** - Validates `PRIVATE_KEY` and `EVM_RPC_URL`
-2. **RPC Initialization** - Creates `publicClient` and `walletClient` via `initRpcClients`
+1. **Environment Validation** - Validates `PRIVATE_KEY`
+2. **Client Initialization** - Creates `publicClient` and `walletClient` via `initEvmClients` (BasedBid RPC proxy for the config `chainId`)
 3. **API Request** - Payload sent to `${API_URL}/collect-fee`:
    ```typescript
    {
@@ -125,7 +124,7 @@ const receipt = await claimEvmFees({
 
 | Error                   | Cause                                   | Fix                                     |
 | ----------------------- | --------------------------------------- | --------------------------------------- |
-| `Invalid environment`   | Missing `PRIVATE_KEY` or `EVM_RPC_URL`  | Check `.env` configuration              |
+| `Invalid environment`   | Missing `PRIVATE_KEY`                   | Check `.env` configuration              |
 | `Failed to claim fees`  | API returned an error                   | Check API availability and network      |
 | `Transaction reverted`  | No fees to claim or unauthorized caller | Verify you are the pool/board owner     |
 | `Gas estimation failed` | Contract call will fail                 | Check `address` is correct and has fees |

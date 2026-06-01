@@ -4,8 +4,6 @@ import { randomBytes } from 'crypto';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { printNextSteps } from 'utils/next-steps';
 
-const SOLANA_RPC_URL = 'https://api.devnet.solana.com';
-
 export const generateSolanaWallet = async () => {
   const randomBytesBuffer = randomBytes(32);
   const privateKeyBytes = new Uint8Array(randomBytesBuffer);
@@ -18,27 +16,22 @@ export const generateSolanaWallet = async () => {
 
   const envPath = '.env';
   const privateKeyLine = `SOLANA_PRIVATE_KEY=${privateKeyBase58}`;
-  const rpcUrlLine = `SOLANA_RPC_URL=${SOLANA_RPC_URL}`;
 
   if (existsSync(envPath)) {
     const envContent = readFileSync(envPath, 'utf-8');
     const lines = envContent.split('\n');
     const filteredLines = lines.filter((line) => {
       const key = line.split('=')[0];
-      return key !== 'SOLANA_PRIVATE_KEY' && key !== 'SOLANA_RPC_URL';
+      return key !== 'SOLANA_PRIVATE_KEY';
     });
-    const newContent = [...filteredLines, privateKeyLine, rpcUrlLine].join(
-      '\n',
-    );
+    const newContent = [...filteredLines, privateKeyLine].join('\n');
     writeFileSync(envPath, newContent + '\n');
   } else {
     const envContent = [
       privateKeyLine,
-      rpcUrlLine,
       '',
       '# EVM (optional)',
       'PRIVATE_KEY=',
-      'EVM_RPC_URL=',
     ].join('\n');
     writeFileSync(envPath, envContent + '\n');
   }
@@ -55,6 +48,5 @@ export const generateSolanaWallet = async () => {
   return {
     address,
     privateKey: privateKeyBase58,
-    rpcUrl: SOLANA_RPC_URL,
   };
 };

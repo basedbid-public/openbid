@@ -36,10 +36,7 @@ export const createSolanaBoard = async (
     return;
   }
 
-  const solanaWrapper = new SolanaWrapper(
-    env.SOLANA_RPC_URL,
-    env.SOLANA_PRIVATE_KEY,
-  );
+  const solanaWrapper = new SolanaWrapper(env.SOLANA_PRIVATE_KEY);
   await solanaWrapper.init(data.chainId);
 
   let logoUrl = 'https://ipfs.based.bid/ipfs/null';
