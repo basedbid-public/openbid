@@ -28,7 +28,7 @@ export class SolanaWrapper {
   constructor(privateKey?: string) {
     if (!privateKey) {
       printNextSteps('What To Try Next', [
-        'Run npm run wallet:solana.',
+        'Run `npm run wallet:solana` to generate a new wallet.',
         'Fund the printed wallet address at https://faucet.solana.com.',
         'Rerun the same Solana command.',
       ]);

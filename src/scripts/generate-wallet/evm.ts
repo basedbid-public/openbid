@@ -1,14 +1,7 @@
 import { existsSync, readFileSync, writeFileSync } from 'fs';
-import { evmChainIdSchema } from 'schema/common';
-import { EvmChainId } from 'types/chain-id';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 
-export const generateEvmWallet = (data: EvmChainId) => {
-  const parsedChainId = evmChainIdSchema.safeParse(data);
-  if (!parsedChainId.success) {
-    throw new Error('Invalid chain ID');
-  }
-
+export const generateEvmWallet = () => {
   const privateKey = generatePrivateKey();
   const account = privateKeyToAccount(privateKey);
 
@@ -55,6 +48,7 @@ export const generateEvmWallet = (data: EvmChainId) => {
   return {
     address: account.address,
     privateKey,
-    chainId: data,
   };
 };
+
+generateEvmWallet();

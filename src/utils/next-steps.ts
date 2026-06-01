@@ -75,7 +75,7 @@ export function getSolanaApiFailureHint(errorBody: string) {
     return [
       'If you are launching without a Board, omit board and boardOwner fields.',
       'If you are launching under a Board, add OPENBID_API_KEY=<key> to .env.',
-      'Then rerun npm run launch:solana:pool_devnet.',
+      'Then rerun the same solana:* command.',
     ];
   }
 
@@ -122,8 +122,8 @@ export function getSolanaApiFailureHint(errorBody: string) {
 
 export function getSolanaEnvironmentHint() {
   return [
-    'Run npm run wallet:solana to create or refresh .env.',
+    'Run `npm run wallet:solana` to create or refresh .env.',
     'Fund the printed wallet address at https://faucet.solana.com.',
-    'Rerun npm run launch:solana:pool_devnet.',
+    'Rerun the same `npm run solana:*` command you were using.',
   ];
 }

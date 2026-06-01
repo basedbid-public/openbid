@@ -40,9 +40,9 @@ export const generateSolanaWallet = async () => {
   printNextSteps('Next Steps', [
     `Fund ${address} with devnet SOL at https://faucet.solana.com`,
     'Add a small test logo at assets/logo.jpg',
-    'Run npm run launch:solana:pool_devnet',
-    'For Flash Tokens, run npm run launch:solana:flash_devnet',
-    'For Boards, run npm run launch:solana:board_devnet',
+    'Run npm run solana:create-lbp',
+    'For Flash Tokens, run npm run solana:create-flash-token',
+    'For Boards, run npm run solana:create-board',
   ]);
 
   return {
@@ -50,3 +50,7 @@ export const generateSolanaWallet = async () => {
     privateKey: privateKeyBase58,
   };
 };
+
+(async () => {
+  await generateSolanaWallet();
+})().catch(console.error);
