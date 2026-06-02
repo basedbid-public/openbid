@@ -84,23 +84,27 @@ export const createEvmFlashTokenSchema = z.object({
               minTokenBalanceForDividends: rewardTokenDividendsSchema,
             })
             .optional(),
-          customWallets: z.array(
-            z.object({
-              name: z.string(),
-              address: z
-                .string()
-                .regex(/^0x[a-fA-F0-9]{40}$/, 'Invalid EVM address'),
-              amount: z.number(),
-            }),
-          ),
-          feeThreshold: z.union([
-            z.literal(0.01),
-            z.literal(0.1),
-            z.literal(0.25),
-            z.literal(0.5),
-            z.literal(1),
-          ]),
-          tieredFeesEnabled: z.boolean().default(false),
+          customWallets: z
+            .array(
+              z.object({
+                name: z.string(),
+                address: z
+                  .string()
+                  .regex(/^0x[a-fA-F0-9]{40}$/, 'Invalid EVM address'),
+                amount: z.number(),
+              }),
+            )
+            .optional(),
+          feeThreshold: z
+            .union([
+              z.literal(0.01),
+              z.literal(0.1),
+              z.literal(0.25),
+              z.literal(0.5),
+              z.literal(1),
+            ])
+            .optional(),
+          tieredFeesEnabled: z.boolean().default(false).optional(),
           dynamicFees: z
             .object({
               hasHookDynamicFee: z.boolean(),
@@ -115,7 +119,7 @@ export const createEvmFlashTokenSchema = z.object({
               penaltyFee: z.enum(PenaltyFeeType),
             })
             .optional(),
-          buyLimits: v4BuyLimitsSchema,
+          buyLimits: v4BuyLimitsSchema.optional(),
           mevProtectionEnabled: z.boolean().optional(),
         })
 

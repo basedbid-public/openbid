@@ -25,7 +25,7 @@
       "liquidity": 1,
       "buyback": 1,
       "reward": {
-        "token": "USDC",
+        "token": "ETH",
         "amount": 1,
         "minTokenBalanceForDividends": 0.01
       },
@@ -47,7 +47,8 @@
         "maxBuyPerOrigin": 5,
         "isHookWhitelist": false
       },
-      "mevProtectionEnabled": false
+      "mevProtectionEnabled": true,
+      "minTokenBalanceForDividends": 0.01
     }
   }
 }

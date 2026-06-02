@@ -76,12 +76,31 @@ The payload for the `args` parameter of the `createEvmFlashToken` should look so
     "v4": {
       "liquidity": 1,
       "buyback": 1,
-      "feeThreshold": 0.1,
       "reward": {
         "token": "ETH",
         "amount": 1,
         "minTokenBalanceForDividends": 0.01
-      }
+      },
+      "customWallets": [],
+      "feeThreshold": 0.1,
+      "tieredFeesEnabled": false,
+      "dynamicFees": {
+        "hasHookDynamicFee": true,
+        "volatilityDecayPeriod": "medium",
+        "volatilityMultiplier": "medium",
+        "volatilityTrigger": "per_block"
+      },
+      "cooldownProtection": {
+        "cooldownDuration": "medium",
+        "penaltyFee": "medium"
+      },
+      "buyLimits": {
+        "protectPeriod": 600,
+        "maxBuyPerOrigin": 5,
+        "isHookWhitelist": false
+      },
+      "mevProtectionEnabled": true,
+      "minTokenBalanceForDividends": 0.01
     }
   }
 }
