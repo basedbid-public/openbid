@@ -28,23 +28,27 @@ export const createEvmFlashTokenSchema = z.object({
       marketCap: z
         .number()
         .min(1, 'Market cap must be greater than 0')
-        .max(10000000, 'Market cap must be less than 10M'),
-      maxTxAmountPercent: z.union([
-        z.literal(0.001),
-        z.literal(0.01),
-        z.literal(0.1),
-        z.literal(1),
-        z.literal(2.5),
-        z.literal(5),
-      ]),
-      protectBlocks: z.union([
-        z.literal(10),
-        z.literal(20),
-        z.literal(30),
-        z.literal(40),
-        z.literal(60),
-        z.literal(120),
-      ]),
+        .max(10_000_000, 'Market cap must be less than 10K'),
+      maxTxAmountPercent: z
+        .union([
+          z.literal(0.001),
+          z.literal(0.01),
+          z.literal(0.1),
+          z.literal(1),
+          z.literal(2.5),
+          z.literal(5),
+        ])
+        .optional(),
+      protectBlocks: z
+        .union([
+          z.literal(10),
+          z.literal(20),
+          z.literal(30),
+          z.literal(40),
+          z.literal(60),
+          z.literal(120),
+        ])
+        .optional(),
     })
     .optional(),
   dex: z

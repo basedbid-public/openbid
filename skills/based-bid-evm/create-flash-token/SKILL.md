@@ -1,87 +1,213 @@
-# Create Flash Token Skill
+<table>
+  <tr>
+    <th>Name</th>
+    <th>create-flash-token-evm</th>
+  </tr>
+  <tr>
+    <td>Description</td>
+    <td>Use this skill whenever the user wants to create a (flash) token. If EVM wallet is not yet configured, this skill explains how to set them up from scratch.</td>
+  </tr>
+</table>
 
-## Description
+# Create EVM Flash Token Skill
 
-Creates a Flash Token on the based.bid platform. Flash tokens launch immediately without a bonding curve, allowing instant trading. This is a simpler and faster alternative to LBP (Liquidity Bootstrapping Pool) launches.
+## Overview
 
-Unlike LBPs which have a sale period with price discovery, flash tokens are deployed with liquidity immediately available on the DEX. This skill handles token creation, DEX configuration, and fee setup for launching a new meme token with flash mechanics.
+Flash tokens launch immediately without a bonding curve, allowing instant trading. This is a simpler and faster alternative to LBP (Liquidity Bootstrapping Pool) launches.
+
+Tokens are deployed with liquidity immediately available on the DEX. This skill handles token creation, DEX configuration, and fee setup of the new token.
 
 Currently Ethereum, Binance Smart Chain and Base chains are supported. The user can launch on a V3 DEX (where they can set max 1% of fees) or V4 DEX (where users can increase fees up to 10% and get bigger payouts, also enabling the Fee Builder feature on V4).
 
 Fee Builder allows users to reroute their fees however they like (up to `dex.feeTier` percent). Users can increase the percentage that goes into liquidity or buybacks from fees to strengthen their token's chart (`fees.v4.liquidity`), reward long-term token holders with airdrop payouts (`fees.v4.reward`) or send fee payouts to custom wallets (to payout KOLs or marketing teams).
 
-**Optional `boardTitle`:** Only send this if the user explicitly wants to launch under a custom board they created via the create-board skill. If omitted, no board is sent. **Never send `'based'` or any default value unless the user explicitly requests it.**
+## Setting up the request payload
 
-## Invocation
+### Launch Type:
 
-Run the create-flash-token script directly using ts-node:
+- **Simple** (default): Name, symbol, logo only. Uses recommended defaults. Bypasses transaction confirmation.
+- **Advanced**: Full control over all parameters. Requires explicit confirmation before transaction.
 
-```bash
-npx ts-node src/scripts/evm/create-flash-token.ts
+> **Agent note:**: ALWAYS ask the user to choose a mode. Use `simple` if no preference specified.
+
+#### Simple Mode
+
+**For Simple mode:**
+
+- Prompt the user for the token name, token symbol and image
+  - If image is not provided, use the `assets/placeholder.png` file as a placeholder
+  - If the user provides an image, save it in the `assets` folder and fix the path in the `metadata.logo`
+    object
+  - optionally prompt the user for the description and use the default one if not provided: `This token was deployed on based.bid using the most advanced token standards. Programmable Economy: ENABLED`
+- By default the token will launch on the Base chain, since it is cheapest and fastest
+- All other parameters use defaults:
+  - `totalSupply` should be `1000000`
+  - `initialBuyAmount` should be `0`
+  - `metadata` should only include the `logo`, the rest of the platforms should be empty string
+  - the DEX should be Uniswap V4 wiht a fee tier of 3
+  - v4 fees should be set and should be split between buybacks, liquidity and the creator wallet (see the example JSON below)
+- Execute with `SKIP_TX_CONFIRMATION=true` so it does not wait for user to confirm the transaction
+
+The payload for the `args` parameter of the `createEvmFlashToken` should look something like:
+
+```json
+{
+  "isSandboxMode": false,
+  "chainId": 8453,
+  "token": {
+    "name": "<USER_INPUT:name>",
+    "symbol": "<USER_INPUT:symbol>",
+    "totalSupply": 1000000,
+    "initialBuyAmount": 0,
+    "metadata": {
+      "logo": "<USER_INPUT:logoUrl>",
+      "twitter": "",
+      "telegram": "",
+      "website": "",
+      "discord": "",
+      "description": "<USER_INPUT:description>"
+    }
+  },
+  "dex": {
+    "version": "uniswap_v4",
+    "feeTier": 3
+  },
+  "fees": {
+    "v4": {
+      "liquidity": 1,
+      "buyback": 1,
+      "feeThreshold": 0.1,
+      "customWallets": [
+        {
+          "name": "Creator",
+          "address": "<USER_WALLET_ADDRESS>",
+          "amount": 1
+        }
+      ]
+    }
+  }
+}
 ```
 
-Or build and run:
+Edit the `src/helpers/configs/evm/create-flash-token.json` config file with the `name`, `symbol`, `logo` and `address` replaced with what the user entered.
+
+Deploy the token with:
 
 ```bash
-npm run build && node dist/scripts/evm/create-flash-token.js
+SKIP_TX_CONFIRMATION=true npm run evm:create-flash-token
+```
+
+---
+
+#### Advanced Mode:
+
+- Ask the user about each parameter specifically, refer to the `Parameters` section below
+- Require user confirmation before transaction
+
+Edit the `src/helpers/configs/evm/create-flash-token.json` config file with the parameters that the user entered.
+
+Deploy the token with:
+
+```bash
+npm run evm:create-flash-token
 ```
 
 ## Parameters
 
-The `createFlashToken` function accepts a `CreateFlashTokenEvmSdk` type (inferred from `evmFlashTokenCreateSdkSchema`):
-
-```typescript
-import { CreateFlashTokenEvmSdk } from 'schema/flash-token/evm/sdk';
-```
-
-**Schema location:** `schema/flash-token/evm/sdk.ts` — `evmFlashTokenCreateSdkSchema` (Zod)
-
 **Key fields:**
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `chainId` | `number` | `1`, `56`, or `8453` |
-| `token` | `object` | `name`, `symbol`, `totalSupply`, `initialBuyAmount`, `metadata` (logo, social links, description) |
-| `sale` | `object` | `boardTitle?`, `marketCap`, `maxTxAmountPercent`, `protectBlocks` |
+| Parameter       | Type      | Description                                                                                                                |
+| --------------- | --------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `isSandboxMode` | `boolean` | denotes if the project should launch on based.bid's mainnet or testnet (set to `true` to experiment with various settings) |
+| `chainId`       | `number`  | `1` (Ethereum), `56` (Binance Smart Chain), or `8453` (Base)                                                               |
+| `token`         | `Token`   | token data                                                                                                                 |
+| `boardTitle`    | `string`  | the board the token should launch under                                                                                    |
+| `sale`          | `Sale`    | sale data                                                                                                                  |
+| `dex`           | `Dex`     | DEX data                                                                                                                   |
+| `fees`          | `Fees`    | fee data                                                                                                                   |
 
-> **Board behavior:** `boardTitle` is **purely optional**. Only include it if the user explicitly provides a custom board name. Omitting it means the token launches without any board affiliation. **Do not send `'based'` or any default string.**
-| `dex` | `object` | `version` (EvmDexType), `feeTier` |
-| `fees` | `object` | `v4?` (V4 fees configuration) |
+#### Token object
 
-## Configuration
+| Parameter          | Type       | Description                                                                                                                     |
+| ------------------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `name`             | `string`   | token name                                                                                                                      |
+| `symbol`           | `string`   | token symbol                                                                                                                    |
+| `totalSupply`      | `number`   | token total supply                                                                                                              |
+| `initialBuyAmount` | `number`   | ETH amount of how many tokens the token creator wants to buy as the initial buyer to secure a portion of the supply immediately |
+| `metadata`         | `Metadata` | token metadata object that gets uploaded on IPFS                                                                                |
 
-The script reads configuration from environment variables (see `.env`):
+#### Metadata object
 
-| Variable           | Required | Description                                                                                                                               |
-| ------------------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `PRIVATE_KEY`      | Yes      | Wallet private key for signing transactions                                 |
-| `BASEDBID_API_KEY` | No       | Required only when launching under a custom board (see below)               |
+| Parameter     | Type     | Description                                                                     |
+| ------------- | -------- | ------------------------------------------------------------------------------- |
+| `logo`        | `string` | local path to the token logo                                                    |
+| `twitter`     | `string` | Twitter/X page for the token (optional, should be set to `''` by default)       |
+| `telegram`    | `string` | Telegram group for the token (optional, should be set to `''` by default)       |
+| `website`     | `string` | website, associated with the token (optional, should be set to `''` by default) |
+| `discord`     | `string` | Discord server URL for the token (optional, should be set to `''` by default)   |
+| `description` | `string` | token description, shown on the based.bid web                                   |
 
-On-chain operations use the BasedBid RPC proxy (`https://cdn.based.bid/api/rpc/evm`) for the `chainId` in your config. No RPC URL is required in `.env`.
+#### Sale object
 
-### API Key Requirement
+| Parameter            | Type     | Description                                                 |
+| -------------------- | -------- | ----------------------------------------------------------- |
+| `marketCap`          | `number` | (optional) starting market cap for your token               |
+| `maxTxAmountPercent` | `number` | (optional) caps the maximum amount a single wallet can hold |
+| `protectBlocks`      | `number` | (optional) number of protect blocks                         |
 
-The `BASEDBID_API_KEY` environment variable is **required** when launching under a custom board.
+#### Dex object
 
-**When is it needed?**
-- If `boardTitle` is set to a non-empty string (custom board name), you must set `BASEDBID_API_KEY`
-- If `boardTitle` is empty or omitted (default "based" board), no API key is needed
+| Parameter | Type         | Description                           |
+| --------- | ------------ | ------------------------------------- |
+| `version` | `EvmDexType` | type of DEX to launch on              |
+| `feeTier` | `number`     | DEX fee percentage (up to 10% on EVM) |
 
-**Example `.env` for custom board launch:**
-```env
-PRIVATE_KEY=0x...
-BASEDBID_API_KEY=bb_live_xxxxxxxxxxxxxxxxxxxxxxxx
-```
+#### Fee object
 
-**Example `.env` for default board launch:**
-```env
-PRIVATE_KEY=0x...
-# No BASEDBID_API_KEY needed
-```
+| Parameter | Type     | Description                             |
+| --------- | -------- | --------------------------------------- |
+| `v4`      | `V4Fees` | (optional) V4 fee builder configuration |
 
-The SDK automatically includes the `x-api-key` header in BasedBid API requests and IPFS uploads when a custom board is specified.
+#### V4Fees object
 
-## DEX Options
+| Parameter              | Type                 | Description                                                                                                                                   |
+| ---------------------- | -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `liquidity`            | `number`             | Percentage of fees to liquidity                                                                                                               |
+| `buyback`              | `number`             | Percentage of fees to buyback                                                                                                                 |
+| `reward`               | `object`             | Reward configuration with `token`, `amount`, `minTokenBalanceForDividends`                                                                    |
+| `customWallets`        | `array`              | Array of custom wallet addresses for fee distribution - useful for sending custom fee amounts to the rest of the team (KOLs, marketing, etc.) |
+| `feeThreshold`         | `number`             | The ETH amount that denotes how often fees get distributed                                                                                    |
+| `tieredFeesEnabled`    | `boolean`            | Increases fee amount on sell (more than 5% sell - 25% fee increaase; more than 10% sell - 40% fee increase)                                   |
+| `dynamicFees`          | `DynamicFees`        | Dynamic fee configuration that increases fees with project volatility                                                                         |
+| `cooldownProtection`   | `CooldownProtection` | Limits how quickly the same wallet can trade again                                                                                            |
+| `buyLimits`            | `BuyLimits`          | Buy limit settings                                                                                                                            |
+| `mevProtectionEnabled` | `boolean`            | Enable MEV protection to shield against front-running and sandwich attack                                                                     |
+
+#### DynamicFees object
+
+| Parameter               | Type      | Description                                                   |
+| ----------------------- | --------- | ------------------------------------------------------------- |
+| `hasHookDynamicFee`     | `boolean` | Enable dynamic fees based on volatility                       |
+| `volatilityDecayPeriod` | `string`  | How fast volatility decays: `"fast"`, `"medium"`, or `"slow"` |
+| `volatilityMultiplier`  | `string`  | Volatility multiplier: `"low"`, `"medium"`, or `"high"`       |
+| `volatilityTrigger`     | `string`  | When volatility is measured: `"per_block"` or `"per_epoch"`   |
+
+#### CooldownProtection object
+
+| Parameter          | Type     | Description                                                               |
+| ------------------ | -------- | ------------------------------------------------------------------------- |
+| `cooldownDuration` | `string` | Cooldown duration: `"short"`, `"medium"`, or `"long"`                     |
+| `penaltyFee`       | `string` | Penalty fee for trading during cooldown: `"low"`, `"medium"`, or `"high"` |
+
+#### BuyLimits object
+
+| Parameter         | Type      | Description                                                            |
+| ----------------- | --------- | ---------------------------------------------------------------------- |
+| `protectPeriod`   | `number`  | Protection period in seconds (0-3600)                                  |
+| `maxBuyPerOrigin` | `number`  | Maximum buy per origin (0-10)                                          |
+| `isHookWhitelist` | `boolean` | Enable hook whitelist (allows higher limits for whitelisted addresses) |
+
+### DEX Options
 
 Supported DEX versions:
 
@@ -95,7 +221,7 @@ Fee tiers:
 - V3: fee tier must be `1`
 - V4: fee tier must be between `1` and `10`
 
-## DEX Version Recommendation
+#### DEX Version Recommendation
 
 **Important:** For new token launches, you should **use V4 by default** (`EvmDexType.UNISWAP_V4` or `EvmDexType.PANCAKESWAP_V4`).
 
@@ -106,85 +232,12 @@ V4 is the most modern and recommended approach because it:
 - Allows custom fee splits to reward holders and strengthen the token's chart
 - Provides anti-snipe protection via `buyLimits`
 
-Only use V3 (`EvmDexType.UNISWAP_V3` or `EvmDexType.PANCAKESWAP_V3`) if you specifically need V3 behavior or are migrating an existing V3 pool.
-
-## Sale Parameters
-
-Flash tokens have different sale mechanics than LBPs:
-
-| Parameter            | Description                                                      | Example |
-| -------------------- | ---------------------------------------------------------------- | ------- |
-| `marketCap`          | Initial market cap in USD                                        | 10000   |
-| `maxTxAmountPercent` | Maximum transaction amount as percentage of total supply (0-100) | 0.1     |
-| `protectBlocks`      | Number of blocks to restrict large buys (anti-snipe protection)  | 20      |
-
-## Fee Builder Options (V4)
-
-When using V4 fee builder, exactly one protection mechanism must be enabled:
-
-### Dynamic Fees
-
-```typescript
-{
-  hasHookDynamicFee: true,
-  volatilityDecayPeriod: VolatilityDecayPeriodType.FAST | 'MEDIUM' | 'SLOW',
-  volatilityMultiplier: VolatilityMultiplierType.LOW | 'MEDIUM' | 'HIGH',
-  volatilityTrigger: VolatilityTriggerType.PER_BLOCK | 'PER_EPOCH'
-}
-```
-
-### Cooldown Protection
-
-```typescript
-{
-  cooldownProtection: {
-    cooldownDuration: CooldownDurationType.SHORT | 'MEDIUM' | 'LONG',
-    penaltyFee: PenaltyFeeType.LOW | 'MEDIUM' | 'HIGH'
-  }
-}
-```
-
-### Buy limits (snipe + hook whitelist)
-
-```typescript
-{
-  buyLimits: {
-    protectPeriod: number,      // seconds, 0–3600
-    maxBuyPerOrigin: number,    // 0–10
-    isHookWhitelist: false
-  }
-}
-// or with hook whitelist:
-{
-  buyLimits: {
-    protectPeriod: 600,
-    maxBuyPerOrigin: 5,
-    isHookWhitelist: true,
-    maxBuyForWhitelisted: 10    // must be >= maxBuyPerOrigin
-  }
-}
-```
-
-### MEV Protection
-
-```typescript
-{
-  mevProtectionEnabled: true;
-}
-```
-
-### Tiered Fees
-
-```typescript
-{
-  tieredFeesEnabled: true;
-}
-```
+Only use V3 (`EvmDexType.UNISWAP_V3` or `EvmDexType.PANCAKESWAP_V3`) if the user specifically asks for it.
 
 ## Execution Flow
 
-1. **Input Validation** - Schema validation via `evmFlashTokenCreateSdkSchema`
-2. **Metadata Preparation** - Token metadata should be pre-uploaded to IPFS (unlike LBP which handles IPFS upload)
+1. **Input Validation**
+2. **Metadata upload** - Token metadata should be pre-uploaded to IPFS
 3. **API Request** - Payload sent to `${API_URL}/create-flash` which returns ABI-encoded contract call data
 4. **ABI Normalization** - The API returns flattened args; `normalizeByAbi` expands tuples back to nested structures viem expects
 5. **Transaction** - Signed and sent via `sendTransaction`
@@ -200,6 +253,8 @@ On success, the script outputs:
 - Basescan URL for verification
 - Token contract address
 
+> **Agent note:**: Inform the user that the launch was successful and present them with the TX hash as well as the address of the token that got deployed
+
 ## Error Handling
 
 Common errors:
@@ -211,67 +266,12 @@ Common errors:
 | `Failed to create flash token (API)` | API returned null                         | Check API server and network connectivity                        |
 | `Missing required ABI value`         | `normalizeByAbi` can't find value         | Verify API response args match ABI input structure               |
 
-## Example Usage
-
-Modify `src/create-flash-token.ts` as reference to configure your Flash Token:
-
-```typescript
-const args: CreateFlashTokenEvmSdk = {
-  chainId: base.id,
-  token: {
-    name: 'My Flash Token',
-    symbol: 'MFT',
-    totalSupply: 1_000_000_000,
-    initialBuyAmount: 0,
-    metadataUrl: 'https://ipfs.based.bid/ipfs/...', // Pre-uploaded to IPFS
-  },
-  sale: {
-    // boardTitle: 'my-custom-board', // ONLY include if user explicitly wants a custom board
-    marketCap: 10000,
-    maxTxAmountPercent: 0.1,
-    protectBlocks: 20,
-  },
-  dex: {
-    version: EvmDexType.UNISWAP_V4,
-    feeTier: 2,
-  },
-  fees: {
-    v4: {
-      liquidity: 1,
-      buyback: 1,
-      feeThreshold: 0.1,
-      tieredFeesEnabled: false,
-      dynamicFees: {
-        hasHookDynamicFee: true,
-        volatilityDecayPeriod: VolatilityDecayPeriodType.MEDIUM,
-        volatilityMultiplier: VolatilityMultiplierType.MEDIUM,
-        volatilityTrigger: VolatilityTriggerType.PER_BLOCK,
-      },
-      cooldownProtection: {
-        cooldownDuration: CooldownDurationType.MEDIUM,
-        penaltyFee: PenaltyFeeType.MEDIUM,
-      },
-      buyLimits: {
-        protectPeriod: 600,
-        maxBuyPerOrigin: 5,
-        isHookWhitelist: false,
-      },
-      mevProtectionEnabled: true,
-      customWallets: [],
-    },
-  },
-};
-
-await createFlashToken(args);
-```
-
 ## Key Differences from LBP
 
 | Feature      | Flash Token                                                | LBP                                    |
 | ------------ | ---------------------------------------------------------- | -------------------------------------- |
 | Launch Type  | Instant liquidity                                          | Bonding curve with sale period         |
 | Sale Period  | None - trades immediately                                  | Configurable duration with price curve |
-| Metadata     | Pre-uploaded IPFS URL required                             | Automatic IPFS upload handled          |
 | Package Type | Not applicable                                             | BASED / SUPER_BASED / ULTRA_BASED      |
 | Anti-Snipe   | `maxTxAmountPercent`, `protectBlocks`                      | Whitelist, allocation limits           |
 | API Endpoint | `/create-flash`                                            | `/create-lbp`                          |
@@ -279,32 +279,6 @@ await createFlashToken(args);
 
 ## Sandbox Mode
 
-For EVM chains, `isSandboxMode` is accepted in the SDK schema but **has no effect** — all operations execute on mainnet of the target chain (Ethereum, BSC, or Base). The parameter exists for API consistency with Solana workflows.
+For EVM chains, `isSandboxMode` is accepted in the SDK schema. If true, it will launch on based.bid's testnet app, allowing you to test configuration before you plan to go fully live.
 
-When using Solana, setting `isSandboxMode: true` routes to **testnet.based.bid** instead of the mainnet based.bid app, allowing experimentation without real funds. EVM always uses mainnet regardless of this setting.
-
-```typescript
-// isSandboxMode is accepted but ignored for EVM
-await createFlashToken({
-  chainId: 8453,
-  token: { name: 'Test', symbol: 'TST', totalSupply: 1_000_000, initialBuyAmount: 0, metadata: { logo: './logo.png' } },
-  dex: { version: EvmDexType.UNISWAP_V4, feeTier: 3 },
-  isSandboxMode: true,  // Accepted but no effect on EVM (always uses mainnet)
-});
-```
-
-## Transaction Confirmation
-
-**Important for AI Agents:** When executing this skill, you MUST:
-
-1. **Display the transaction cost preview** to the user (shown automatically - includes gas estimate and total cost in ETH)
-2. **Wait for user confirmation** before proceeding with the transaction
-3. **Do not submit the transaction** until the user explicitly approves
-
-The script will prompt: `Do you want to proceed? (y/n):`
-
-- Type `y` or `yes` to confirm and submit the transaction
-- Type `n` or `no` to cancel the operation
-- The transaction will NOT be submitted until explicit confirmation is received
-
-**Automated flows:** Set `SKIP_TX_CONFIRMATION=true` environment variable or use `isSandboxMode: true` to bypass the confirmation prompt (for testing/automation).
+> **Agent note:**: By default always put sandbox mode to false, only offer the user the option if they seem to want to play around with the advanced settings before launching on mainnet.

@@ -6,6 +6,39 @@ Claim accumulated trading fees from an LBP (Liquidity Bootstrapping Pool) on EVM
 
 Fee collection is a single on-chain transaction: the API returns the function name, contract address, ABI-encoded args, and `value` (msg.value), which are then signed and sent via `sendTransaction` using the `CollectFeeForLBPFacet` ABI.
 
+## Agent Behavior
+
+When the user requests to claim fees, collect these required inputs:
+
+1. **address**: Pool or board contract address (0x...)
+2. **target**: What to claim from - either `"pool"` or `"board"`
+3. **chainId**: Default is Base (8453). Options: 1 (Ethereum), 56 (BSC), 8453 (Base)
+
+**Confirmation:** Display fee amount estimate and require user confirmation before executing.
+
+### JSON Template
+
+Generate this config, replacing the marked values with user input:
+
+```json
+{
+  "isSandboxMode": true,
+  "chainId": <USER_INPUT:chainId>,
+  "target": "<USER_INPUT:target>",
+  "address": "<USER_INPUT:address>"
+}
+```
+
+**Default values:** chainId=8453
+
+**To execute:**
+```bash
+npm run evm:claim-fees -- evm-claim-fees <config_file> --dry-run
+# Then run without --dry-run to execute
+```
+
+---
+
 ## Invocation
 
 ```bash

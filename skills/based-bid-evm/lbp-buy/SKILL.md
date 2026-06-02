@@ -6,6 +6,45 @@ Buy tokens from a Liquidity Bootstrapping Pool (LBP) or a Flash Token on the bas
 
 The buy functionality supports multiple EVM chains (Ethereum, BSC, Base) and interacts with the TradeFacet smart contract to execute token purchases. The skill obtains transaction data from the BasedBid API, estimates gas, and submits the transaction on-chain.
 
+## Agent Behavior
+
+When the user requests to buy tokens, collect these required inputs:
+
+1. **address**: Token/LBP contract address (0x...)
+2. **amount**: Purchase amount in native token (e.g., 0.01)
+3. **chainId**: Default is Base (8453). Options: 1 (Ethereum), 56 (BSC), 8453 (Base)
+
+**Optional:**
+- slippage: 1, 5, or 10 percent (default: 5)
+- referrer: Wallet address for referral tracking (default: zero address)
+
+**Confirmation:** Display transaction preview (amount, estimated gas, total cost) and require user confirmation before executing.
+
+### JSON Template
+
+Generate this config, replacing the marked values with user input:
+
+```json
+{
+  "isSandboxMode": true,
+  "chainId": <USER_INPUT:chainId>,
+  "address": "<USER_INPUT:address>",
+  "slippage": <USER_INPUT:slippage>,
+  "referrer": "<USER_INPUT:referrer>",
+  "amount": <USER_INPUT:amount>
+}
+```
+
+**Default values:** chainId=8453, slippage=5, referrer=0x0000000000000000000000000000000000000000
+
+**To execute:**
+```bash
+npm run evm:lbp-buy -- evm-lbp-buy <config_file> --dry-run
+# Then run without --dry-run to execute
+```
+
+---
+
 ## Invocation
 
 Run the buy script directly using ts-node:

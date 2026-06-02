@@ -11,6 +11,79 @@ Unlike the EVM flash token flow, the Solana version requires **two sequential tr
 
 Both transactions are base64-encoded compiled VersionedTransactions returned by the API, signed with wallet + mint keypairs, and broadcast on Solana devnet.
 
+## Agent Behavior
+
+When the user requests a Flash Token launch on Solana, ALWAYS ask them to choose a mode:
+
+**"Would you like a Simple or Advanced launch?"**
+- **Simple** (default): Name, symbol, logo only. Uses recommended defaults. Bypasses transaction confirmation.
+- **Advanced**: Full control over all parameters. Requires explicit confirmation before transaction.
+
+Use `simple` if no preference specified.
+
+**For Simple mode:**
+- Collect: name, symbol, logo_url
+- All other parameters use defaults (chainId: 5011 devnet, meteora DEX)
+- Execute with `SKIP_TX_CONFIRMATION=true`
+
+**For Advanced mode:**
+- Follow the full Parameters section below
+- Require user confirmation before transaction
+
+### Simple Mode JSON Template
+
+Generate this config, replacing the marked values with user input:
+
+```json
+{
+  "isSandboxMode": true,
+  "package": "based",
+  "chainId": 5011,
+  "dex": {
+    "version": "meteora",
+    "feeTier": "1"
+  },
+  "token": {
+    "name": "<USER_INPUT:name>",
+    "symbol": "<USER_INPUT:symbol>",
+    "totalSupply": "1000000000",
+    "decimals": 9,
+    "metadata": {
+      "logo": "<USER_INPUT:logo_url>"
+    }
+  },
+  "meteora": {
+    "virtualUsd": 0.01,
+    "nativeSolPriceUsd": 150,
+    "feeTierIndex": "1",
+    "hasHookDynamicFee": true
+  },
+  "fees": {
+    "feeDistribution": false,
+    "dynamicFee": false,
+    "liquidityPercent": 10,
+    "buybackPercent": 10,
+    "rewardPercent": 10,
+    "marketingPercent": 5,
+    "creatorPercent": 5,
+    "customFeePercent": 0,
+    "customFees": [],
+    "collectQuoteThreshold": "0",
+    "collectBaseThreshold": "0",
+    "feeDistributionPayoutKind": "SOL",
+    "minTokenBalanceForDividends": "0"
+  }
+}
+```
+
+**To execute (simple mode):**
+```bash
+SKIP_TX_CONFIRMATION=true npm run solana:create-flash-token -- solana-create-flash-token <config_file> --dry-run
+# Then run without --dry-run to execute
+```
+
+---
+
 ## Invocation
 
 ```bash

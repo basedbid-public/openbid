@@ -21,10 +21,6 @@
     "feeTier": 3
   },
   "fees": {
-    "buyPoolCreator": 0.001,
-    "sellPoolCreator": 0.001,
-    "buyReferral": 0,
-    "graduation": 0.0025,
     "v4": {
       "liquidity": 1,
       "buyback": 1,

@@ -4,6 +4,36 @@
 
 Claim accumulated trading fees from an LBP (Liquidity Bootstrapping Pool) on **Solana**. This skill calls the BasedBid API at `/sol/collect-lbp-fees`, receives a base64-encoded compiled transaction, signs it with the user's wallet, and broadcasts it on Solana devnet.
 
+## Agent Behavior
+
+When the user requests to claim LBP fees on Solana, collect this required input:
+
+1. **address**: LBP token mint address (Solana base58)
+
+**Note:** chainId is always 5011 (Solana Devnet) for this skill.
+
+**Confirmation:** Display fee amount estimate and require user confirmation before executing.
+
+### JSON Template
+
+Generate this config, replacing the marked values with user input:
+
+```json
+{
+  "isSandboxMode": true,
+  "chainId": 5011,
+  "address": "<USER_INPUT:address>"
+}
+```
+
+**To execute:**
+```bash
+npm run solana:claim-lbp-fees -- solana-claim-lbp-fees <config_file> --dry-run
+# Then run without --dry-run to execute
+```
+
+---
+
 ## Invocation
 
 ```bash

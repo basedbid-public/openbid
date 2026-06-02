@@ -6,6 +6,44 @@ Sell tokens from a Liquidity Bootstrapping Pool (LBP) or Flash Token on **Solana
 
 Unlike the EVM sell flow (which requires two transactions: approve + sell), the Solana version typically requires only **one transaction** — the API returns a base64-encoded compiled VersionedTransaction that handles both token transfer and swap execution.
 
+## Agent Behavior
+
+When the user requests to sell tokens on Solana, collect these required inputs:
+
+1. **address**: Token mint address (Solana base58)
+2. **amount**: Amount to sell in token units
+
+**Optional:**
+- slippage: 1, 5, or 10 percent (default: 5)
+
+**Note:** chainId is always 5011 (Solana Devnet) for this skill.
+
+**Confirmation:** Display transaction preview and require user confirmation before executing.
+
+### JSON Template
+
+Generate this config, replacing the marked values with user input:
+
+```json
+{
+  "isSandboxMode": true,
+  "chainId": 5011,
+  "address": "<USER_INPUT:address>",
+  "amount": <USER_INPUT:amount>,
+  "slippage": <USER_INPUT:slippage>
+}
+```
+
+**Default values:** slippage=5
+
+**To execute:**
+```bash
+npm run solana:lbp-sell -- solana-lbp-sell <config_file> --dry-run
+# Then run without --dry-run to execute
+```
+
+---
+
 ## Invocation
 
 ```bash

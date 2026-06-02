@@ -11,6 +11,71 @@ Unlike the EVM flow, the Solana LBP creation involves:
 - Signing with **wallet first, then mint keypair** (order matters)
 - Optional fee-distribution setup via a separate endpoint
 
+## Agent Behavior
+
+When the user requests an LBP launch on Solana, ALWAYS ask them to choose a mode:
+
+**"Would you like a Simple or Advanced launch?"**
+- **Simple** (default): Name, symbol, logo only. Uses recommended defaults. Bypasses transaction confirmation.
+- **Advanced**: Full control over all parameters. Requires explicit confirmation before transaction.
+
+Use `simple` if no preference specified.
+
+**For Simple mode:**
+- Collect: name, symbol, logo_url
+- All other parameters use defaults (chainId: 5011 devnet, meteora DEX)
+- Execute with `SKIP_TX_CONFIRMATION=true`
+
+**For Advanced mode:**
+- Follow the full Parameters section below
+- Require user confirmation before transaction
+
+### Simple Mode JSON Template
+
+Generate this config, replacing the marked values with user input:
+
+```json
+{
+  "isSandboxMode": true,
+  "package": "based",
+  "chainId": 5011,
+  "board": "",
+  "token": {
+    "name": "<USER_INPUT:name>",
+    "symbol": "<USER_INPUT:symbol>",
+    "totalSupply": "1000000000",
+    "initialBuyAmount": "0",
+    "metadata": {
+      "logo": "<USER_INPUT:logo_url>"
+    }
+  },
+  "sale": {
+    "marketCap": "9000",
+    "startTime": 0,
+    "maxAllocationPerUser": "0",
+    "whitelistedAddresses": []
+  },
+  "dex": {
+    "version": "meteora",
+    "feeTier": "1"
+  },
+  "fees": {
+    "buyPoolCreator": 0,
+    "sellPoolCreator": 0,
+    "buyReferral": 0,
+    "graduation": 0
+  }
+}
+```
+
+**To execute (simple mode):**
+```bash
+SKIP_TX_CONFIRMATION=true npm run solana:create-lbp -- solana-create-lbp <config_file> --dry-run
+# Then run without --dry-run to execute
+```
+
+---
+
 ## Invocation
 
 ```bash

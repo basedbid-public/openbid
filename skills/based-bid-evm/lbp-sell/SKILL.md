@@ -15,6 +15,47 @@ Unlike buying, selling requires **two sequential transactions**:
 
 Both transactions must succeed for the sell to complete.
 
+## Agent Behavior
+
+When the user requests to sell tokens, collect these required inputs:
+
+1. **address**: Token contract address (0x...)
+2. **amount**: Amount to sell in token units
+3. **chainId**: Default is Base (8453). Options: 1 (Ethereum), 56 (BSC), 8453 (Base)
+
+**Optional:**
+- slippage: 1, 5, or 10 percent (default: 5)
+- referrer: Wallet address for referral tracking (default: zero address)
+
+**Important:** Selling requires TWO transactions (approve + sell). Inform the user before proceeding.
+
+**Confirmation:** Display transaction preview (amount, estimated gas for both txs, total cost) and require user confirmation before executing.
+
+### JSON Template
+
+Generate this config, replacing the marked values with user input:
+
+```json
+{
+  "isSandboxMode": true,
+  "chainId": <USER_INPUT:chainId>,
+  "address": "<USER_INPUT:address>",
+  "slippage": <USER_INPUT:slippage>,
+  "referrer": "<USER_INPUT:referrer>",
+  "amount": <USER_INPUT:amount>
+}
+```
+
+**Default values:** chainId=8453, slippage=5, referrer=0x0000000000000000000000000000000000000000
+
+**To execute:**
+```bash
+npm run evm:lbp-sell -- evm-lbp-sell <config_file> --dry-run
+# Then run without --dry-run to execute
+```
+
+---
+
 ## Invocation
 
 Run the sell script directly using ts-node:

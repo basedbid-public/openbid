@@ -6,6 +6,46 @@ Buy tokens from a Liquidity Bootstrapping Pool (LBP) or Flash Token on **Solana*
 
 Unlike the EVM buy flow, the Solana version receives a base64-encoded compiled VersionedTransaction from the API, attaches blockhash lifetime, signs it with the user's wallet, and sends it via Solana RPC.
 
+## Agent Behavior
+
+When the user requests to buy tokens on Solana, collect these required inputs:
+
+1. **address**: Token mint address (Solana base58)
+2. **amount**: Amount to buy in SOL
+
+**Optional:**
+- slippage: 1, 5, or 10 percent (default: 5)
+- referrer: Wallet address for referral (default: zero address)
+
+**Note:** chainId is always 5011 (Solana Devnet) for this skill.
+
+**Confirmation:** Display transaction preview and require user confirmation before executing.
+
+### JSON Template
+
+Generate this config, replacing the marked values with user input:
+
+```json
+{
+  "isSandboxMode": true,
+  "chainId": 5011,
+  "address": "<USER_INPUT:address>",
+  "amount": <USER_INPUT:amount>,
+  "slippage": <USER_INPUT:slippage>,
+  "referrer": "<USER_INPUT:referrer>"
+}
+```
+
+**Default values:** slippage=5, referrer=11111111111111111111111111111111 (zero address)
+
+**To execute:**
+```bash
+npm run solana:lbp-buy -- solana-lbp-buy <config_file> --dry-run
+# Then run without --dry-run to execute
+```
+
+---
+
 ## Invocation
 
 ```bash

@@ -29,6 +29,44 @@ Before using this skill, ensure:
 2. Logo image file exists and is accessible
 3. (Optional) Banner image file if you want a banner
 
+## Agent Behavior
+
+When the user requests to create a board on Solana, collect these required inputs:
+
+1. **title**: Board name (1-100 characters)
+2. **description**: Board description (1-1000 characters)
+3. **logo**: Path to logo image file
+
+**Optional:**
+- banner: Path to banner image file
+- chainId: Default is Solana Devnet (5011)
+
+**Confirmation:** Display board details and require user confirmation before creating.
+
+### JSON Template
+
+Generate this config, replacing the marked values with user input:
+
+```json
+{
+  "isSandboxMode": true,
+  "chainId": 5011,
+  "title": "<USER_INPUT:title>",
+  "description": "<USER_INPUT:description>",
+  "logo": "<USER_INPUT:logo_path>",
+  "banner": "<USER_INPUT:banner_path>",
+  "fees": [{ "launchPackage": "based", "feePer": "0.001" }]
+}
+```
+
+**To execute:**
+```bash
+npm run solana:create-board -- solana-create-board <config_file> --dry-run
+# Then run without --dry-run to execute
+```
+
+---
+
 ## Usage
 
 ### Basic Usage

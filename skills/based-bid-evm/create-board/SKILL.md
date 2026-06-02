@@ -18,6 +18,44 @@ When you create a board, you can:
 - **Logo**: Visual branding for your board (displayed on the platform)
 - **Metadata**: All board information stored on IPFS for decentralization
 
+## Agent Behavior
+
+When the user requests to create a board, collect these required inputs:
+
+1. **title**: Board name (1-100 characters)
+2. **description**: Board description (1-1000 characters)
+3. **logo**: Path to logo image file
+
+**Optional:**
+- banner: Path to banner image file
+- chainId: Default is Base (8453). Options: 1 (Ethereum), 56 (BSC), 8453 (Base)
+
+**Confirmation:** Display board details and require user confirmation before creating.
+
+### JSON Template
+
+Generate this config, replacing the marked values with user input:
+
+```json
+{
+  "isSandboxMode": true,
+  "chainId": 8453,
+  "title": "<USER_INPUT:title>",
+  "description": "<USER_INPUT:description>",
+  "logo": "<USER_INPUT:logo_path>",
+  "banner": "<USER_INPUT:banner_path>",
+  "fees": [{ "launchPackage": "based", "feePer": "0.001" }]
+}
+```
+
+**To execute:**
+```bash
+npm run evm:create-board -- evm-create-board <config_file> --dry-run
+# Then run without --dry-run to execute
+```
+
+---
+
 ## Invocation
 
 Run the create-board script directly using ts-node:

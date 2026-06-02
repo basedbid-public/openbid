@@ -6,6 +6,36 @@ Claim accumulated trading fees from a **Flash Token** on **Solana**. This skill 
 
 This is the flash-token-specific variant of fee collection (as opposed to `claim-lbp-fees` which is for regular LBPs).
 
+## Agent Behavior
+
+When the user requests to claim flash token fees on Solana, collect this required input:
+
+1. **address**: Flash token mint address (Solana base58)
+
+**Note:** chainId is always 5011 (Solana Devnet) for this skill.
+
+**Confirmation:** Display fee amount estimate and require user confirmation before executing.
+
+### JSON Template
+
+Generate this config, replacing the marked values with user input:
+
+```json
+{
+  "isSandboxMode": true,
+  "chainId": 5011,
+  "address": "<USER_INPUT:address>"
+}
+```
+
+**To execute:**
+```bash
+npm run solana:claim-flash-fees -- solana-claim-flash-fees <config_file> --dry-run
+# Then run without --dry-run to execute
+```
+
+---
+
 ## Invocation
 
 ```bash

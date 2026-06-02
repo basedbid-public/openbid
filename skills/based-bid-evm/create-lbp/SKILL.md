@@ -10,6 +10,104 @@ Fee Builder allows users to reroute their fees however they like (up to `dex.fee
 
 **Optional `boardTitle`**: Only send this if the user explicitly wants to launch under a custom board they (or someone else) created via the create-board skill. If omitted, no board is sent — the token launches without being tied to any specific board. **Never send `'based'` or any default value unless the user explicitly requests it.**
 
+## Agent Behavior
+
+When the user requests an LBP launch, ALWAYS ask them to choose a mode:
+
+**"Would you like a Simple or Advanced launch?"**
+- **Simple** (default): Name, symbol, logo only. Uses recommended defaults. Bypasses transaction confirmation.
+- **Advanced**: Full control over all parameters. Requires explicit confirmation before transaction.
+
+Use `simple` if no preference specified.
+
+**For Simple mode:**
+- Collect: name, symbol, logo_url
+- All other parameters use defaults
+- Execute with `SKIP_TX_CONFIRMATION=true`
+
+**For Advanced mode:**
+- Follow the full Parameters section below
+- Require user confirmation before transaction
+
+### Simple Mode JSON Template
+
+Generate this config, replacing the marked values with user input:
+
+```json
+{
+  "isSandboxMode": true,
+  "package": "based",
+  "chainId": 8453,
+  "token": {
+    "name": "<USER_INPUT:name>",
+    "symbol": "<USER_INPUT:symbol>",
+    "totalSupply": 1000000,
+    "initialBuyAmount": 0,
+    "metadata": {
+      "logo": "<USER_INPUT:logo_url>",
+      "twitter": "",
+      "telegram": "",
+      "website": "",
+      "discord": "",
+      "description": ""
+    }
+  },
+  "sale": {
+    "startTime": 0,
+    "maxAllocationPerUser": 0,
+    "maxAllocationPerWhitelistedUser": 0,
+    "delayTradeTime": 0,
+    "whitelistedAddresses": []
+  },
+  "dex": {
+    "version": "uniswap_v4",
+    "feeTier": 3
+  },
+  "fees": {
+    "buyPoolCreator": 0.001,
+    "sellPoolCreator": 0.001,
+    "buyReferral": 0,
+    "graduation": 0.0025,
+    "v4": {
+      "liquidity": 1,
+      "buyback": 1,
+      "reward": {
+        "token": "USDC",
+        "amount": 1,
+        "minTokenBalanceForDividends": 0.01
+      },
+      "customWallets": [],
+      "feeThreshold": 0.1,
+      "tieredFeesEnabled": false,
+      "dynamicFees": {
+        "hasHookDynamicFee": true,
+        "volatilityDecayPeriod": "medium",
+        "volatilityMultiplier": "medium",
+        "volatilityTrigger": "per_block"
+      },
+      "cooldownProtection": {
+        "cooldownDuration": "medium",
+        "penaltyFee": "medium"
+      },
+      "buyLimits": {
+        "protectPeriod": 600,
+        "maxBuyPerOrigin": 5,
+        "isHookWhitelist": false
+      },
+      "mevProtectionEnabled": false
+    }
+  }
+}
+```
+
+**To execute (simple mode):**
+```bash
+SKIP_TX_CONFIRMATION=true npm run evm:create-lbp -- evm-create-lbp <config_file> --dry-run
+# Then run without --dry-run to execute
+```
+
+---
+
 ## Invocation
 
 Run the create-lbp script directly using ts-node:
