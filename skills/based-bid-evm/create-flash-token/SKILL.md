@@ -77,13 +77,11 @@ The payload for the `args` parameter of the `createEvmFlashToken` should look so
       "liquidity": 1,
       "buyback": 1,
       "feeThreshold": 0.1,
-      "customWallets": [
-        {
-          "name": "Creator",
-          "address": "<USER_WALLET_ADDRESS>",
-          "amount": 1
-        }
-      ]
+      "reward": {
+        "token": "ETH",
+        "amount": 1,
+        "minTokenBalanceForDividends": 0.01
+      }
     }
   }
 }
