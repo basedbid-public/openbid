@@ -3,8 +3,8 @@ import { CHAIN_NAME_CONFIG, CHAIN_SLUG_CONFIG } from 'constants/chain-config';
 import 'dotenv/config';
 import { ApiType } from 'enums';
 import { EvmApiResponse, OpenbidRunOptions } from 'interfaces/common';
-import { CreateLbpEvmApi, evmLbpCreateApiSchema } from 'schema/lbp/evm/api';
-import { CreateLbpEvmSdk } from 'schema/lbp/evm/sdk';
+import { CreateLbpEvmApi } from 'schema/lbp/evm/api';
+import { CreateLbpEvmSdk, evmLbpCreateSchema } from 'schema/lbp/evm/sdk';
 import {
   BasedBidApi,
   EvmValidator,
@@ -27,7 +27,7 @@ export const createEvmLbp = async (
   }
 
   const { data, env } = EvmValidator.validate<CreateLbpEvmSdk>(
-    evmLbpCreateApiSchema,
+    evmLbpCreateSchema,
     args,
     options,
   );

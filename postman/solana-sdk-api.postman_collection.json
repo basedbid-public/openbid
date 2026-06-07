@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "1a988250-a808-4548-a167-b694f41bc1f9",
     "name": "Solana SDK API",
-    "description": "BasedBid Solana SDK endpoints for creating boards, LBPs, buying, selling, and fee collection.\n\n**Base URLs**\n- Sandbox SDK: `https://cdn.based.bid/api`\n- Sandbox Platform: `https://testnet.based.bid/api`\n- Production SDK: `https://static.based.bid/api`\n- Production Platform: `https://based.bid/api`\n\n**Headers**\n- `Content-Type: application/json`\n- `x-api-key: <your-api-key>`\n\n**Endpoints**\n- `POST /sol/create-lbp` - Create LBP\n- `POST /sol/apply-sub-board` - Create Board\n- `POST /sol/lbp-buy` - Buy LBP tokens\n- `POST /sol/lbp-sell` - Sell LBP tokens\n- `POST /sol/collect-lbp-fees` - Collect LBP fees\n- `POST /sol/confirm-launch` - Confirm LBP launch\n- `POST /sol/release-vanity` - Release vanity address\n- `POST /token/fee-distribution` - Set fee distribution (Platform API)",
+    "description": "BasedBid Solana SDK endpoints for creating boards, LBPs, flash tokens, buying, selling, and fee collection.\n\n**Base URLs**\n- Sandbox SDK: `https://cdn.based.bid/api`\n- Sandbox Platform: `https://testnet.based.bid/api`\n- Production SDK: `https://static.based.bid/api`\n- Production Platform: `https://based.bid/api`\n\n**Headers**\n- `Content-Type: application/json`\n- `x-api-key: <your-api-key>`\n\n**Endpoints**\n- `POST /sol/create-lbp` - Create LBP\n- `POST /sol/create-flash-tx1` - Create Flash Token (TX1: mint)\n- `POST /sol/create-flash-tx2` - Create Flash Token (TX2: market init)\n- `POST /sol/apply-sub-board` - Create Board\n- `POST /sol/lbp-buy` - Buy LBP tokens\n- `POST /sol/lbp-sell` - Sell LBP tokens\n- `POST /sol/collect-lbp-fees` - Collect LBP fees\n- `POST /sol/collect-flash-fees` - Collect Flash Token fees\n- `POST /sol/confirm-launch` - Confirm LBP or Flash Token launch\n- `POST /sol/release-vanity` - Release vanity address\n- `POST /token/fee-distribution` - Set fee distribution (Platform API)",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "54841686",
     "_collection_link": "https://go.postman.co/collection/54841686-1a988250-a808-4548-a167-b694f41bc1f9?source=collection_link"
@@ -51,12 +51,8 @@
         },
         "url": {
           "raw": "{{sdkBaseUrl}}/upload",
-          "host": [
-            "{{sdkBaseUrl}}"
-          ],
-          "path": [
-            "upload"
-          ]
+          "host": ["{{sdkBaseUrl}}"],
+          "path": ["upload"]
         },
         "description": "Multipart upload for image files. Field name must be `file`.\n\n**When is API key required?**\n\nThe API key is only needed when launching under a **custom board**. Passing an empty string for the board launches under the default \"based\" board (open to all). Custom boards require ownership verification.\n\n**Success response**:\n\n``` json\n{\n  \"ok\": true,\n  \"response\": { \"cid\": \"...\", \"url\": \"https://ipfs.based.bid/ipfs/...\" }\n}\n\n ```\n\nUse `response.url` as `logo` in metadata JSON."
       },
@@ -116,15 +112,57 @@
         },
         "url": {
           "raw": "{{sdkBaseUrl}}/upload/json",
-          "host": [
-            "{{sdkBaseUrl}}"
-          ],
-          "path": [
-            "upload",
-            "json"
-          ]
+          "host": ["{{sdkBaseUrl}}"],
+          "path": ["upload", "json"]
         },
         "description": "JSON metadata pinned to IPFS. The `seed` field is a numeric string generated in the pre-request script.\n\n**When is API key required?**\n\nThe API key is only needed when launching under a **custom board**. Passing an empty string for the board launches under the default \"based\" board (open to all). Custom boards require ownership verification.\n\n**Required fields**\n\n- `name` - Token name\n    \n- `symbol` - Token symbol\n    \n- `decimals` - Must be 9 for Solana\n    \n- `totalSupply` - Token supply as string\n    \n- `logo` - URL from step 1\n    \n- `seed` - Must match the `data.seed` in create-lbp request\n    \n\n**Success response**:\n\n``` json\n{\n  \"ok\": true,\n  \"response\": { \"cid\": \"...\", \"url\": \"https://ipfs.based.bid/ipfs/...\" }\n}\n\n ```"
+      },
+      "response": []
+    },
+    {
+      "name": "IPFS - Upload Flash Token Metadata JSON",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+              "try {",
+              "  const json = pm.response.json();",
+              "  if (json && json.response && json.response.url) {",
+              "    pm.collectionVariables.set('metadata_url', json.response.url);",
+              "    console.log('Set collection variable metadata_url =', json.response.url);",
+              "  }",
+              "} catch (e) { console.warn('Could not parse JSON', e); }"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "x-api-key",
+            "value": "{{apiKey}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Test Flash Token\",\n  \"symbol\": \"FLASH\",\n  \"decimals\": 9,\n  \"totalSupply\": \"1000000000\",\n  \"logo\": \"{{logo_url}}\",\n  \"twitter\": \"https://x.com/example\",\n  \"telegram\": \"https://t.me/example\",\n  \"website\": \"https://example.com\",\n  \"discord\": \"https://discord.gg/example\",\n  \"description\": \"Flash token description\"\n}"
+        },
+        "url": {
+          "raw": "{{sdkBaseUrl}}/upload/json",
+          "host": ["{{sdkBaseUrl}}"],
+          "path": ["upload", "json"]
+        },
+        "description": "JSON metadata pinned to IPFS for **Flash Token** launches. Unlike LBP metadata, no `seed` field is required.\n\n**When is API key required?**\n\nThe API key is only needed when launching under a **custom board**.\n\n**Required fields**\n\n- `name` - Token name\n- `symbol` - Token symbol\n- `decimals` - Must be 9 for Solana\n- `totalSupply` - Token supply as string\n- `logo` - URL from IPFS logo upload\n\n**Success response**:\n\n``` json\n{\n  \"ok\": true,\n  \"response\": { \"cid\": \"...\", \"url\": \"https://ipfs.based.bid/ipfs/...\" }\n}\n```\n\nUse `response.url` as `token.metadataUrl` in create-flash-tx1."
       },
       "response": []
     },
@@ -188,19 +226,144 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"chainId\": {{chainId}},\n  \"signer\": \"{{signer}}\",\n  \"data\": {\n    \"seed\": \"{{seed}}\",\n    \"advanced\": false,\n    \"package\": 0,\n    \"isXSale\": false,\n    \"hasFee\": false,\n    \"hasMarketCap\": false,\n    \"hasSoftCap\": false,\n    \"hasStartTime\": false,\n    \"hasEndTime\": false,\n    \"hasMaxAllocationPerUser\": false,\n    \"isWhitelist\": false,\n    \"token\": {\n      \"name\": \"Test Token\",\n      \"symbol\": \"TEST\",\n      \"totalSupply\": \"1000000000\",\n      \"decimals\": 9,\n      \"initialBuyAmount\": \"0\",\n      \"metadataUrl\": \"{{metadata_url}}\",\n      \"raiseTokenDecimals\": 9\n    },\n    \"dex\": {\n      \"routerId\": \"meteora\",\n      \"meteoraFeeTierIndex\": \"1\"\n    },\n    \"sale\": {\n      \"marketCap\": \"10000\",\n      \"softCap\": \"2.396026490066225166\",\n      \"startTime\": 0,\n      \"endTime\": 0,\n      \"initialBuyAmount\": \"0\",\n      \"baseTokenForPair\": \"So11111111111111111111111111111111111111112\",\n      \"baseTokenDecimals\": 9,\n      \"buyReferralFeePer\": \"0\",\n      \"sellMemeTokenOwnerFeePer\": \"0\",\n      \"buyMemeTokenOwnerFeePer\": \"0\",\n      \"finalizeFeePer\": \"0\",\n      \"maxAllocationPerUser\": \"0\",\n      \"referrer\": \"11111111111111111111111111111111\"\n    },\n    \"baseTokenAddress\": \"So11111111111111111111111111111111111111112\",\n    \"baseTokenDecimals\": 9\n  }\n}"
+          "raw": "{\n  \"chainId\": {{chainId}},\n  \"signer\": \"{{signer}}\",\n  \"data\": {\n    \"seed\": \"{{seed}}\",\n    \"advanced\": false,\n    \"package\": 0,\n    \"amountsInRaiseToken\": true,\n    \"isXSale\": false,\n    \"hasFee\": false,\n    \"hasMarketCap\": false,\n    \"hasSoftCap\": false,\n    \"hasStartTime\": false,\n    \"hasEndTime\": false,\n    \"hasMaxAllocationPerUser\": false,\n    \"isWhitelist\": false,\n    \"token\": {\n      \"name\": \"Test Token\",\n      \"symbol\": \"TEST\",\n      \"totalSupply\": \"1000000000\",\n      \"decimals\": 9,\n      \"initialBuyAmount\": \"0\",\n      \"initialBuySupplyPercent\": \"0\",\n      \"metadataUrl\": \"{{metadata_url}}\",\n      \"raiseTokenDecimals\": 9\n    },\n    \"dex\": {\n      \"routerId\": \"meteora\",\n      \"meteoraFeeTierIndex\": \"1\"\n    },\n    \"sale\": {\n      \"marketCap\": \"10000\",\n      \"softCap\": \"2.396026490066225166\",\n      \"startTime\": 0,\n      \"endTime\": 0,\n      \"baseTokenForPair\": \"So11111111111111111111111111111111111111112\",\n      \"baseTokenDecimals\": 9,\n      \"amountsInRaiseToken\": true,\n      \"buyReferralFeePer\": \"0\",\n      \"sellMemeTokenOwnerFeePer\": \"0\",\n      \"buyMemeTokenOwnerFeePer\": \"0\",\n      \"finalizeFeePer\": \"0\",\n      \"maxAllocationPerUser\": \"0\",\n      \"referrer\": \"11111111111111111111111111111111\"\n    },\n    \"baseTokenAddress\": \"So11111111111111111111111111111111111111112\",\n    \"baseTokenDecimals\": 9\n  }\n}"
         },
         "url": {
           "raw": "{{sdkBaseUrl}}/sol/create-lbp",
-          "host": [
-            "{{sdkBaseUrl}}"
-          ],
-          "path": [
-            "sol",
-            "create-lbp"
-          ]
+          "host": ["{{sdkBaseUrl}}"],
+          "path": ["sol", "create-lbp"]
         },
-        "description": "Builds the unsigned Solana transaction for LBP creation.\n\n**When is API key required?**\n\nThe API key is only needed when launching under a **custom board**. Passing an empty string for the board launches under the default \"based\" board (open to all). Custom boards require ownership verification.\n\n**Key fields**\n\n- `signer` - Creator wallet (base58)\n    \n- `data.seed` - Must match seed in metadata JSON\n    \n- `data.token.metadataUrl` - Must be `https://ipfs.based.bid/ipfs/...`\n    \n- `data.dex.routerId` - `meteora` or `raydium`\n    \n- `data.package` - 0 = Based, 1 = Super Based, 2 = third tier\n    \n\n**Response**:\n\n``` json\n{\n  \"ok\": true,\n  \"transaction\": \"<base64 compiled VersionedTransaction>\",\n  \"mintAddress\": \"<pubkey>\",\n  \"mintSignerSecretHex\": \"<128 hex chars>\",\n  \"blockhash\": \"<recent blockhash>\",\n  \"lastValidBlockHeight\": 0\n}\n\n ```\n\n**Signing**: Wallet first, mint signer second."
+        "description": "Builds the unsigned Solana transaction for LBP creation.\n\n**When is API key required?**\n\nThe API key is only needed when launching under a **custom board**. Passing an empty string for the board launches under the default \"based\" board (open to all). Custom boards require ownership verification.\n\n**Key fields**\n\n- `signer` - Creator wallet (base58)\n    \n- `data.seed` - Must match seed in metadata JSON\n    \n- `data.token.metadataUrl` - Must be `https://ipfs.based.bid/ipfs/...`\n    \n- `data.amountsInRaiseToken` - Optional boolean. When `true`, `data.token.initialBuyAmount` is interpreted as a human-readable **SOL** amount (e.g. `\"0.1\"` = 0.1 SOL). Also set on `data.sale.amountsInRaiseToken` when sale amounts use the same convention.\n    \n- `data.token.initialBuyAmount` - Creator's initial buy at launch. Meaning depends on `amountsInRaiseToken`: SOL when `true`, otherwise in raise-token smallest units. Use `\"0\"` when using `initialBuySupplyPercent` instead.\n    \n- `data.token.initialBuySupplyPercent` - Percentage of total token supply the creator buys at launch (numeric string, e.g. `\"0.1\"` = 0.1% of supply). Use `\"0\"` to skip. The backend calculates the required SOL from the LBP curve; set `initialBuyAmount` to `\"0\"` when using this field.\n    \n- `data.dex.routerId` - `meteora` or `raydium`\n    \n- `data.package` - 0 = Based, 1 = Super Based, 2 = third tier\n    \n\n**Response**:\n\n``` json\n{\n  \"ok\": true,\n  \"transaction\": \"<base64 compiled VersionedTransaction>\",\n  \"mintAddress\": \"<pubkey>\",\n  \"mintSignerSecretHex\": \"<128 hex chars>\",\n  \"blockhash\": \"<recent blockhash>\",\n  \"lastValidBlockHeight\": 0\n}\n\n ```\n\n**Signing**: Wallet first, mint signer second."
+      },
+      "response": []
+    },
+    {
+      "name": "Create Flash Token TX1",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "if (!pm.collectionVariables.get('metadata_url')) {",
+              "  console.warn('metadata_url is empty — run IPFS Upload steps first');",
+              "}"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Has transaction (base64)', function () {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json).to.have.property('transaction');",
+              "});",
+              "pm.test('Has mintSignerSecretHex', function () {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json).to.have.property('mintSignerSecretHex');",
+              "});",
+              "try {",
+              "  const json = pm.response.json();",
+              "  if (json.mintAddress) pm.collectionVariables.set('mint_address', json.mintAddress);",
+              "  if (json.flashSeed) pm.collectionVariables.set('flash_seed', json.flashSeed);",
+              "  if (json.meteoraTokenAccountSeed) pm.collectionVariables.set('meteora_token_account_seed', json.meteoraTokenAccountSeed);",
+              "} catch (e) { console.warn('Could not parse JSON', e); }"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "x-api-key",
+            "value": "{{apiKey}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"chainId\": {{chainId}},\n  \"signer\": \"{{signer}}\",\n  \"flashDex\": 1,\n  \"token\": {\n    \"name\": \"Test Flash Token\",\n    \"symbol\": \"FLASH\",\n    \"metadataUrl\": \"{{metadata_url}}\",\n    \"totalSupply\": \"1000000000\",\n    \"decimals\": 9,\n    \"initialBuySupplyPercent\": \"0\"\n  },\n  \"hasInitialSwap\": false,\n  \"baseTokenMint\": \"So11111111111111111111111111111111111111112\",\n  \"virtualUsd\": 0.01,\n  \"nativeSolPriceUsd\": 150,\n  \"meteoraFeeTierIndex\": \"1\",\n  \"hasHookDynamicFee\": true,\n  \"boardSeed\": \"\"\n}"
+        },
+        "url": {
+          "raw": "{{sdkBaseUrl}}/sol/create-flash-tx1",
+          "host": ["{{sdkBaseUrl}}"],
+          "path": ["sol", "create-flash-tx1"]
+        },
+        "description": "Builds the unsigned Solana transaction for Flash Token creation (step 1 of 2: mint).\n\n**Flow**: TX1 → sign & broadcast → TX2 → sign & broadcast → confirm-launch\n\n**When is API key required?**\n\nThe API key is only needed when launching under a **custom board**.\n\n**Key fields**\n\n- `signer` - Creator wallet (base58)\n- `flashDex` - `1` = Meteora, `2` = Raydium\n- `token.metadataUrl` - Must be `https://ipfs.based.bid/ipfs/...`\n- `token.initialBuySupplyPercent` - Percentage of total supply for creator initial buy (e.g. `\"0.1\"`). Set `\"0\"` to skip. When > 0, set `hasInitialSwap` to `true`.\n\n**Meteora fields** (`flashDex: 1`)\n\n- `baseTokenMint` - SOL mint (`So11111111111111111111111111111111111111112`)\n- `virtualUsd`, `nativeSolPriceUsd`, `meteoraFeeTierIndex`, `hasHookDynamicFee`, `boardSeed`\n\n**Raydium fields** (`flashDex: 2`)\n\n- `raydiumFeeTierIndex`, `finalStartPrice`\n\n**Response**:\n\n``` json\n{\n  \"ok\": true,\n  \"transaction\": \"<base64>\",\n  \"mintAddress\": \"<pubkey>\",\n  \"mintSignerSecretHex\": \"<128 hex chars>\",\n  \"flashSeed\": \"<seed>\",\n  \"meteoraTokenAccountSeed\": \"<seed>\",\n  \"positionNftSignerSecretHex\": \"<optional>\",\n  \"blockhash\": \"<recent blockhash>\",\n  \"lastValidBlockHeight\": 0\n}\n```\n\n**Signing**: Wallet first, then mint signer (and position NFT signer if returned). After broadcasting, set `tx1_signature` collection variable before running TX2."
+      },
+      "response": []
+    },
+    {
+      "name": "Create Flash Token TX2",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "if (!pm.collectionVariables.get('mint_address')) {",
+              "  console.warn('mint_address is empty — run Create Flash Token TX1 first');",
+              "}",
+              "if (!pm.collectionVariables.get('flash_seed')) {",
+              "  console.warn('flash_seed is empty — run Create Flash Token TX1 first');",
+              "}",
+              "if (!pm.collectionVariables.get('tx1_signature')) {",
+              "  console.warn('tx1_signature is empty — paste TX1 signature after signing');",
+              "}"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Has transaction (base64)', function () {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json).to.have.property('transaction');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "x-api-key",
+            "value": "{{apiKey}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"chainId\": {{chainId}},\n  \"signer\": \"{{signer}}\",\n  \"flashDex\": 1,\n  \"tx1Signature\": \"{{tx1_signature}}\",\n  \"flashSeed\": \"{{flash_seed}}\",\n  \"mintAddress\": \"{{mint_address}}\",\n  \"baseTokenMint\": \"So11111111111111111111111111111111111111112\",\n  \"raiseTokenDecimals\": 9,\n  \"token\": {\n    \"totalSupply\": \"1000000000\",\n    \"decimals\": 9,\n    \"initialBuySupplyPercent\": \"0\"\n  },\n  \"virtualUsd\": 0.01,\n  \"meteoraFeeTierIndex\": \"1\",\n  \"meteoraTokenAccountSeed\": \"{{meteora_token_account_seed}}\",\n  \"finalStartPrice\": 0.05\n}"
+        },
+        "url": {
+          "raw": "{{sdkBaseUrl}}/sol/create-flash-tx2",
+          "host": ["{{sdkBaseUrl}}"],
+          "path": ["sol", "create-flash-tx2"]
+        },
+        "description": "Builds the unsigned Solana transaction for Flash Token market initialization (step 2 of 2).\n\n**Prerequisites**\n\n- TX1 signed and broadcast; set `tx1_signature` collection variable\n- `flash_seed`, `mint_address`, and `meteora_token_account_seed` populated from TX1 response\n\n**Key fields**\n\n- `flashDex` - Must match TX1 (`1` = Meteora, `2` = Raydium)\n- `tx1Signature` - Confirmed TX1 transaction signature\n- `flashSeed` - From TX1 response\n- `mintAddress` - From TX1 response\n\n**Meteora fields** (`flashDex: 1`)\n\n- `virtualUsd`, `meteoraFeeTierIndex`, `meteoraTokenAccountSeed`, `finalStartPrice`\n\n**Raydium fields** (`flashDex: 2`)\n\n- `raydiumFeeTierIndex`, `finalStartPrice`\n\n**Response**:\n\n``` json\n{\n  \"ok\": true,\n  \"transaction\": \"<base64>\",\n  \"mintAddress\": \"<pubkey>\",\n  \"positionNftSignerSecretHex\": \"<optional for Raydium>\",\n  \"blockhash\": \"<recent blockhash>\",\n  \"lastValidBlockHeight\": 0\n}\n```\n\n**Signing**: Wallet (+ position NFT signer for Raydium if returned). Then call **Confirm Launch** with TX1 signature."
       },
       "response": []
     },
@@ -259,13 +422,8 @@
         },
         "url": {
           "raw": "{{sdkBaseUrl}}/sol/apply-sub-board",
-          "host": [
-            "{{sdkBaseUrl}}"
-          ],
-          "path": [
-            "sol",
-            "apply-sub-board"
-          ]
+          "host": ["{{sdkBaseUrl}}"],
+          "path": ["sol", "apply-sub-board"]
         },
         "description": "Creates a Board on Solana.\n\n**When is API key required?**\n\nThe API key is only needed when launching under a **custom board**. Passing an empty string for the board launches under the default \"based\" board (open to all). Custom boards require ownership verification.\n\n**Required fields**\n\n- `signer` - Creator wallet (base58)\n    \n- `seed` - Numeric seed for the board\n    \n- `metaData` - IPFS URL for board metadata\n    \n- `flashLaunchFeePer` - Fee percentage for flash launch\n    \n- `fees` - Array of fee configurations per launch package\n    \n\n**Response**:\n\n``` json\n{\n  \"ok\": true,\n  \"transaction\": \"<base64>\",\n  \"boardId\": \"<pubkey>\",\n  \"boardTitle\": \"...\",\n  \"blockhash\": \"...\",\n  \"lastValidBlockHeight\": 0\n}\n\n ```"
       },
@@ -306,13 +464,8 @@
         },
         "url": {
           "raw": "{{sdkBaseUrl}}/sol/lbp-buy",
-          "host": [
-            "{{sdkBaseUrl}}"
-          ],
-          "path": [
-            "sol",
-            "lbp-buy"
-          ]
+          "host": ["{{sdkBaseUrl}}"],
+          "path": ["sol", "lbp-buy"]
         },
         "description": "Buys tokens from an LBP on Solana.\n\n**Required fields**\n- `signer` - Buyer wallet (base58)\n- `memeMint` - LBP mint address\n- `amount` - Buy amount\n- `slippage` - Slippage: 1, 5, or 10\n- `referrer` - Referrer address (use zero address if none)\n\n**Response**:\n```json\n{\n  \"ok\": true,\n  \"transaction\": \"<base64>\",\n  \"blockhash\": \"...\",\n  \"lastValidBlockHeight\": 0\n}\n```"
       },
@@ -355,13 +508,8 @@
         },
         "url": {
           "raw": "{{sdkBaseUrl}}/sol/lbp-sell",
-          "host": [
-            "{{sdkBaseUrl}}"
-          ],
-          "path": [
-            "sol",
-            "lbp-sell"
-          ]
+          "host": ["{{sdkBaseUrl}}"],
+          "path": ["sol", "lbp-sell"]
         },
         "description": "Sells tokens from an LBP on Solana.\n\n**Required fields**\n- `signer` - Seller wallet (base58)\n- `memeMint` - LBP mint address\n- `amount` - Amount of tokens to sell\n- `slippage` - Slippage: 1, 5, or 10\n\n**Response**:\n```json\n{\n  \"ok\": true,\n  \"transaction\": \"<base64>\",\n  \"blockhash\": \"...\",\n  \"lastValidBlockHeight\": 0\n}\n```"
       },
@@ -404,15 +552,67 @@
         },
         "url": {
           "raw": "{{sdkBaseUrl}}/sol/collect-lbp-fees",
-          "host": [
-            "{{sdkBaseUrl}}"
-          ],
-          "path": [
-            "sol",
-            "collect-lbp-fees"
-          ]
+          "host": ["{{sdkBaseUrl}}"],
+          "path": ["sol", "collect-lbp-fees"]
         },
         "description": "Collects accumulated fees from an LBP pool.\n\n**Required fields**\n- `signer` - Wallet address to receive fees\n- `memeMint` - LBP mint address\n\n**Response**:\n```json\n{\n  \"ok\": true,\n  \"transaction\": \"<base64>\",\n  \"blockhash\": \"...\",\n  \"lastValidBlockHeight\": 0\n}\n```"
+      },
+      "response": []
+    },
+    {
+      "name": "Collect Flash Token Fees",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "if (!pm.collectionVariables.get('mint_address')) {",
+              "  console.warn('mint_address is empty — run Create Flash Token TX1 first');",
+              "}"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Has transaction', function () {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json).to.have.property('transaction');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "x-api-key",
+            "value": "{{apiKey}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"chainId\": {{chainId}},\n  \"signer\": \"{{signer}}\",\n  \"flashMint\": \"{{mint_address}}\"\n}"
+        },
+        "url": {
+          "raw": "{{sdkBaseUrl}}/sol/collect-flash-fees",
+          "host": ["{{sdkBaseUrl}}"],
+          "path": ["sol", "collect-flash-fees"]
+        },
+        "description": "Collects accumulated trading fees from a Flash Token pool.\n\n**Required fields**\n\n- `signer` - Wallet address to receive fees (base58)\n- `flashMint` - Flash token mint address\n- `chainId` - Solana chain ID (5011)\n\n**Response**:\n\n``` json\n{\n  \"ok\": true,\n  \"transaction\": \"<base64>\",\n  \"blockhash\": \"...\",\n  \"lastValidBlockHeight\": 0\n}\n```"
       },
       "response": []
     },
@@ -449,13 +649,8 @@
         },
         "url": {
           "raw": "{{sdkBaseUrl}}/sol/confirm-launch",
-          "host": [
-            "{{sdkBaseUrl}}"
-          ],
-          "path": [
-            "sol",
-            "confirm-launch"
-          ]
+          "host": ["{{sdkBaseUrl}}"],
+          "path": ["sol", "confirm-launch"]
         },
         "description": "Confirms the LBP or flash token launch with BasedBid after the creation transaction is confirmed.\n\n**Required fields**\n\n- `chainId` - Solana chain ID (5011)\n    \n- `mintAddress` - Mint address of the created token\n    \n- `signature` - Transaction signature of the confirmed pool creation\n    \n\n**Response**:\n\n``` json\n{\n  \"ok\": true\n}\n\n ```"
       },
@@ -494,13 +689,8 @@
         },
         "url": {
           "raw": "{{sdkBaseUrl}}/sol/release-vanity",
-          "host": [
-            "{{sdkBaseUrl}}"
-          ],
-          "path": [
-            "sol",
-            "release-vanity"
-          ]
+          "host": ["{{sdkBaseUrl}}"],
+          "path": ["sol", "release-vanity"]
         },
         "description": "Releases a vanity address if the LBP creation or flash token creation failed after the transaction was confirmed.\n\n**Required fields**\n\n- `chainId` - Solana chain ID\n    \n- `mintAddress` - Mint address to release\n    \n- `signature` - Transaction signature\n    \n\n**Response**:\n\n``` json\n{\n  \"ok\": true\n}\n\n ```"
       },
@@ -552,15 +742,10 @@
         },
         "url": {
           "raw": "{{platformBaseUrl}}/token/fee-distribution",
-          "host": [
-            "{{platformBaseUrl}}"
-          ],
-          "path": [
-            "token",
-            "fee-distribution"
-          ]
+          "host": ["{{platformBaseUrl}}"],
+          "path": ["token", "fee-distribution"]
         },
-        "description": "**IMPORTANT**: This endpoint uses the Platform API (different base URL).\n\nRegisters fee-distribution settings for a newly created LBP mint. This is required on Solana to adjust Fee Builder rerouting\n\n**Required fields**\n\n- `chainId` - Must match the LBP chain ID\n    \n- `address` - Mint address from create-lbp response\n    \n- Percent fields should sum reasonably (with `customFees[].percent`)\n    \n- `feeDistributionPayoutKind` - `SOL` or `TOKEN`\n    \n\n**Response**:\n\n``` json\n{\n  \"ok\": true,\n  \"transaction\": \"<base64>\",\n  \"blockhash\": \"...\",\n  \"lastValidBlockHeight\": 0\n}\n\n ```"
+        "description": "**IMPORTANT**: This endpoint uses the Platform API (different base URL).\n\nRegisters fee-distribution settings for a newly created LBP or Flash Token mint. This is required on Solana to adjust Fee Builder rerouting\n\n**Required fields**\n\n- `chainId` - Must match the token chain ID\n    \n- `address` - Mint address from create-lbp or create-flash-tx1 response\n    \n- Percent fields should sum reasonably (with `customFees[].percent`)\n    \n- `feeDistributionPayoutKind` - `SOL` or `TOKEN`\n    \n\n**Response**:\n\n``` json\n{\n  \"ok\": true,\n  \"transaction\": \"<base64>\",\n  \"blockhash\": \"...\",\n  \"lastValidBlockHeight\": 0\n}\n\n ```"
       },
       "response": []
     }
@@ -600,6 +785,18 @@
     },
     {
       "key": "seed",
+      "value": ""
+    },
+    {
+      "key": "flash_seed",
+      "value": ""
+    },
+    {
+      "key": "tx1_signature",
+      "value": "YOUR_TX1_TRANSACTION_SIGNATURE"
+    },
+    {
+      "key": "meteora_token_account_seed",
       "value": ""
     }
   ]

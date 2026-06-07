@@ -1,6 +1,7 @@
+import 'dotenv/config';
+
 import subBoardFacetAbi from 'constants/abi/SubBoardFacet.json';
 import { CHAIN_NAME_CONFIG } from 'constants/chain-config';
-import 'dotenv/config';
 import { ApiType } from 'enums';
 import { EvmApiResponse, OpenbidRunOptions } from 'interfaces/common';
 import { createEvmBoardSchema, CreateEvmBoardSdk } from 'schema/board/evm/sdk';

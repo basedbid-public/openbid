@@ -1,6 +1,8 @@
-import { SOLANA_CHAIN_NAME_CONFIG } from 'constants/solana-chain-config';
 import 'dotenv/config';
-import { ApiType, SolanaDexType } from 'enums';
+
+import { KeyPairSigner } from '@solana/kit';
+import { SOLANA_CHAIN_NAME_CONFIG } from 'constants/solana-chain-config';
+import { ApiType, SolanaFlashDexType } from 'enums';
 import { OpenbidRunOptions, SolanaVanityUpdateData } from 'interfaces/common';
 import { CreateSolanaFlashTx1ApiResponse } from 'interfaces/create-flash-token';
 import {
@@ -51,7 +53,7 @@ export const createSolanaFlashToken = async (
     const solanaWrapper = new SolanaWrapper(env.SOLANA_PRIVATE_KEY);
     await solanaWrapper.init(data.chainId);
 
-    const { token, raydium, meteora, board, boardOwner, fees, dex } = data;
+    const { token, raydium, meteora, board, boardOwner, fees, flashDex } = data;
 
     const apiKey =
       board || boardOwner ? process.env.BASEDBID_API_KEY : undefined;
@@ -90,25 +92,22 @@ export const createSolanaFlashToken = async (
     const tx1Payload: CreateSolanaFlashTx1Api = {
       chainId: args.chainId,
       signer: solanaWrapper.publicKey,
-      dex: {
-        version: args.dex.version,
-        feeTier: args.dex.feeTier,
-      },
+      flashDex,
       token: {
         name: token.name,
         symbol: token.symbol,
         metadataUrl: metadataUrl,
         totalSupply: token.totalSupply,
         decimals: 9,
+        initialBuySupplyPercent: token.initialBuySupplyPercent,
       },
-      ...(dex.version === SolanaDexType.RAYDIUM &&
+      hasInitialSwap: Number(token.initialBuySupplyPercent) > 0,
+      ...(flashDex === SolanaFlashDexType.RAYDIUM &&
         raydium && {
           raydiumFeeTierIndex: raydium.feeTierIndex,
           finalStartPrice: raydium.finalStartPrice,
-          hasInitialSwap: raydium.hasInitialSwap,
-          solanaInitialBuyHuman: raydium.solanaInitialBuyHuman,
         }),
-      ...(dex.version === SolanaDexType.METEORA &&
+      ...(flashDex === SolanaFlashDexType.METEORA &&
         meteora && {
           baseTokenMint: 'So11111111111111111111111111111111111111112',
           virtualUsd: meteora.virtualUsd,
@@ -152,12 +151,22 @@ export const createSolanaFlashToken = async (
       tx1Response.mintSignerSecretHex,
     );
 
+    let positionNftSigner: KeyPairSigner<string> | null = null;
+    if (tx1Response.positionNftSignerSecretHex) {
+      positionNftSigner = await solanaWrapper.getSignerFromPrivateKey(
+        tx1Response.positionNftSignerSecretHex,
+      );
+    }
+
     const tx1Signature = await solanaWrapper.sendTransaction(
       tx1Response.transaction,
       tx1Response.blockhash,
       tx1Response.lastValidBlockHeight,
       `${tx1Response.txCost?.totalRequired.sol} SOL`,
-      [mintSigner.keyPair],
+      [
+        mintSigner.keyPair,
+        ...(positionNftSigner ? [positionNftSigner.keyPair] : []),
+      ],
       {
         description: 'Create Flash Token Mint',
         skipConfirmation: args.isSandboxMode,
@@ -180,10 +189,7 @@ export const createSolanaFlashToken = async (
     const tx2Payload: CreateSolanaFlashTx2Api = {
       chainId: args.chainId,
       signer: solanaWrapper.publicKey,
-      dex: {
-        version: args.dex.version,
-        feeTier: args.dex.feeTier,
-      },
+      flashDex: data.flashDex,
       tx1Signature,
       flashSeed: tx1Response.flashSeed,
       mintAddress: tx1Response.mintAddress,
@@ -192,16 +198,16 @@ export const createSolanaFlashToken = async (
       token: {
         totalSupply: args.token.totalSupply,
         decimals: 9,
+        initialBuySupplyPercent: token.initialBuySupplyPercent,
       },
-      ...(args.dex.version === SolanaDexType.RAYDIUM &&
+      ...(data.flashDex === SolanaFlashDexType.RAYDIUM &&
         args.raydium && {
           raydiumFeeTierIndex: args.raydium.feeTierIndex,
           finalStartPrice: args.raydium.finalStartPrice,
-          hasInitialSwap: args.raydium.hasInitialSwap,
-          solanaInitialBuyHuman: args.raydium.solanaInitialBuyHuman,
         }),
-      ...(args.dex.version === SolanaDexType.METEORA &&
+      ...(data.flashDex === SolanaFlashDexType.METEORA &&
         args.meteora && {
+          virtualUsd: args.meteora.virtualUsd,
           meteoraFeeTierIndex: args.meteora.feeTierIndex,
           meteoraTokenAccountSeed: tx1Response.meteoraTokenAccountSeed,
           finalStartPrice: args.meteora.finalStartPrice,

@@ -1,9 +1,10 @@
+import 'dotenv/config';
+
 import { SOLANA_BASE_TOKEN_PAIR, SOLANA_DECIMALS } from 'constants/solana';
 import {
   SOLANA_CHAIN_NAME_CONFIG,
   SOLANA_CHAIN_SLUG_CONFIG,
 } from 'constants/solana-chain-config';
-import 'dotenv/config';
 import { ApiType, SolanaDexType } from 'enums';
 import { OpenbidRunOptions, SolanaVanityUpdateData } from 'interfaces/common';
 import { CreateSolanaLbpApiResponse } from 'interfaces/create-lbp';
@@ -106,6 +107,7 @@ export const createSolanaLbp = async (
         seed,
         advanced: true,
         package: getLaunchPackageIndex(data.package),
+        amountsInRaiseToken: true,
         baseTokenAddress: SOLANA_BASE_TOKEN_PAIR,
         baseTokenDecimals: SOLANA_DECIMALS,
         token: {
@@ -114,6 +116,7 @@ export const createSolanaLbp = async (
           totalSupply: token.totalSupply,
           decimals: SOLANA_DECIMALS,
           initialBuyAmount: token.initialBuyAmount,
+          initialBuySupplyPercent: token.initialBuySupplyPercent,
           metadataUrl,
           raiseTokenDecimals: SOLANA_DECIMALS,
         },
@@ -130,12 +133,12 @@ export const createSolanaLbp = async (
           marketCap: sale.marketCap,
           softCap: sale.softCap,
           endTime: sale.endTime,
-          initialBuyAmount: token.initialBuyAmount,
           startTime: sale.startTime,
           maxAllocationPerUser: sale.maxAllocationPerUser,
           baseTokenForPair: SOLANA_BASE_TOKEN_PAIR,
           baseTokenDecimals: SOLANA_DECIMALS,
           referrer: sale.referrer,
+          amountsInRaiseToken: true,
         },
         ...(fees && {
           fees: {

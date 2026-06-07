@@ -3,8 +3,8 @@
   "package": "based",
   "chainId": 8453,
   "token": {
-    "name": "dante sdk",
-    "symbol": "dante",
+    "name": "Rat",
+    "symbol": "RATONE",
     "totalSupply": 1000000,
     "initialBuyAmount": 0,
     "metadata": {

@@ -30,6 +30,7 @@ export const createLbpSolanaApiPayloadSchema = z.object({
       decimals: z.literal(SOLANA_DECIMALS),
       totalSupply: numberStringSchema(),
       initialBuyAmount: numberStringSchema(),
+      initialBuySupplyPercent: numberStringSchema(),
       raiseTokenDecimals: z.literal(SOLANA_DECIMALS),
     }),
     sale: z
@@ -37,7 +38,6 @@ export const createLbpSolanaApiPayloadSchema = z.object({
         marketCap: numberStringSchema(0.1, 10_000_000),
         softCap: numberStringSchema(1, 100).optional(),
         endTime: saleTimeSchema().optional(),
-        initialBuyAmount: numberStringSchema().default('0'),
         baseTokenForPair: z
           .literal(SOLANA_BASE_TOKEN_PAIR)
           .default(SOLANA_BASE_TOKEN_PAIR),

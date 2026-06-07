@@ -1,6 +1,10 @@
 import { SOLANA_DECIMALS } from 'constants/solana';
-import { SolanaDexType } from 'enums';
-import { metadataUrlSchema, solanaAddressSchema } from 'schema/common';
+import { SolanaFlashDexType } from 'enums';
+import {
+  metadataUrlSchema,
+  numberStringSchema,
+  solanaAddressSchema,
+} from 'schema/common';
 import { solanaChainIdSchema } from 'schema/common/sdk-input';
 import { z } from 'zod';
 
@@ -10,27 +14,29 @@ const tokenSchemaTx1 = z.object({
   metadataUrl: metadataUrlSchema,
   totalSupply: z.string(),
   decimals: SOLANA_DECIMALS,
+  initialBuySupplyPercent: numberStringSchema(),
 });
 
 const tokenSchemaTx2 = z.object({
   totalSupply: z.string(),
   decimals: z.literal(9),
+  initialBuySupplyPercent: numberStringSchema(),
 });
 
 export const createSolanaFlashTx1ApiSchema = z
   .object({
     chainId: solanaChainIdSchema,
     signer: solanaAddressSchema,
-    dex: z.object({
-      version: z.enum(SolanaDexType),
-      feeTier: z.string(),
-    }),
+    flashDex: z.union([
+      z.literal(SolanaFlashDexType.RAYDIUM),
+      z.literal(SolanaFlashDexType.METEORA),
+    ]),
     token: tokenSchemaTx1,
+
+    hasInitialSwap: z.boolean().optional(),
     // Raydium specific
     raydiumFeeTierIndex: z.string().optional(),
     finalStartPrice: z.number().positive().optional(),
-    hasInitialSwap: z.boolean().optional(),
-    solanaInitialBuyHuman: z.string().optional(),
     // Meteora specific
     baseTokenMint: z.string().optional(),
     virtualUsd: z.number().positive().optional(),
@@ -41,12 +47,10 @@ export const createSolanaFlashTx1ApiSchema = z
   })
   .refine(
     (data) => {
-      if (data.dex.version === SolanaDexType.RAYDIUM) {
+      if (data.flashDex === SolanaFlashDexType.RAYDIUM) {
         return (
           data.raydiumFeeTierIndex !== undefined &&
-          data.finalStartPrice !== undefined &&
-          data.hasInitialSwap !== undefined &&
-          data.solanaInitialBuyHuman !== undefined
+          data.finalStartPrice !== undefined
         );
       }
       return (
@@ -71,10 +75,10 @@ export type CreateSolanaFlashTx1Api = z.infer<
 export const createSolanaFlashTx2ApiSchema = z.object({
   chainId: solanaChainIdSchema,
   signer: solanaAddressSchema,
-  dex: z.object({
-    version: z.enum(SolanaDexType),
-    feeTier: z.string(),
-  }),
+  flashDex: z.union([
+    z.literal(SolanaFlashDexType.RAYDIUM),
+    z.literal(SolanaFlashDexType.METEORA),
+  ]),
   tx1Signature: z.string(),
   flashSeed: z.string(),
   mintAddress: z.string(),
@@ -84,8 +88,6 @@ export const createSolanaFlashTx2ApiSchema = z.object({
   // Raydium specific
   raydiumFeeTierIndex: z.string().optional(),
   finalStartPrice: z.number().positive().optional(),
-  hasInitialSwap: z.boolean().optional(),
-  solanaInitialBuyHuman: z.string().optional(),
   // Meteora specific
   meteoraFeeTierIndex: z.string().optional(),
   meteoraTokenAccountSeed: z.string().optional(),

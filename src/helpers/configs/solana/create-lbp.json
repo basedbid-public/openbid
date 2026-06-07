@@ -1,12 +1,13 @@
 {
-  "isSandboxMode": false,
+  "isSandboxMode": true,
   "package": "based",
-  "chainId": 501,
+  "chainId": 5011,
   "token": {
-    "name": "Wojak",
-    "symbol": "WOJAK",
+    "name": "dante 0.1 supply percent buy",
+    "symbol": "dante",
     "totalSupply": "1000000000",
     "initialBuyAmount": "0",
+    "initialBuySupplyPercent": "0.1",
     "metadata": {
       "logo": "./assets/placeholder.png",
       "twitter": "",
@@ -32,14 +33,14 @@
     "graduation": 0,
     "feeDistribution": true,
     "dynamicFee": false,
-    "liquidityPercent": 10,
-    "buybackPercent": 10,
+    "liquidityPercent": 15,
+    "buybackPercent": 15,
     "rewardPercent": 0,
     "marketingPercent": 0,
-    "creatorPercent": 5,
+    "creatorPercent": 20,
     "customFees": [],
-    "collectQuoteThreshold": "0",
-    "collectBaseThreshold": "0",
+    "collectQuoteThreshold": "0.1",
+    "collectBaseThreshold": "0.1",
     "feeDistributionPayoutKind": "SOL",
     "minTokenBalanceForDividends": "0"
   }

@@ -1,12 +1,12 @@
 {
-  "isSandboxMode": false,
+  "isSandboxMode": true,
   "package": "based",
-  "chainId": 501,
+  "chainId": 5011,
   "token": {
-    "name": "Flash Token",
+    "name": "Flashy flash",
     "symbol": "FLASH",
     "totalSupply": "1000000000",
-    "initialBuyAmount": "0",
+    "initialBuySupplyPercent": "0.1",
     "metadata": {
       "logo": "./assets/placeholder.png",
       "twitter": "",
@@ -16,10 +16,7 @@
       "description": ""
     }
   },
-  "dex": {
-    "version": "meteora",
-    "feeTier": "1"
-  },
+  "flashDex": 1,
   "fees": {
     "buyPoolCreator": 0,
     "sellPoolCreator": 0,

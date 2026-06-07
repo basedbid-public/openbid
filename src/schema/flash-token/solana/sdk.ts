@@ -1,5 +1,9 @@
-import { SolanaDexType } from 'enums';
-import { metadataInputSchema, solanaAddressSchema } from 'schema/common';
+import { SolanaFlashDexType } from 'enums';
+import {
+  metadataInputSchema,
+  numberStringSchema,
+  solanaAddressSchema,
+} from 'schema/common';
 import { solanaChainIdSchema } from 'schema/common/sdk-input';
 import { z } from 'zod';
 
@@ -7,10 +11,10 @@ export const createSolanaFlashInputSchema = z
   .object({
     isSandboxMode: z.boolean().default(false),
     chainId: solanaChainIdSchema,
-    dex: z.object({
-      version: z.enum(SolanaDexType),
-      feeTier: z.string(),
-    }),
+    flashDex: z.union([
+      z.literal(SolanaFlashDexType.RAYDIUM),
+      z.literal(SolanaFlashDexType.METEORA),
+    ]),
     board: z.string().optional(),
     boardOwner: solanaAddressSchema.optional(),
     token: z.object({
@@ -20,13 +24,12 @@ export const createSolanaFlashInputSchema = z
         .max(100, 'Token symbol must be less than 100 characters'),
       totalSupply: z.string(),
       metadata: metadataInputSchema,
+      initialBuySupplyPercent: numberStringSchema(),
     }),
     raydium: z
       .object({
         feeTierIndex: z.string(),
         finalStartPrice: z.number().positive(),
-        hasInitialSwap: z.boolean(),
-        solanaInitialBuyHuman: z.string(),
       })
       .optional(),
     meteora: z
@@ -100,7 +103,7 @@ export const createSolanaFlashInputSchema = z
   })
   .refine(
     (data) => {
-      if (data.dex.version === SolanaDexType.RAYDIUM) {
+      if (data.flashDex === SolanaFlashDexType.RAYDIUM) {
         return data.raydium !== undefined;
       }
       return data.meteora !== undefined;

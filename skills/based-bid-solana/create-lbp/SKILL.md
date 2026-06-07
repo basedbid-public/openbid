@@ -45,6 +45,7 @@ Generate this config, replacing the marked values with user input:
     "symbol": "<USER_INPUT:symbol>",
     "totalSupply": "1000000000",
     "initialBuyAmount": "0",
+    "initialBuySupplyPercent": "0",
     "metadata": {
       "logo": "<USER_INPUT:logo_url>"
     }
@@ -110,6 +111,8 @@ import { CreateSolanaLbpInput } from 'schema/lbp/solana/sdk-input';
 
 **Validation rule:** `board` and `boardOwner` must both be defined or both omitted.
 
+**Initial buy:** Use either `initialBuyAmount` (fixed SOL spend) or `initialBuySupplyPercent` (target % of total supply). Set the unused field to `'0'`. When `initialBuySupplyPercent` is `'0'`, no supply-percent initial buy is performed.
+
 > **Board behavior:** `board` is **purely optional**. Only include it if the user explicitly provides a custom board name they created via the create-board skill. Omitting it means the token launches without any board affiliation. **Do not send `'based'` or any default string unless the user explicitly requests it.**
 
 ### Token Configuration
@@ -120,8 +123,9 @@ import { CreateSolanaLbpInput } from 'schema/lbp/solana/sdk-input';
 | `symbol`           | `string` | Yes      | Token symbol (max 100 chars)                      |
 | `totalSupply`      | `string` | Yes      | Total supply as numeric string                    |
 | `decimals`         | `number` | No       | Defaults to `9` (Solana standard)                 |
-| `initialBuyAmount` | `string` | Yes      | Initial buy amount as numeric string (e.g. `'0'`) |
-| `metadata`         | `object` | Yes      | Metadata (see below)                              |
+| `initialBuyAmount`         | `string` | Yes      | Fixed SOL amount (raise token) for the creator's initial buy at launch. Use `'0'` when using `initialBuySupplyPercent` instead. |
+| `initialBuySupplyPercent`  | `string` | No       | Percentage of total supply the creator buys at launch (e.g. `'0.1'` = 0.1%). Defaults to `'0'`. Backend calculates required SOL from the LBP curve. |
+| `metadata`                 | `object` | Yes      | Metadata (see below)                                                                                                              |
 
 ### Token Metadata
 
@@ -228,6 +232,7 @@ The SDK automatically includes the `x-api-key` header in BasedBid API requests a
 7. **Metadata Upload** - Uploads metadata to IPFS via `IpfsUpload.uploadMetadata()`
 8. **API Request** - Payload sent to `${API_URL}/sol/create-lbp`:
    - `package` mapped to numeric index via `getLaunchPackageIndex()`
+   - `token.initialBuyAmount` and `token.initialBuySupplyPercent` passed through to the API
    - `dex.routerId` set to DEX version
    - `dex.meteoraFeeTierIndex` or `dex.raydiumFeeTierIndex` depending on DEX
    - `sale.baseTokenForPair` and `sale.baseTokenDecimals` set to constants
@@ -282,6 +287,7 @@ await createLbpSolana({
     symbol: 'MTK',
     totalSupply: '100000000',
     initialBuyAmount: '0',
+    initialBuySupplyPercent: '0',
     metadata: {
       logo: './assets/placeholder.png',
       twitter: 'https://x.com/mytoken',
@@ -306,7 +312,8 @@ await createLbpSolana({
     name: 'Premium Token',
     symbol: 'PRM',
     totalSupply: '1000000000',
-    initialBuyAmount: '1000',
+    initialBuyAmount: '0',
+    initialBuySupplyPercent: '0.1',
     metadata: {
       logo: './assets/placeholder.png',
       description: 'A premium Solana token',

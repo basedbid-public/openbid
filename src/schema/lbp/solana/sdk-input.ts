@@ -29,6 +29,7 @@ export const createSolanaLbpInputSchema = z
       totalSupply: z.string(),
       decimals: z.literal(SOLANA_DECIMALS).default(SOLANA_DECIMALS).optional(),
       initialBuyAmount: numberStringSchema(),
+      initialBuySupplyPercent: numberStringSchema().default('0'),
       metadata: metadataInputSchema,
     }),
     sale: z
