@@ -73,9 +73,10 @@ export async function sendTransaction(
     console.log(`  TOTAL:      ${formatEther(totalCostWei)}`);
     console.log('========================================\n');
 
-    const shouldProceed = await askConfirmation(
-      'Do you want to proceed? (y/n): ',
-    );
+    const shouldProceed =
+      process.env.SKIP_TX_CONFIRMATION === 'true'
+        ? true
+        : await askConfirmation('Do you want to proceed? (y/n): ');
 
     if (!shouldProceed) {
       console.log('Transaction cancelled by user.');

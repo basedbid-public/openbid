@@ -1,0 +1,182 @@
+#!/bin/bash
+# Create flash token on Solana
+# Usage: create-flash-token-solana --token-name "My Token" --symbol "MTK" [options]
+
+set -e
+
+show_help() {
+  echo "Usage: create-flash-token-solana [options]"
+  echo ""
+  echo "Options:"
+  echo "  --token-name <name>         Token name (required)"
+  echo "  --symbol <symbol>           Token symbol (required)"
+  echo "  --initial-supply <amount>   Total supply (default: 1000000)"
+  echo "  --logo <path>               Logo path (default: ./assets/placeholder.png)"
+  echo "  --twitter <url>             Twitter URL"
+  echo "  --telegram <url>            Telegram URL"
+  echo "  --website <url>             Website URL"
+  echo "  --discord <url>             Discord URL"
+  echo "  --fee-tier <bps>            Dex fee tier in bps (default: 3)"
+  echo "  --liquidity-fee <bps>       Liquidity fee in bps (default: 1)"
+  echo "  --buyback-fee <bps>         Buyback fee in bps (default: 1)"
+  echo "  --reward-token <token>      Reward token symbol (default: SOL)"
+  echo "  --min-balance <amount>      Min token balance for dividends (default: 0.01)"
+  echo "  --sandbox                   Enable sandbox mode"
+  echo "  --no-sandbox                Disable sandbox mode (default)"
+  echo "  --yes                       Skip transaction confirmation (for agents/demos)"
+  echo ""
+  echo "Environment:"
+  echo "  SKIP_TX_CONFIRMATION=true   Skip all confirmations"
+  echo ""
+  echo "Example:"
+  echo "  create-flash-token-solana \\"
+  echo "    --token-name \"My Token\" \\"
+  echo "    --symbol \"MTK\""
+}
+
+# Parse known arguments, collect rest for passing through
+TOKEN_NAME=""
+SYMBOL=""
+INITIAL_SUPPLY="1000000"
+LOGO="./assets/placeholder.png"
+TWITTER=""
+TELEGRAM=""
+WEBSITE=""
+DISCORD=""
+FEE_TIER="3"
+LIQUIDITY_FEE="1"
+BUYBACK_FEE="1"
+REWARD_TOKEN="SOL"
+MIN_BALANCE="0.01"
+SANDBOX_MODE="false"
+SKIP_CONFIRM="false"
+EXTRA_ARGS=()
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --token-name) TOKEN_NAME="$2"; shift 2 ;;
+    --symbol) SYMBOL="$2"; shift 2 ;;
+    --initial-supply) INITIAL_SUPPLY="$2"; shift 2 ;;
+    --logo) LOGO="$2"; shift 2 ;;
+    --twitter) TWITTER="$2"; shift 2 ;;
+    --telegram) TELEGRAM="$2"; shift 2 ;;
+    --website) WEBSITE="$2"; shift 2 ;;
+    --discord) DISCORD="$2"; shift 2 ;;
+    --fee-tier) FEE_TIER="$2"; shift 2 ;;
+    --liquidity-fee) LIQUIDITY_FEE="$2"; shift 2 ;;
+    --buyback-fee) BUYBACK_FEE="$2"; shift 2 ;;
+    --reward-token) REWARD_TOKEN="$2"; shift 2 ;;
+    --min-balance) MIN_BALANCE="$2"; shift 2 ;;
+    --sandbox) SANDBOX_MODE="true"; shift ;;
+    --no-sandbox) SANDBOX_MODE="false"; shift ;;
+    --yes) SKIP_CONFIRM="true"; shift ;;
+    --help|-h) show_help; exit 0 ;;
+    *) EXTRA_ARGS+=("$1"); shift ;;
+  esac
+done
+
+
+# Check env var for skip confirmation
+if [[ "$SKIP_CONFIRM" == "true" ]]; then
+  export SKIP_TX_CONFIRMATION="true"
+fi
+
+# Validate required
+if [[ -z "$TOKEN_NAME" ]] || [[ -z "$SYMBOL" ]]; then
+  echo "Error: --token-name and --symbol are required"
+  show_help
+  exit 1
+fi
+
+# Build config JSON matching the required format (Solana uses chainId 101)
+CONFIG=$(cat << CONFIG_EOF
+{
+  "isSandboxMode": SANDBOX_MODE_PLACEHOLDER,
+  "package": "based",
+  "chainId": 101,
+  "token": {
+    "name": "$TOKEN_NAME",
+    "symbol": "$SYMBOL",
+    "totalSupply": $INITIAL_SUPPLY,
+    "initialBuyAmount": 0,
+    "metadata": {
+      "logo": "$LOGO",
+      "twitter": "$TWITTER",
+      "telegram": "$TELEGRAM",
+      "website": "$WEBSITE",
+      "discord": "$DISCORD",
+      "description": ""
+    }
+  },
+  "dex": {
+    "version": "uniswap_v4",
+    "feeTier": $FEE_TIER
+  },
+  "fees": {
+    "v4": {
+      "liquidity": $LIQUIDITY_FEE,
+      "buyback": $BUYBACK_FEE,
+      "reward": {
+        "token": "$REWARD_TOKEN",
+        "amount": 1,
+        "minTokenBalanceForDividends": $MIN_BALANCE
+      },
+      "customWallets": [],
+      "feeThreshold": 0.1,
+      "tieredFeesEnabled": false,
+      "dynamicFees": {
+        "hasHookDynamicFee": true,
+        "volatilityDecayPeriod": "medium",
+        "volatilityMultiplier": "medium",
+        "volatilityTrigger": "per_block"
+      },
+      "cooldownProtection": {
+        "cooldownDuration": "medium",
+        "penaltyFee": "medium"
+      },
+      "buyLimits": {
+        "protectPeriod": 600,
+        "maxBuyPerOrigin": 5,
+        "isHookWhitelist": false
+      },
+      "mevProtectionEnabled": true,
+      "minTokenBalanceForDividends": $MIN_BALANCE
+    }
+  }
+}
+CONFIG_EOF
+)
+
+CONFIG=$(echo "$CONFIG" | sed "s/SANDBOX_MODE_PLACEHOLDER/$SANDBOX_MODE/g")
+
+cd "$(dirname "$0")/.." || exit 1
+
+# Check if node_modules exists, run npm install if needed
+if [[ ! -d "node_modules" ]]; then
+  echo "node_modules not found. Running npm install..."
+  npm install
+fi
+
+# Create temp config
+TEMP_CONFIG=$(mktemp)
+echo "$CONFIG" > "$TEMP_CONFIG"
+
+echo "Creating flash token on Solana..."
+echo "Token: $TOKEN_NAME ($SYMBOL)"
+echo ""
+
+# Confirm if not sandbox mode and not skipping confirmation
+if [[ "$SANDBOX_MODE" == "false" && "$SKIP_CONFIRM" == "false" ]]; then
+  echo "WARNING: This will submit a LIVE transaction on Solana mainnet."
+  read -p "Continue? (y/N) " -n 1 -r
+  echo ""
+  if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    echo "Aborted."
+    rm -f "$TEMP_CONFIG"
+    exit 1
+  fi
+fi
+
+npm run solana:create-flash-token -- solana-create-flash-token "$TEMP_CONFIG" "${EXTRA_ARGS[@]}"
+
+rm -f "$TEMP_CONFIG"

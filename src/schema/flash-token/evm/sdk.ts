@@ -94,7 +94,8 @@ export const createEvmFlashTokenSchema = z.object({
                 amount: z.number(),
               }),
             )
-            .optional(),
+            .optional()
+            .default([]),
           feeThreshold: z
             .union([
               z.literal(0.01),
@@ -103,8 +104,9 @@ export const createEvmFlashTokenSchema = z.object({
               z.literal(0.5),
               z.literal(1),
             ])
-            .optional(),
-          tieredFeesEnabled: z.boolean().default(false).optional(),
+            .optional()
+            .default(0.1),
+          tieredFeesEnabled: z.boolean().optional().default(false),
           dynamicFees: z
             .object({
               hasHookDynamicFee: z.boolean(),

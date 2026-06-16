@@ -1,7 +1,8 @@
+import 'dotenv/config';
+
 import flashLaunchV3Abi from 'constants/abi/FlashLaunchForV3Facet.json';
 import flashLaunchV4Abi from 'constants/abi/FlashLaunchForV4Facet.json';
 import { CHAIN_NAME_CONFIG } from 'constants/chain-config';
-import 'dotenv/config';
 import { ApiType, EvmDexType } from 'enums';
 import { EvmApiResponse, OpenbidRunOptions } from 'interfaces/common';
 import { CreateFlashTokenEvmApi } from 'schema/flash-token/evm/api';
@@ -41,6 +42,10 @@ export const createEvmFlashToken = async (
     console.log('Validation passed');
     return;
   }
+  const { publicClient, walletClient, account } = initEvmClients(
+    data.chainId,
+    env.PRIVATE_KEY,
+  );
 
   let logoUrl = 'https://ipfs.based.bid/ipfs/null';
   if (dryRun) {
@@ -49,11 +54,6 @@ export const createEvmFlashToken = async (
   } else {
     logoUrl = await IpfsUpload.uploadImage(data.token.metadata.logo);
   }
-
-  const { publicClient, walletClient, account } = initEvmClients(
-    data.chainId,
-    env.PRIVATE_KEY,
-  );
 
   const metadata = {
     name: data.token.name,
@@ -101,8 +101,8 @@ export const createEvmFlashToken = async (
     sale: {
       boardTitle: data.boardTitle,
       marketCap: sale.marketCap,
-      maxTxAmountPercent: sale.maxTxAmountPercent,
-      protectBlocks: sale.protectBlocks,
+      maxTxAmountPercent: sale.maxTxAmountPercent ?? 0.01,
+      protectBlocks: sale.protectBlocks ?? 10,
     },
     dex: {
       version: data.dex.version,
@@ -156,6 +156,8 @@ export const createEvmFlashToken = async (
     normalizeByAbi(json.args[index], input, `args[${index}]`),
   );
 
+  const skipConfirmation = process.env.SKIP_TX_CONFIRMATION === 'true';
+
   const result = await sendTransaction({
     publicClient,
     walletClient,
@@ -166,7 +168,7 @@ export const createEvmFlashToken = async (
     args: tupleArgs,
     value: txValue,
     errorLabel: 'Create Flash Token',
-    skipConfirmation: args.isSandboxMode,
+    skipConfirmation,
   });
 
   LogHelper.printResult({

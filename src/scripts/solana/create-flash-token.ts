@@ -55,6 +55,8 @@ export const createSolanaFlashToken = async (
 
     const { token, raydium, meteora, board, boardOwner, fees, flashDex } = data;
 
+    const skipConfirmation = process.env.SKIP_TX_CONFIRMATION === 'true';
+
     const apiKey =
       board || boardOwner ? process.env.BASEDBID_API_KEY : undefined;
 
@@ -169,7 +171,7 @@ export const createSolanaFlashToken = async (
       ],
       {
         description: 'Create Flash Token Mint',
-        skipConfirmation: args.isSandboxMode,
+        skipConfirmation,
       },
     );
 
@@ -252,7 +254,7 @@ export const createSolanaFlashToken = async (
       tx2Signers,
       {
         description: 'Initialize Flash Token Market',
-        skipConfirmation: args.isSandboxMode,
+        skipConfirmation,
       },
     );
 
