@@ -16,6 +16,7 @@ show_help() {
   echo "  --telegram <url>            Telegram URL"
   echo "  --website <url>             Website URL"
   echo "  --discord <url>             Discord URL"
+  echo "  --description <text>        Token description"
   echo "  --fee-tier <bps>            Dex fee tier in bps (default: 3)"
   echo "  --liquidity-fee <bps>       Liquidity fee in bps (default: 1)"
   echo "  --buyback-fee <bps>         Buyback fee in bps (default: 1)"
@@ -43,6 +44,7 @@ TWITTER=""
 TELEGRAM=""
 WEBSITE=""
 DISCORD=""
+DESCRIPTION=""
 FEE_TIER="3"
 LIQUIDITY_FEE="1"
 BUYBACK_FEE="1"
@@ -62,6 +64,7 @@ while [[ $# -gt 0 ]]; do
     --telegram) TELEGRAM="$2"; shift 2 ;;
     --website) WEBSITE="$2"; shift 2 ;;
     --discord) DISCORD="$2"; shift 2 ;;
+    --description) DESCRIPTION="$2"; shift 2 ;;
     --fee-tier) FEE_TIER="$2"; shift 2 ;;
     --liquidity-fee) LIQUIDITY_FEE="$2"; shift 2 ;;
     --buyback-fee) BUYBACK_FEE="$2"; shift 2 ;;
@@ -97,7 +100,7 @@ CONFIG=$(cat << CONFIG_EOF
       "telegram": "$TELEGRAM",
       "website": "$WEBSITE",
       "discord": "$DISCORD",
-      "description": ""
+      "description": "$DESCRIPTION"
     }
   },
   "dex": {
