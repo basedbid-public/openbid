@@ -159,12 +159,12 @@ The script generates a JSON config matching this structure:
 
 Set these in your `.env` file:
 
-| Variable                  | Description                                                     |
-| ------------------------ | --------------------------------------------------------------- |
-| `DEPLOYER_PRIVATE_KEY`   | Wallet private key for signing transactions                     |
-| `BASE_RPC_URL`           | Base blockchain RPC URL (default: `https://mainnet.base.org`)   |
-| `SOLANA_RPC_URL`         | Solana RPC URL (default: `https://api.mainnet-beta.solana.com`) |
-| `SKIP_TX_CONFIRMATION`   | Set to `true` to skip all mainnet confirmations                 |
+| Variable               | Description                                                     |
+| ---------------------- | --------------------------------------------------------------- |
+| `DEPLOYER_PRIVATE_KEY` | Wallet private key for signing transactions                     |
+| `BASE_RPC_URL`         | Base blockchain RPC URL (default: `https://mainnet.base.org`)   |
+| `SOLANA_RPC_URL`       | Solana RPC URL (default: `https://api.mainnet-beta.solana.com`) |
+| `SKIP_TX_CONFIRMATION` | Set to `true` to skip all mainnet confirmations                 |
 
 ## Transaction Confirmation
 
@@ -177,14 +177,14 @@ Continue? (y/N)
 
 **Bypass confirmation for agent/demo flows:**
 
-| Method | Example |
-|--------|---------|
-| CLI flag | `./bin/create-flash-token-base --yes --token-name "Test" --symbol "TST"` |
+| Method       | Example                                                                                      |
+| ------------ | -------------------------------------------------------------------------------------------- |
+| CLI flag     | `./bin/create-flash-token-base --yes --token-name "Test" --symbol "TST"`                     |
 | Env variable | `SKIP_TX_CONFIRMATION=true ./bin/create-flash-token-base --token-name "Test" --symbol "TST"` |
 
 ## Notes
 
-- `node_modules` is checked automatically; `npm install` runs only if missing
+- Run `./install.sh` once before using the CLI scripts to install the required NPM dependencies
 - Sandbox mode is **disabled** by default
 - Chain ID: `8453` for Base, `101` for Solana
 - Reward token defaults to `ETH` on Base, `SOL` on Solana
