@@ -25,6 +25,8 @@ show_help() {
   echo "  --sandbox                   Enable sandbox mode"
   echo "  --no-sandbox                Disable sandbox mode (default)"
   echo "  --yes                       Skip transaction confirmation (for agents/demos)"
+  echo "  --dry-run                  Validate and print payload without executing"
+  echo "  --validate                 Validate schema only"
   echo ""
   echo "Environment:"
   echo "  SKIP_TX_CONFIRMATION=true   Skip all confirmations"
@@ -52,6 +54,8 @@ REWARD_TOKEN="ETH"
 MIN_BALANCE="0.01"
 SANDBOX_MODE="false"
 SKIP_CONFIRM="false"
+DRY_RUN="false"
+VALIDATE_ONLY="false"
 EXTRA_ARGS=()
 
 while [[ $# -gt 0 ]]; do
@@ -73,6 +77,8 @@ while [[ $# -gt 0 ]]; do
     --sandbox) SANDBOX_MODE="true"; shift ;;
     --no-sandbox) SANDBOX_MODE="false"; shift ;;
     --yes) SKIP_CONFIRM="true"; shift ;;
+    --dry-run) DRY_RUN="true"; EXTRA_ARGS+=("$1"); shift ;;
+    --validate) VALIDATE_ONLY="true"; EXTRA_ARGS+=("$1"); shift ;;
     --help|-h) show_help; exit 0 ;;
     *) EXTRA_ARGS+=("$1"); shift ;;
   esac
@@ -83,68 +89,100 @@ if [[ "$SKIP_CONFIRM" == "true" ]]; then
   export SKIP_TX_CONFIRMATION="true"
 fi
  
-# Build config JSON matching the required format
-CONFIG=$(cat << CONFIG_EOF
-{
-  "isSandboxMode": SANDBOX_MODE_PLACEHOLDER,
-  "package": "based",
-  "chainId": 8453,
-  "token": {
-    "name": "$TOKEN_NAME",
-    "symbol": "$SYMBOL",
-    "totalSupply": $INITIAL_SUPPLY,
-    "initialBuyAmount": 0,
-    "metadata": {
-      "logo": "$LOGO",
-      "twitter": "$TWITTER",
-      "telegram": "$TELEGRAM",
-      "website": "$WEBSITE",
-      "discord": "$DISCORD",
-      "description": "$DESCRIPTION"
-    }
-  },
-  "dex": {
-    "version": "uniswap_v4",
-    "feeTier": $FEE_TIER
-  },
-  "fees": {
-    "v4": {
-      "liquidity": $LIQUIDITY_FEE,
-      "buyback": $BUYBACK_FEE,
-      "reward": {
-        "token": "$REWARD_TOKEN",
-        "amount": 1,
-        "minTokenBalanceForDividends": $MIN_BALANCE
-      },
-      "customWallets": [],
-      "feeThreshold": 0.1,
-      "tieredFeesEnabled": false,
-      "dynamicFees": {
-        "hasHookDynamicFee": true,
-        "volatilityDecayPeriod": "medium",
-        "volatilityMultiplier": "medium",
-        "volatilityTrigger": "per_block"
-      },
-      "cooldownProtection": {
-        "cooldownDuration": "medium",
-        "penaltyFee": "medium"
-      },
-      "buyLimits": {
-        "protectPeriod": 600,
-        "maxBuyPerOrigin": 5,
-        "isHookWhitelist": false
-      },
-      "mevProtectionEnabled": true,
-      "minTokenBalanceForDividends": $MIN_BALANCE
-    }
+# Build config with JSON.stringify so user-provided text is escaped safely.
+CONFIG="$(
+  TOKEN_NAME="$TOKEN_NAME" \
+  SYMBOL="$SYMBOL" \
+  INITIAL_SUPPLY="$INITIAL_SUPPLY" \
+  LOGO="$LOGO" \
+  TWITTER="$TWITTER" \
+  TELEGRAM="$TELEGRAM" \
+  WEBSITE="$WEBSITE" \
+  DISCORD="$DISCORD" \
+  DESCRIPTION="$DESCRIPTION" \
+  FEE_TIER="$FEE_TIER" \
+  LIQUIDITY_FEE="$LIQUIDITY_FEE" \
+  BUYBACK_FEE="$BUYBACK_FEE" \
+  REWARD_TOKEN="$REWARD_TOKEN" \
+  MIN_BALANCE="$MIN_BALANCE" \
+  SANDBOX_MODE="$SANDBOX_MODE" \
+  node <<'NODE'
+const number = (name) => {
+  const value = Number(process.env[name]);
+  if (!Number.isFinite(value)) {
+    console.error(`Error: ${name} must be a valid number`);
+    process.exit(1);
   }
-}
-CONFIG_EOF
-)
+  return value;
+};
 
-CONFIG=$(echo "$CONFIG" | sed "s/SANDBOX_MODE_PLACEHOLDER/$SANDBOX_MODE/g")
+const config = {
+  isSandboxMode: process.env.SANDBOX_MODE === 'true',
+  package: 'based',
+  chainId: 8453,
+  token: {
+    name: process.env.TOKEN_NAME,
+    symbol: process.env.SYMBOL,
+    totalSupply: number('INITIAL_SUPPLY'),
+    initialBuyAmount: 0,
+    metadata: {
+      logo: process.env.LOGO,
+      twitter: process.env.TWITTER,
+      telegram: process.env.TELEGRAM,
+      website: process.env.WEBSITE,
+      discord: process.env.DISCORD,
+      description: process.env.DESCRIPTION,
+    },
+  },
+  dex: {
+    version: 'uniswap_v4',
+    feeTier: number('FEE_TIER'),
+  },
+  fees: {
+    v4: {
+      liquidity: number('LIQUIDITY_FEE'),
+      buyback: number('BUYBACK_FEE'),
+      reward: {
+        token: process.env.REWARD_TOKEN,
+        amount: 1,
+        minTokenBalanceForDividends: number('MIN_BALANCE'),
+      },
+      customWallets: [],
+      feeThreshold: 0.1,
+      tieredFeesEnabled: false,
+      dynamicFees: {
+        hasHookDynamicFee: true,
+        volatilityDecayPeriod: 'medium',
+        volatilityMultiplier: 'medium',
+        volatilityTrigger: 'per_block',
+      },
+      cooldownProtection: {
+        cooldownDuration: 'medium',
+        penaltyFee: 'medium',
+      },
+      buyLimits: {
+        protectPeriod: 600,
+        maxBuyPerOrigin: 5,
+        isHookWhitelist: false,
+      },
+      mevProtectionEnabled: true,
+    },
+  },
+};
 
-cd "$(dirname "$0")/.." || exit 1
+process.stdout.write(JSON.stringify(config, null, 2));
+NODE
+)"
+
+# Resolve symlinks so globally installed commands run from the cloned repo.
+SOURCE="${BASH_SOURCE[0]}"
+while [[ -L "$SOURCE" ]]; do
+  SOURCE_DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ "$SOURCE" != /* ]] && SOURCE="$SOURCE_DIR/$SOURCE"
+done
+REPO_DIR="$(cd -P "$(dirname "$SOURCE")/.." && pwd)"
+cd "$REPO_DIR" || exit 1
 
 if [[ ! -d "node_modules" ]]; then
   echo "Error: node_modules not found. Run ./install.sh first." >&2
@@ -153,6 +191,7 @@ fi
 
 # Create temp config
 TEMP_CONFIG=$(mktemp)
+trap 'rm -f "$TEMP_CONFIG"' EXIT
 echo "$CONFIG" > "$TEMP_CONFIG"
 
 echo "Creating flash token on Base..."
@@ -160,17 +199,14 @@ echo "Token: $TOKEN_NAME ($SYMBOL)"
 echo ""
 
 # Confirm if not sandbox mode and not skipping confirmation
-if [[ "$SANDBOX_MODE" == "false" && "$SKIP_CONFIRM" == "false" ]]; then
+if [[ "$SANDBOX_MODE" == "false" && "$SKIP_CONFIRM" == "false" && "$DRY_RUN" == "false" && "$VALIDATE_ONLY" == "false" ]]; then
   echo "WARNING: This will submit a LIVE transaction on Base mainnet."
   read -p "Continue? (y/N) " -n 1 -r
   echo ""
   if [[ ! $REPLY =~ ^[Yy]$ ]]; then
     echo "Aborted."
-    rm -f "$TEMP_CONFIG"
     exit 1
   fi
 fi
 
 npm run evm:create-flash-token -- "$TEMP_CONFIG" "${EXTRA_ARGS[@]}"
-
-rm -f "$TEMP_CONFIG"

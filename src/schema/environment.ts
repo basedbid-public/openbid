@@ -19,7 +19,7 @@ const solanaEnvSchema = z.object({
 
 /** Hardhat account #0 — dry-run previews only, never for real transactions. */
 export const DUMMY_EVM_PRIVATE_KEY =
-  '0xeeEEeeEeEeeEeeEeEeeEEEeeeeEeeeeeeeEEeE' as const;
+  '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80' as const;
 
 /** Valid ed25519 seed — dry-run previews only, never for real transactions. */
 export const DUMMY_SOLANA_PRIVATE_KEY = bs58.encode(new Uint8Array(32).fill(1));
