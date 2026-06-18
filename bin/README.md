@@ -161,7 +161,8 @@ Set these in your `.env` file:
 
 | Variable               | Description                                                     |
 | ---------------------- | --------------------------------------------------------------- |
-| `DEPLOYER_PRIVATE_KEY` | Wallet private key for signing transactions                     |
+| `PRIVATE_KEY`          | EVM wallet private key for signing transactions                 |
+| `SOLANA_PRIVATE_KEY`   | Solana wallet private key for signing transactions              |
 | `BASE_RPC_URL`         | Base blockchain RPC URL (default: `https://mainnet.base.org`)   |
 | `SOLANA_RPC_URL`       | Solana RPC URL (default: `https://api.mainnet-beta.solana.com`) |
 | `SKIP_TX_CONFIRMATION` | Set to `true` to skip all mainnet confirmations                 |
