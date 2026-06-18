@@ -183,9 +183,27 @@ Continue? (y/N)
 | CLI flag     | `./bin/create-flash-token-base --yes --token-name "Test" --symbol "TST"`                     |
 | Env variable | `SKIP_TX_CONFIRMATION=true ./bin/create-flash-token-base --token-name "Test" --symbol "TST"` |
 
+## Installation
+
+**Remote install (Bankr / agents):**
+
+```bash
+curl -fsSL https://www.based.bid/install.sh | bash
+```
+
+This clones or updates `basedbid-public/openbid` into `~/.local/share/openbid`, runs `npm install`, and links `create-flash-token-base` onto `PATH` at `~/.local/bin/create-flash-token-base`.
+
+**Local install (from a cloned repo):**
+
+```bash
+./install.sh
+```
+
+Both flows require `git`, `node`, and `npm`. The installer fails fast with a clear error if any prerequisite or dependency step fails.
+
 ## Notes
 
-- Run `./install.sh` once before using the CLI scripts to install the required NPM dependencies
+- Run `./install.sh` once before using the CLI scripts
 - Sandbox mode is **disabled** by default
 - Chain ID: `8453` for Base, `101` for Solana
 - Reward token defaults to `ETH` on Base, `SOL` on Solana
