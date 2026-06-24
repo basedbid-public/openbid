@@ -42,11 +42,6 @@ export const createEvmFlashToken = async (
     console.log('Validation passed');
     return;
   }
-  const { publicClient, walletClient, account } = initEvmClients(
-    data.chainId,
-    env.PRIVATE_KEY,
-  );
-
   let logoUrl = 'https://ipfs.based.bid/ipfs/null';
   if (dryRun) {
     console.log('Skipping logo upload (dry-run mode)');
@@ -122,9 +117,14 @@ export const createEvmFlashToken = async (
   }
 
   if (dryRun) {
-    LogHelper.printDryRunSummary('create-board', apiPayload);
+    LogHelper.printDryRunSummary('create-flash', apiPayload);
     return { dryRun: true, payload: apiPayload };
   }
+
+  const { publicClient, walletClient, account } = initEvmClients(
+    data.chainId,
+    env.PRIVATE_KEY,
+  );
 
   const json = await BasedBidApi.invokeApi<EvmApiResponse>(
     ApiType.SDK,
