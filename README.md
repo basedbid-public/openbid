@@ -99,3 +99,57 @@ board api key required
 |----------|---------|
 | 5011 | Solana Devnet |
 | 501 | Solana Mainnet |
+
+## Solana AI Skill
+
+This repository includes `openbid-solana-launches`, a progressively loaded skill for designing, validating, simulating, and safely executing OpenBid Solana launches.
+
+It covers:
+
+- choosing between an LBP, Flash Token, and white-label Board;
+- translating creator and treasury goals into explicit fee routes;
+- building schema-valid Solana configurations;
+- validating and dry-running without side effects;
+- requiring explicit approval for execution and a second acknowledgement for mainnet;
+- diagnosing schema, API, RPC, and transaction failures.
+
+### Install
+
+For Codex:
+
+```bash
+./install-skill.sh --codex
+```
+
+For Claude Code:
+
+```bash
+./install-skill.sh --claude
+```
+
+For a portable project install:
+
+```bash
+./install-skill.sh --agents .
+```
+
+The canonical entry point is [skill/SKILL.md](skill/SKILL.md). Keep this SDK checkout available and set `OPENBID_SDK_DIR` when using the installed runner elsewhere.
+
+### Safe workflow
+
+```bash
+./skill/scripts/openbid-solana.sh validate solana-create-lbp path/to/config.json
+./skill/scripts/openbid-solana.sh dry-run solana-create-lbp path/to/config.json
+./skill/scripts/openbid-solana.sh execute solana-create-lbp path/to/config.json --confirm-execute
+```
+
+Mainnet execution additionally requires `--confirm-mainnet`.
+
+### Verify
+
+```bash
+npm ci
+npm run check
+```
+
+The verification suite builds the SDK, checks skill structure and safety gates, tests installation, and validates a bundled Solana example without submitting a transaction.
