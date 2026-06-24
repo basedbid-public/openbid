@@ -1029,6 +1029,16 @@
         "internalType": "struct WhitelistOptionForHookBuy",
         "name": "whitelistOptionForHookBuy",
         "type": "tuple"
+      },
+      {
+        "internalType": "address[]",
+        "name": "distributionWallets",
+        "type": "address[]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "distributionAmounts",
+        "type": "uint256[]"
       }
     ],
     "name": "customFlashLaunchV4",

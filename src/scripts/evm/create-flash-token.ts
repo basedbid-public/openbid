@@ -91,6 +91,10 @@ export const createEvmFlashToken = async (
   const apiPayload: CreateFlashTokenEvmApi = {
     isSandboxMode: data.isSandboxMode,
     chainId: data.chainId,
+    initialBuySupplyPercent: data.initialBuySupplyPercent,
+    distributionWallets: data.distributionWallets,
+    distributionAmounts: data.distributionAmounts,
+    distributionAmountUnit: data.distributionAmountUnit,
     token: {
       name: data.token.name,
       symbol: data.token.symbol,
