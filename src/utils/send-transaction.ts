@@ -1,6 +1,7 @@
 import { createInterface } from 'readline';
 import { SendContractTransactionParams } from 'types/send-contract-parameters';
 import type { Abi, TransactionReceipt, WriteContractParameters } from 'viem';
+import { encodeFunctionData } from 'viem';
 
 const formatEther = (wei: bigint): string => {
   const ether = Number(wei) / 1e18;
@@ -40,6 +41,8 @@ export async function sendTransaction(
     receiptTimeoutMs = 120_000,
     explorerTxUrl,
     errorLabel = 'Transaction',
+    skipConfirmation,
+    sponsored,
   } = params;
 
   try {
@@ -74,6 +77,8 @@ export async function sendTransaction(
     console.log('========================================\n');
 
     const shouldProceed =
+      sponsored ||
+      skipConfirmation ||
       process.env.SKIP_TX_CONFIRMATION === 'true'
         ? true
         : await askConfirmation('Do you want to proceed? (y/n): ');
@@ -85,9 +90,64 @@ export async function sendTransaction(
 
     console.log('Sending transaction...');
 
+    if (sponsored) {
+      console.log('Using Base gas sponsorship (ERC-4337 paymaster)...');
+      const smartAccount = await sponsored.smartAccountFactory();
+      const { bundlerClient } = sponsored;
+
+      const userOpHash = await bundlerClient.sendUserOperation({
+        account: smartAccount,
+        calls: [
+          {
+            to: address,
+            value,
+            data: encodeFunctionData({
+              abi,
+              functionName,
+              args,
+            }),
+          },
+        ],
+      });
+
+      const userOperationReceipt =
+        await bundlerClient.waitForUserOperationReceipt({
+          hash: userOpHash,
+          timeout: receiptTimeoutMs,
+        });
+
+      const txHash = userOperationReceipt.receipt.transactionHash;
+      const receipt = await publicClient.waitForTransactionReceipt({
+        hash: txHash,
+        timeout: receiptTimeoutMs,
+      });
+
+      console.log('Sponsored UserOperation hash:', userOpHash);
+      console.log('Transaction sent! Hash:', txHash);
+      console.log('\n========================================');
+      console.log('       Transaction Confirmed!');
+      console.log('========================================');
+      console.log('Block number:', receipt.blockNumber?.toString());
+      console.log('Gas used:', receipt.gasUsed.toString());
+      console.log(
+        'Status:',
+        receipt.status === 'success' ? 'Success' : 'Failed',
+      );
+      if (explorerTxUrl) {
+        console.log('Tx URL:', explorerTxUrl(txHash));
+      }
+      console.log('========================================\n');
+
+      if (receipt.status === 'reverted') {
+        throw new Error(`Transaction reverted at block ${receipt.blockNumber}`);
+      }
+
+      return receipt;
+    }
+
     const hash = await walletClient.writeContract({
       address,
-      abi: abi as Abi,
+      abi,
       functionName,
       args,
       gas: gasEstimate,

@@ -43,7 +43,9 @@ export const getEvmEnvironment = (options?: { optional?: boolean }) => {
     throw new Error('PRIVATE_KEY must be defined');
   }
 
-  return { PRIVATE_KEY: env.PRIVATE_KEY };
+  return {
+    PRIVATE_KEY: env.PRIVATE_KEY,
+  };
 };
 
 export const getSolanaEnvironment = (options?: { optional?: boolean }) => {

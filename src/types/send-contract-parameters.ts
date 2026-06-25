@@ -1,4 +1,5 @@
 import { Abi, Account, Address, PublicClient, WalletClient } from 'viem';
+import type { BundlerClient, SmartAccount } from 'viem/account-abstraction';
 
 export type SendContractTransactionParams = {
   publicClient: PublicClient;
@@ -17,4 +18,10 @@ export type SendContractTransactionParams = {
 
   /** Skip transaction confirmation prompt (for automated flows) */
   skipConfirmation?: boolean;
+
+  /** Optional ERC-4337 sponsored flow config (Base only) */
+  sponsored?: {
+    bundlerClient: BundlerClient;
+    smartAccountFactory: () => Promise<SmartAccount>;
+  };
 };

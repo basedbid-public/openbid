@@ -42,9 +42,10 @@ export const createEvmFlashToken = async (
     console.log('Validation passed');
     return;
   }
-  const { publicClient, walletClient, account } = initEvmClients(
+  const { publicClient, walletClient, account, sponsored } = initEvmClients(
     data.chainId,
     env.PRIVATE_KEY,
+    { sponsored: true },
   );
 
   let logoUrl = 'https://ipfs.based.bid/ipfs/null';
@@ -173,6 +174,7 @@ export const createEvmFlashToken = async (
     value: txValue,
     errorLabel: 'Create Flash Token',
     skipConfirmation,
+    sponsored,
   });
 
   LogHelper.printResult({

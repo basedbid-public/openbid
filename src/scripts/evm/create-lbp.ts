@@ -37,9 +37,10 @@ export const createEvmLbp = async (
     return;
   }
 
-  const { publicClient, walletClient, account } = initEvmClients(
+  const { publicClient, walletClient, account, sponsored } = initEvmClients(
     data.chainId,
     env.PRIVATE_KEY,
+    { sponsored: true },
   );
 
   const apiKey = data.token.boardTitle
@@ -158,6 +159,7 @@ export const createEvmLbp = async (
     value: txValue,
     errorLabel: 'Create LBP',
     skipConfirmation: args.isSandboxMode,
+    sponsored,
   });
 
   LogHelper.printResult({

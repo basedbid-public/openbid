@@ -24,6 +24,8 @@ export class BasedBidApi {
 
   static rpcApiUrl = 'https://cdn.based.bid/api/rpc';
 
+  static paymasterApiUrl = 'https://cdn.based.bid/api/paymaster';
+
   static evmRpcUrl(chainId: number) {
     return `${this.rpcApiUrl}/evm?chainId=${chainId}`;
   }
