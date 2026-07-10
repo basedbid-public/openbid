@@ -5,7 +5,7 @@ import {
 import 'dotenv/config';
 import { ApiType } from 'enums';
 import { ClaimSolanaFeeApiResponse } from 'interfaces/claim-fees';
-import { OpenbidRunOptions } from 'interfaces/common';
+import { OpenbidRunOptions, resolveRunMode } from 'interfaces/common';
 import {
   ClaimSolanaLbpFeesRequest,
   claimSolanaLbpFeesRequestSchema,
@@ -16,7 +16,7 @@ export const claimSolanaLbpFees = async (
   args: ClaimSolanaLbpFeesRequest,
   options?: OpenbidRunOptions,
 ) => {
-  const { printPayload, dryRun, validate } = options ?? {};
+  const { printPayload, dryRun, validate } = resolveRunMode(options);
 
   if (printPayload) {
     LogHelper.printSectionWithSeparator(

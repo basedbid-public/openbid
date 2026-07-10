@@ -4,7 +4,11 @@ import flashLaunchV3Abi from 'constants/abi/FlashLaunchForV3Facet.json';
 import flashLaunchV4Abi from 'constants/abi/FlashLaunchForV4Facet.json';
 import { CHAIN_NAME_CONFIG } from 'constants/chain-config';
 import { ApiType, EvmDexType } from 'enums';
-import { EvmApiResponse, OpenbidRunOptions } from 'interfaces/common';
+import {
+  EvmApiResponse,
+  OpenbidRunOptions,
+  resolveRunMode,
+} from 'interfaces/common';
 import { CreateFlashTokenEvmApi } from 'schema/flash-token/evm/api';
 import {
   createEvmFlashTokenSchema,
@@ -24,7 +28,7 @@ export const createEvmFlashToken = async (
   args: CreateFlashTokenEvmSdk,
   options?: OpenbidRunOptions,
 ) => {
-  const { printPayload, dryRun, validate } = options ?? {};
+  const { printPayload, dryRun, validate } = resolveRunMode(options);
 
   if (printPayload) {
     LogHelper.printSectionWithSeparator(

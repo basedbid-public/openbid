@@ -2,7 +2,11 @@ import creationFacetAbi from 'constants/abi/CreationFacet.json';
 import { CHAIN_NAME_CONFIG, CHAIN_SLUG_CONFIG } from 'constants/chain-config';
 import 'dotenv/config';
 import { ApiType } from 'enums';
-import { EvmApiResponse, OpenbidRunOptions } from 'interfaces/common';
+import {
+  EvmApiResponse,
+  OpenbidRunOptions,
+  resolveRunMode,
+} from 'interfaces/common';
 import { CreateLbpEvmApi } from 'schema/lbp/evm/api';
 import { CreateLbpEvmSdk, evmLbpCreateSchema } from 'schema/lbp/evm/sdk';
 import {
@@ -20,7 +24,7 @@ export const createEvmLbp = async (
   args: CreateLbpEvmSdk,
   options?: OpenbidRunOptions,
 ) => {
-  const { printPayload, dryRun, validate } = options ?? {};
+  const { printPayload, dryRun, validate } = resolveRunMode(options);
 
   if (printPayload) {
     LogHelper.printSectionWithSeparator('- - - Creating LBP on EVM - - -');

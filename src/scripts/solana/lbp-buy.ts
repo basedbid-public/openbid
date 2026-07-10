@@ -4,7 +4,11 @@ import {
 } from 'constants/solana-chain-config';
 import 'dotenv/config';
 import { ApiType } from 'enums';
-import { OpenbidRunOptions, SolanaApiResponse } from 'interfaces/common';
+import {
+  OpenbidRunOptions,
+  resolveRunMode,
+  SolanaApiResponse,
+} from 'interfaces/common';
 import { BuySolanaSdk, buySolanaSdkSchema } from 'schema/buy/solana/sdk';
 import { BasedBidApi, LogHelper, SolanaValidator, SolanaWrapper } from 'utils';
 
@@ -12,7 +16,7 @@ export const solanaLbpBuy = async (
   args: BuySolanaSdk,
   options?: OpenbidRunOptions,
 ) => {
-  const { printPayload, dryRun, validate } = options ?? {};
+  const { printPayload, dryRun, validate } = resolveRunMode(options);
 
   if (printPayload) {
     LogHelper.printSectionWithSeparator('- - - Buying LBP on Solana - - -');

@@ -3,7 +3,7 @@
   "package": "based",
   "chainId": 5011,
   "token": {
-    "name": "dante 0.1 supply percent buy",
+    "name": "messi out",
     "symbol": "dante",
     "totalSupply": "1000000000",
     "initialBuyAmount": "0",
@@ -24,7 +24,7 @@
   },
   "dex": {
     "version": "meteora",
-    "feeTier": "1"
+    "feeTier": "3"
   },
   "fees": {
     "buyPoolCreator": 0,
@@ -34,10 +34,10 @@
     "feeDistribution": true,
     "dynamicFee": false,
     "liquidityPercent": 15,
-    "buybackPercent": 15,
+    "buybackPercent": 20,
     "rewardPercent": 0,
     "marketingPercent": 0,
-    "creatorPercent": 20,
+    "creatorPercent": 15,
     "customFees": [],
     "collectQuoteThreshold": "0.1",
     "collectBaseThreshold": "0.1",

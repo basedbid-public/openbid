@@ -2,7 +2,7 @@ import { SOLANA_CHAIN_NAME_CONFIG } from 'constants/solana-chain-config';
 import 'dotenv/config';
 import { ApiType } from 'enums';
 import { ClaimSolanaFeeApiResponse } from 'interfaces/claim-fees';
-import { OpenbidRunOptions } from 'interfaces/common';
+import { OpenbidRunOptions, resolveRunMode } from 'interfaces/common';
 import {
   ClaimSolanaFlashTokenFeesRequest,
   claimSolanaFlashTokenFeesRequestSchema,
@@ -13,7 +13,7 @@ export const claimSolanaFlashFees = async (
   args: ClaimSolanaFlashTokenFeesRequest,
   options?: OpenbidRunOptions,
 ) => {
-  const { printPayload, dryRun, validate } = options ?? {};
+  const { printPayload, dryRun, validate } = resolveRunMode(options);
 
   if (printPayload) {
     LogHelper.printSectionWithSeparator(

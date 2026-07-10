@@ -6,7 +6,12 @@ import {
   SOLANA_CHAIN_SLUG_CONFIG,
 } from 'constants/solana-chain-config';
 import { ApiType, SolanaDexType } from 'enums';
-import { OpenbidRunOptions, SolanaVanityUpdateData } from 'interfaces/common';
+import { writeFileSync } from 'fs';
+import {
+  OpenbidRunOptions,
+  resolveRunMode,
+  SolanaVanityUpdateData,
+} from 'interfaces/common';
 import { CreateSolanaLbpApiResponse } from 'interfaces/create-lbp';
 import { solanaFeeDistributionApiPayloadSchema } from 'schema/lbp/solana/fee-distribution';
 import {
@@ -31,7 +36,7 @@ export const createSolanaLbp = async (
 ) => {
   let launchConfirmed = false;
 
-  const { printPayload, dryRun, validate } = options ?? {};
+  const { printPayload, dryRun, validate } = resolveRunMode(options);
 
   if (printPayload) {
     LogHelper.printSectionWithSeparator('- - - Creating LBP on Solana - - -');
@@ -151,6 +156,8 @@ export const createSolanaLbp = async (
       },
     };
 
+    writeFileSync('api-payload.json', JSON.stringify(apiPayload, null, 2));
+
     if (printPayload) {
       LogHelper.printApiPayload('sol/create-lbp', apiPayload);
     }
@@ -266,6 +273,10 @@ export const createSolanaLbp = async (
       );
     }
 
+    writeFileSync(
+      'fee-distribution-payload.json',
+      JSON.stringify(solanaFeeDistributionValidated.data, null, 2),
+    );
     await BasedBidApi.invokeApi(
       ApiType.PLATFORM,
       'token/fee-distribution',

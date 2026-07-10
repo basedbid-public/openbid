@@ -8,6 +8,14 @@ import {
 import { solanaChainIdSchema } from 'schema/common/sdk-input';
 import { z } from 'zod';
 
+/**
+ * API-WIRE schemas for the based.bid Solana `/create-flash-tx1` and `/create-flash-tx2`
+ * endpoints. Solana Flash Token launches are two sequential transactions (see
+ * `createFlashTokenSolana`): TX1 creates the mint and pool state, TX2 finalizes the pool
+ * and enables trading. Both payloads are built internally from validated
+ * `createSolanaFlashInputSchema` (./sdk.ts) input plus values only known after TX1
+ * completes (`tx1Signature`, `flashSeed`, `mintAddress`, etc.) for TX2.
+ */
 const tokenSchemaTx1 = z.object({
   name: z.string().max(100),
   symbol: z.string().max(100),

@@ -4,6 +4,7 @@ import {
 } from './api-request';
 import { CreateSolanaLbpInput, createSolanaLbpInputSchema } from './sdk-input';
 
+/** Validates SDK-input and API-payload args for Solana LBP creation against their respective Zod schemas, throwing a descriptive error on failure. */
 export class SolanaLbpValidator {
   static validateInput(args: unknown): CreateSolanaLbpInput {
     const result = createSolanaLbpInputSchema.safeParse(args);

@@ -18,10 +18,6 @@ export class BasedBidApi {
       : `https://www.based.bid/api`;
   }
 
-  static basedTradeUrl(isSandboxMode: boolean) {
-    return isSandboxMode ? 'https://tt.based.bid' : `https://trade.based.bid`;
-  }
-
   static rpcApiUrl = 'https://cdn.based.bid/api/rpc';
 
   static paymasterApiUrl = 'https://cdn.based.bid/api/paymaster';

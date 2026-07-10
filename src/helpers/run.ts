@@ -1,6 +1,20 @@
+/**
+ * Generic CLI entry point used by every `npm run <chain>:<operation>` script (see
+ * `package.json`).
+ *
+ * Reads a JSON config file, looks up the matching SDK function by
+ * `operation` name, and invokes it with an `OpenbidRunOptions.mode`
+ * derived from the `--dry-run`/`--validate` CLI flags
+ *
+ * Operation naming: always `<chain>-<action>`, e.g. `evm-create-lbp`,
+ * `solana-create-flash-token`. Note EVM has a single unified `evm-claim-fees` (with a
+ * `target: 'pool' | 'board'` field to pick what's claimed), while Solana splits this
+ * into two operations - `solana-claim-lbp-fees` and `solana-claim-flash-fees` - because
+ * LBP and Flash Token fee distribution use different config shapes on that chain.
+ */
 import 'dotenv/config';
 import { readFileSync } from 'fs';
-import { OpenbidRunOptions } from 'interfaces/common';
+import { OpenbidRunMode, OpenbidRunOptions } from 'interfaces/common';
 
 import { CreateEvmBoardSdk } from 'schema/board/evm/sdk';
 import { CreateSolanaBoardSdk } from 'schema/board/solana/sdk';
@@ -36,12 +50,14 @@ import {
 
 const [, , operation, configFile, ...extraArgs] = process.argv;
 
-const runOptions: OpenbidRunOptions = {
-  dryRun: extraArgs.includes('--dry-run'),
-  validate: extraArgs.includes('--validate'),
-  printPayload:
-    extraArgs.includes('--dry-run') || extraArgs.includes('--validate'),
-};
+const mode: OpenbidRunMode = extraArgs.includes('--validate')
+  ? 'validate'
+  : extraArgs.includes('--dry-run')
+    ? 'dry-run'
+    : 'live';
+
+const runOptions: OpenbidRunOptions = { mode };
+const printPayload = mode === 'dry-run' || mode === 'validate';
 
 if (!operation || !configFile) {
   console.error(
@@ -78,11 +94,11 @@ if (extraArgs.includes('--help') || extraArgs.includes('-h')) {
 const configContent = readFileSync(configFile, 'utf-8');
 const config = JSON.parse(configContent) as unknown;
 
-if (runOptions.printPayload) {
+if (printPayload) {
   console.log('\n========== DRY RUN / VALIDATE MODE ==========\n');
   console.log('Operation:', operation);
   console.log('Config file:', configFile);
-  console.log('Options:', runOptions);
+  console.log('Mode:', mode);
   console.log('\n---------- Loaded Config ----------');
   console.log(JSON.stringify(config, null, 2));
   console.log('\n');

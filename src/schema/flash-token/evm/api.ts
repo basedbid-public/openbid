@@ -15,6 +15,13 @@ import { z } from 'zod';
 
 export const distributionAmountUnitSchema = z.enum(['percent', 'usd']);
 
+/**
+ * API-WIRE schema for the based.bid `/create-flash` endpoint payload. This is NOT what
+ * callers construct directly - `createEvmFlashToken` builds this shape internally from
+ * validated `createEvmFlashTokenSchema` (sdk.ts) input plus derived values (e.g. an
+ * uploaded `metadataUrl` in place of the sdk's local `logo` path). Used to validate the
+ * outgoing request before it's sent to the API.
+ */
 export const evmFlashTokenCreateApiSchema = z
   .object({
     isSandboxMode: z.boolean().default(false),
@@ -80,7 +87,7 @@ export const evmFlashTokenCreateApiSchema = z
                   address: z
                     .string()
                     .regex(/^0x[a-fA-F0-9]{40}$/, 'Invalid EVM address'),
-                  amount: z.number(),
+                  percent: z.number(),
                 }),
               ),
               feeThreshold: z.number(),

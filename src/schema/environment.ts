@@ -24,6 +24,12 @@ export const DUMMY_EVM_PRIVATE_KEY =
 /** Valid ed25519 seed — dry-run previews only, never for real transactions. */
 export const DUMMY_SOLANA_PRIVATE_KEY = bs58.encode(new Uint8Array(32).fill(1));
 
+/**
+ * Reads and validates `PRIVATE_KEY` from the environment. Throws with a "What To Try
+ * Next" hint if missing, unless `options.optional` is true (used by `--dry-run` /
+ * `--validate` flows), in which case it silently falls back to `DUMMY_EVM_PRIVATE_KEY`
+ * so payload-building code can run without a real signer.
+ */
 export const getEvmEnvironment = (options?: { optional?: boolean }) => {
   const parsed = evmEnvSchema.safeParse(process.env);
   if (!parsed.success) {
@@ -48,6 +54,7 @@ export const getEvmEnvironment = (options?: { optional?: boolean }) => {
   };
 };
 
+/** Solana counterpart to `getEvmEnvironment` - same optional/dummy-key fallback behavior, for `SOLANA_PRIVATE_KEY`. */
 export const getSolanaEnvironment = (options?: { optional?: boolean }) => {
   const parsed = solanaEnvSchema.safeParse(process.env);
   if (!parsed.success) {

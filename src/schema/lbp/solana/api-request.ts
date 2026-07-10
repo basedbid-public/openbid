@@ -11,6 +11,13 @@ import {
 } from 'schema/common';
 import { z } from 'zod';
 
+/**
+ * API-WIRE schema for the based.bid Solana create-LBP endpoint payload. Built internally
+ * by `createLbpSolana` from validated `createSolanaLbpInputSchema` (./sdk-input.ts)
+ * input - nests most fields under `data`, swaps `LaunchPackageType` for a numeric
+ * `package` index, and replaces the sdk's local `metadata.logo` with an uploaded
+ * `metadataUrl`.
+ */
 export const createLbpSolanaApiPayloadSchema = z.object({
   chainId: z.number().int().min(0),
   signer: z.string(),

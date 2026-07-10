@@ -3,7 +3,12 @@ import 'dotenv/config';
 import { KeyPairSigner } from '@solana/kit';
 import { SOLANA_CHAIN_NAME_CONFIG } from 'constants/solana-chain-config';
 import { ApiType, SolanaFlashDexType } from 'enums';
-import { OpenbidRunOptions, SolanaVanityUpdateData } from 'interfaces/common';
+import { writeFileSync } from 'fs';
+import {
+  OpenbidRunOptions,
+  resolveRunMode,
+  SolanaVanityUpdateData,
+} from 'interfaces/common';
 import { CreateSolanaFlashTx1ApiResponse } from 'interfaces/create-flash-token';
 import {
   CreateSolanaFlashTx1Api,
@@ -30,7 +35,7 @@ export const createSolanaFlashToken = async (
 ) => {
   let launchConfirmed = false;
 
-  const { printPayload, dryRun, validate } = options ?? {};
+  const { printPayload, dryRun, validate } = resolveRunMode(options);
 
   if (printPayload) {
     LogHelper.printSectionWithSeparator(
@@ -291,6 +296,11 @@ export const createSolanaFlashToken = async (
           fees.feeDistributionPayoutCustomMint ?? '',
         rewardToken: fees.rewardToken ?? '',
       };
+
+      writeFileSync(
+        'fee-distribution-payload.json',
+        JSON.stringify(feeDistributionPayload, null, 2),
+      );
 
       const solanaFeeDistributionValidated =
         solanaFeeDistributionApiPayloadSchema.safeParse(feeDistributionPayload);

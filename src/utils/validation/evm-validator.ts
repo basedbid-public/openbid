@@ -1,4 +1,4 @@
-import { OpenbidRunOptions } from 'interfaces/common';
+import { OpenbidRunOptions, resolveRunMode } from 'interfaces/common';
 import { getEvmEnvironment } from 'schema/environment';
 import { ZodObject } from 'zod';
 
@@ -8,8 +8,8 @@ export class EvmValidator {
     data: unknown,
     runOptions?: OpenbidRunOptions,
   ) {
-    const skipEnvValidation =
-      runOptions?.validate === true || runOptions?.dryRun === true;
+    const { dryRun, validate, printPayload } = resolveRunMode(runOptions);
+    const skipEnvValidation = validate || dryRun;
 
     const env = getEvmEnvironment({ optional: skipEnvValidation });
 
@@ -18,7 +18,7 @@ export class EvmValidator {
       throw new Error('Validation failed: ' + input.error.message);
     }
 
-    if (runOptions?.printPayload) {
+    if (printPayload) {
       console.table(input.data);
     }
 

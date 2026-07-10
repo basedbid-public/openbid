@@ -3,7 +3,11 @@ import 'dotenv/config';
 import subBoardFacetAbi from 'constants/abi/SubBoardFacet.json';
 import { CHAIN_NAME_CONFIG } from 'constants/chain-config';
 import { ApiType } from 'enums';
-import { EvmApiResponse, OpenbidRunOptions } from 'interfaces/common';
+import {
+  EvmApiResponse,
+  OpenbidRunOptions,
+  resolveRunMode,
+} from 'interfaces/common';
 import { createEvmBoardSchema, CreateEvmBoardSdk } from 'schema/board/evm/sdk';
 import {
   BasedBidApi,
@@ -19,7 +23,7 @@ export const createEvmBoard = async (
   args: CreateEvmBoardSdk,
   options?: OpenbidRunOptions,
 ) => {
-  const { printPayload, dryRun, validate } = options ?? {};
+  const { printPayload, dryRun, validate } = resolveRunMode(options);
 
   if (printPayload) {
     LogHelper.printSectionWithSeparator('- - - Creating Board on EVM - - -');

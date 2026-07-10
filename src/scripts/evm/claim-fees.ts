@@ -2,7 +2,11 @@ import collectFeeForLBPFacetAbi from 'constants/abi/CollectFeeForLBPFacet.json';
 import { CHAIN_NAME_CONFIG } from 'constants/chain-config';
 import 'dotenv/config';
 import { ApiType } from 'enums';
-import { EvmApiResponse, OpenbidRunOptions } from 'interfaces/common';
+import {
+  EvmApiResponse,
+  OpenbidRunOptions,
+  resolveRunMode,
+} from 'interfaces/common';
 import {
   ClaimEvmFeesSdk,
   claimEvmFeesSdkSchema,
@@ -19,7 +23,7 @@ export const claimEvmFees = async (
   args: ClaimEvmFeesSdk,
   options?: OpenbidRunOptions,
 ) => {
-  const { printPayload, dryRun, validate } = options ?? {};
+  const { printPayload, dryRun, validate } = resolveRunMode(options);
 
   if (printPayload) {
     LogHelper.printSectionWithSeparator('- - - Claiming Fees on EVM - - -');

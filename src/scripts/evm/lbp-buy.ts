@@ -2,7 +2,11 @@ import tradeFacetAbi from 'constants/abi/TradeFacet.json';
 import { CHAIN_NAME_CONFIG, CHAIN_SLUG_CONFIG } from 'constants/chain-config';
 import 'dotenv/config';
 import { ApiType } from 'enums';
-import { EvmApiResponse, OpenbidRunOptions } from 'interfaces/common';
+import {
+  EvmApiResponse,
+  OpenbidRunOptions,
+  resolveRunMode,
+} from 'interfaces/common';
 import { BuyEvmSdk, buyEvmSdkSchema } from 'schema/buy/evm/sdk';
 import {
   BasedBidApi,
@@ -16,7 +20,7 @@ export const evmLbpBuy = async (
   args: BuyEvmSdk,
   options?: OpenbidRunOptions,
 ) => {
-  const { printPayload, dryRun, validate } = options ?? {};
+  const { printPayload, dryRun, validate } = resolveRunMode(options);
 
   if (printPayload) {
     LogHelper.printSectionWithSeparator('- - - Buying LBP on EVM - - -');

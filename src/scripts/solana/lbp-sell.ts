@@ -4,7 +4,11 @@ import {
 } from 'constants/solana-chain-config';
 import 'dotenv/config';
 import { ApiType } from 'enums';
-import { OpenbidRunOptions, SolanaApiResponse } from 'interfaces/common';
+import {
+  OpenbidRunOptions,
+  resolveRunMode,
+  SolanaApiResponse,
+} from 'interfaces/common';
 import { SellSolanaApi } from 'schema/sell/solana/api';
 import { SellSolanaSdk, sellSolanaSdkSchema } from 'schema/sell/solana/sdk';
 import { BasedBidApi, LogHelper, SolanaValidator, SolanaWrapper } from 'utils';
@@ -13,7 +17,7 @@ export const solanaLbpSell = async (
   args: SellSolanaSdk,
   options?: OpenbidRunOptions,
 ) => {
-  const { printPayload, dryRun, validate } = options ?? {};
+  const { printPayload, dryRun, validate } = resolveRunMode(options);
 
   if (printPayload) {
     LogHelper.printSectionWithSeparator('- - - Selling LBP on Solana - - -');

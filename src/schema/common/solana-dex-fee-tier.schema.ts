@@ -6,4 +6,6 @@ import z from 'zod';
  * 2 = 4% fees
  * 3 = 6% fees
  */
-export const solanaDexFeeTierSchema = z.enum(['0', '1', '2', '3']);
+export const solanaDexFeeTierSchema = z
+  .enum(['0', '1', '2', '3'])
+  .describe('DEX fee tier index: "0"=1%, "1"=2%, "2"=4%, "3"=6% fees');

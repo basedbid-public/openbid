@@ -1,7 +1,7 @@
 import { SOLANA_CHAIN_NAME_CONFIG } from 'constants/solana-chain-config';
 import 'dotenv/config';
 import { ApiType } from 'enums';
-import { OpenbidRunOptions } from 'interfaces/common';
+import { OpenbidRunOptions, resolveRunMode } from 'interfaces/common';
 import { CreateSolanaBoardApiResponse } from 'interfaces/create-board';
 import {
   CreateSolanaBoardSdk,
@@ -20,7 +20,7 @@ export const createSolanaBoard = async (
   args: CreateSolanaBoardSdk,
   options?: OpenbidRunOptions,
 ) => {
-  const { printPayload, dryRun, validate } = options ?? {};
+  const { printPayload, dryRun, validate } = resolveRunMode(options);
 
   if (printPayload) {
     LogHelper.printSectionWithSeparator('- - - Creating Board on Solana - - -');

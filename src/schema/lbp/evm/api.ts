@@ -16,6 +16,12 @@ import { v4BuyLimitsSchema } from 'schema/v4-fees/buy-limits';
 import { rewardTokenDividendsSchema } from 'schema/v4-fees/reward-token-dividends';
 import { z } from 'zod';
 
+/**
+ * API-WIRE schema for the based.bid `/create-lbp` endpoint payload. Built internally by
+ * `createLbp` from validated `evmLbpCreateSchema` (./sdk.ts) input - notably swaps the
+ * sdk's `LaunchPackageType` enum for a numeric `packageIndex`, and the sdk's local
+ * `metadata` (with a `logo` file path) for an uploaded `metadataUrl`.
+ */
 export const evmLbpCreateApiSchema = z.object({
   package: packageIndexSchema,
   chainId: evmChainIdSchema,
@@ -34,7 +40,11 @@ export const evmLbpCreateApiSchema = z.object({
       ),
   }),
   sale: z.object({
-    boardTitle: z.string(),
+    boardTitle: z
+      .string()
+      .describe(
+        'Custom board title; empty string means the default platform board',
+      ),
     marketCap: z
       .number()
       .min(1, 'Market cap must be greater than 0')
@@ -77,7 +87,7 @@ export const evmLbpCreateApiSchema = z.object({
             address: z
               .string()
               .regex(/^0x[a-fA-F0-9]{40}$/, 'Invalid EVM address'),
-            amount: z.number(),
+            percent: z.number(),
           }),
         ),
         feeThreshold: z.number(),

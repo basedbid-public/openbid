@@ -1,6 +1,13 @@
 import { solanaAddressSchema } from 'schema/common';
 import { z } from 'zod';
 
+/**
+ * API-WIRE schema for the based.bid Solana fee-distribution configuration payload, sent
+ * as part of `createLbpSolana` and `createFlashTokenSolana` to set up how trading fees
+ * get split (liquidity/buyback/reward/marketing/creator/custom) for the new pool. Shares
+ * the same field set as the `fees` objects in `createSolanaLbpInputSchema` /
+ * `createSolanaFlashInputSchema`, but as a standalone schema reused by both launch flows.
+ */
 export const solanaCustomFeeSchema = z.object({
   percent: z.number().min(0).max(100),
   walletAddress: solanaAddressSchema,
