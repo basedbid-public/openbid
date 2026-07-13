@@ -137,7 +137,7 @@ import { CreateLbpEvmSdk } from 'schema/lbp/evm/sdk';
 | Parameter | Type                | Description                                                                                                                    |
 | --------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | `package` | `LaunchPackageType` | `BASED`, `SUPER_BASED`, or `ULTRA_BASED`                                                                                       |
-| `chainId` | `number`            | `1`, `56`, or `8453`                                                                                                           |
+| `chainId` | `number`            | `1`, `56`, `8453`, or `4663`                                                                                                           |
 | `token`   | `object`            | `name`, `symbol`, `totalSupply`, `initialBuyAmount`, `marketCap`, **`boardTitle`?**, `metadata`                                    |
 
 > **Board behavior:** `boardTitle` is **purely optional**. Only include it if the user explicitly provides a custom board name. Omitting it means the token launches without any board affiliation. **Do not send `'based'` or any default string.**
@@ -435,7 +435,7 @@ await createLbp(args);
 
 ## Sandbox Mode
 
-For EVM chains, `isSandboxMode` is accepted in the SDK schema but **has no effect** — all operations execute on mainnet of the target chain (Ethereum, BSC, or Base). The parameter exists for API consistency with Solana workflows.
+For EVM chains, `isSandboxMode` is accepted in the SDK schema but **has no effect** — all operations execute on mainnet of the target chain (Ethereum, BSC, Base, or Robinhood Chain). The parameter exists for API consistency with Solana workflows.
 
 When using Solana, setting `isSandboxMode: true` routes to **testnet.based.bid** instead of the mainnet based.bid app, allowing experimentation without real funds. EVM always uses mainnet regardless of this setting.
 

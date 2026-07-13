@@ -176,7 +176,7 @@ await sellSolana({
 
 | Aspect | EVM | Solana |
 |--------|-----|--------|
-| Chain ID | 1 / 56 / 8453 | 5011 |
+| Chain ID | 1 / 56 / 8453 / 4663 | 5011 |
 | Transactions | 2 (approve + sell) | 1 (single compiled tx) |
 | Address param | `address` (pool contract) | `address` (token mint) |
 | `account` | Passed in args | Derived from `SOLANA_PRIVATE_KEY` |

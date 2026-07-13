@@ -1,4 +1,5 @@
 export * from './based-bid-api';
+export * from './evm-flash-token';
 export * from './get-launch-package-index';
 export * from './init-evm-rpc';
 export * from './ipfs-upload';

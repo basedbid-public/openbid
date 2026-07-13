@@ -136,7 +136,7 @@ npm run evm:create-flash-token
 | Parameter       | Type      | Description                                                                                                                |
 | --------------- | --------- | -------------------------------------------------------------------------------------------------------------------------- |
 | `isSandboxMode` | `boolean` | denotes if the project should launch on based.bid's mainnet or testnet (set to `true` to experiment with various settings) |
-| `chainId`       | `number`  | `1` (Ethereum), `56` (Binance Smart Chain), or `8453` (Base)                                                               |
+| `chainId`       | `number`  | `1` (Ethereum), `56` (Binance Smart Chain), `8453` (Base), or `4663` (Robinhood Chain)                                                               |
 | `token`         | `Token`   | token data                                                                                                                 |
 | `boardTitle`    | `string`  | the board the token should launch under                                                                                    |
 | `sale`          | `Sale`    | sale data                                                                                                                  |

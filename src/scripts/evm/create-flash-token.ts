@@ -23,6 +23,7 @@ import {
   normalizeByAbi,
   sendTransaction,
 } from 'utils';
+import { patchFlashLaunchApiArgs } from 'utils/evm-flash-token';
 
 export const createEvmFlashToken = async (
   args: CreateFlashTokenEvmSdk,
@@ -142,7 +143,7 @@ export const createEvmFlashToken = async (
     apiKey,
   );
 
-  const txValue = BigInt(json.value);
+  const txValue = BigInt(json.value ?? '0');
 
   const flashLaunchAbi = [
     EvmDexType.UNISWAP_V4,
@@ -150,6 +151,8 @@ export const createEvmFlashToken = async (
   ].includes(data.dex.version)
     ? flashLaunchV4Abi
     : flashLaunchV3Abi;
+
+  patchFlashLaunchApiArgs(json.functionName, json.args, sale.marketCap);
 
   const createFlashAbi = flashLaunchAbi.find(
     (item) => item.type === 'function' && item.name === json.functionName,

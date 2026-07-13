@@ -205,5 +205,5 @@ Both flows require `git`, `node`, and `npm`. The installer fails fast with a cle
 
 - Run `./install.sh` once before using the CLI scripts
 - Sandbox mode is **disabled** by default
-- Chain ID: `8453` for Base, `101` for Solana
+- Chain ID: `8453` for Base, `4663` for Robinhood Chain, `101` for Solana
 - Reward token defaults to `ETH` on Base, `SOL` on Solana

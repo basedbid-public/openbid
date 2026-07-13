@@ -184,7 +184,7 @@ await buySolana({
 
 | Aspect | EVM | Solana |
 |--------|-----|--------|
-| Chain ID | 1 / 56 / 8453 | 5011 |
+| Chain ID | 1 / 56 / 8453 / 4663 | 5011 |
 | Transaction | ABI-encoded contract call | Base64 compiled VersionedTransaction |
 | Signers | Single wallet (via viem) | Wallet via SolanaWrapper |
 | Address param | `address` (pool contract) | `address` (token mint) |

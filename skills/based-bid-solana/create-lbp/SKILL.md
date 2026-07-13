@@ -376,7 +376,7 @@ await createLbpSolana({
 
 | Aspect           | EVM                        | Solana                                                     |
 | ---------------- | -------------------------- | ---------------------------------------------------------- |
-| Chain ID         | 1 / 56 / 8453              | 5011 (devnet)                                              |
+| Chain ID         | 1 / 56 / 8453 / 4663              | 5011 (devnet)                                              |
 | Transaction type | ABI-encoded contract call  | Base64 compiled VersionedTransaction                       |
 | Signers          | Single wallet              | Wallet + mint keypair (order matters!)                     |
 | Seed             | N/A                        | 5-digit numeric seed in metadata                           |

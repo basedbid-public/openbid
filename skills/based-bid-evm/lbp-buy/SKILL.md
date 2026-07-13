@@ -4,7 +4,7 @@
 
 Buy tokens from a Liquidity Bootstrapping Pool (LBP) or a Flash Token on the based.bid platform. This skill handles token purchases with configurable slippage protection and referral tracking.
 
-The buy functionality supports multiple EVM chains (Ethereum, BSC, Base) and interacts with the TradeFacet smart contract to execute token purchases. The skill obtains transaction data from the BasedBid API, estimates gas, and submits the transaction on-chain.
+The buy functionality supports multiple EVM chains (Ethereum, BSC, Base, Robinhood Chain) and interacts with the TradeFacet smart contract to execute token purchases. The skill obtains transaction data from the BasedBid API, estimates gas, and submits the transaction on-chain.
 
 ## Agent Behavior
 
@@ -12,7 +12,7 @@ When the user requests to buy tokens, collect these required inputs:
 
 1. **address**: Token/LBP contract address (0x...)
 2. **amount**: Purchase amount in native token (e.g., 0.01)
-3. **chainId**: Default is Base (8453). Options: 1 (Ethereum), 56 (BSC), 8453 (Base)
+3. **chainId**: Default is Base (8453). Options: 1 (Ethereum), 56 (BSC), 8453 (Base), 4663 (Robinhood Chain)
 
 **Optional:**
 - slippage: 1, 5, or 10 percent (default: 5)
@@ -68,7 +68,7 @@ import { BuyEvmSdk } from 'schema/buy/evm/sdk';
 
 // Schema definition (for reference):
 // buyEvmSdkSchema = z.object({
-//   chainId: evmChainIdSchema,          // 1 | 56 | 8453
+//   chainId: evmChainIdSchema,          // 1 | 56 | 8453 | 4663
 //   address: evmAddressSchema,          // 0x... token/pool address
 //   slippage: z.union([z.literal(1), z.literal(5), z.literal(10)]),
 //   referrer: evmAddressSchema,         // referral address
@@ -78,7 +78,7 @@ import { BuyEvmSdk } from 'schema/buy/evm/sdk';
 
 | Parameter  | Type     | Description                | Constraints                       |
 | ---------- | -------- | -------------------------- | --------------------------------- |
-| `chainId`  | `number` | Blockchain network ID      | Must be 1, 56, or 8453            |
+| `chainId`  | `number` | Blockchain network ID      | Must be 1, 56, 8453, or 4663            |
 | `address`  | `string` | Token/LBP contract address | Valid EVM address (0x...)         |
 | `slippage` | `number` | Maximum allowed slippage   | Must be 1, 5, or 10 (percent)     |
 | `referrer` | `string` | Referral wallet address    | Valid EVM address or zero address |
@@ -222,6 +222,7 @@ The buy skill automatically handles different chains:
 | -------- | -------- | -------------- |
 | Ethereum | 1        | etherscan.io   |
 | BSC      | 56       | bscscan.com    |
+| Robinhood Chain | 4663     | robinhoodchain.blockscout.com |
 | Base     | 8453     | basescan.org   |
 
 The `chainId` parameter determines which network the transaction is executed on. The SDK routes RPC through `https://cdn.based.bid/api/rpc/evm` for that chain.
@@ -261,7 +262,7 @@ The self-executing async IIFE at the bottom of `buy.ts` demonstrates usage with 
 
 ## Sandbox Mode
 
-For EVM chains, `isSandboxMode` is accepted in the SDK schema but **has no effect** — all operations execute on mainnet of the target chain (Ethereum, BSC, or Base). The parameter exists for API consistency with Solana workflows.
+For EVM chains, `isSandboxMode` is accepted in the SDK schema but **has no effect** — all operations execute on mainnet of the target chain (Ethereum, BSC, Base, or Robinhood Chain). The parameter exists for API consistency with Solana workflows.
 
 When using Solana, setting `isSandboxMode: true` routes to **testnet.based.bid** instead of the mainnet based.bid app, allowing experimentation without real funds. EVM always uses mainnet regardless of this setting.
 

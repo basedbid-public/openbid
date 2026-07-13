@@ -374,7 +374,7 @@ const result = await createFlashTokenSolana({
 | Transaction type | ABI-encoded contract call  | Base64 compiled VersionedTransaction                           |
 | Signers          | Single wallet              | Wallet + mint keypair (+ position NFT keypair for Raydium TX2) |
 | DEX config       | `version` + `feeTier`      | `dex.version` + `dex.feeTier` + DEX-specific objects           |
-| Chain ID         | 1 / 56 / 8453              | 5011 (devnet)                                                  |
+| Chain ID         | 1 / 56 / 8453 / 4663              | 5011 (devnet)                                                  |
 
 ## Key Differences from Solana LBP
 

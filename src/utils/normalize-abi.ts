@@ -1,5 +1,33 @@
 import { AbiInput } from 'interfaces/common';
 
+const defaultForNullAbiValue = (input: AbiInput, path: string): unknown => {
+  const { type } = input;
+
+  if (type === 'bool') {
+    return false;
+  }
+
+  if (type === 'address') {
+    return '0x0000000000000000000000000000000000000000';
+  }
+
+  if (type.startsWith('uint') || type.startsWith('int')) {
+    return 0;
+  }
+
+  if (type === 'string') {
+    return '';
+  }
+
+  if (type.startsWith('bytes')) {
+    return '0x';
+  }
+
+  throw new Error(
+    `API returned null for required ABI value at ${path} (${type})`,
+  );
+};
+
 export const normalizeByAbi = (
   value: unknown,
   input: AbiInput,
@@ -66,6 +94,10 @@ export const normalizeByAbi = (
 
   if (value === undefined) {
     throw new Error(`Missing required ABI value at ${path} (${input.type})`);
+  }
+
+  if (value === null) {
+    return defaultForNullAbiValue(input, path);
   }
 
   return value;

@@ -40,9 +40,10 @@ export const generateEvmWallet = () => {
       npx ts-node src/scripts/evm/create-board.ts
       
     Available chains:
-      --chainId=1   (Ethereum Mainnet)
-      --chainId=56  (BNB Smart Chain)
+      --chainId=1    (Ethereum Mainnet)
+      --chainId=56   (BNB Smart Chain)
       --chainId=8453 (Base Mainnet)
+      --chainId=4663 (Robinhood Chain)
     `);
 
   return {

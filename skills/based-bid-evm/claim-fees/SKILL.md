@@ -12,7 +12,7 @@ When the user requests to claim fees, collect these required inputs:
 
 1. **address**: Pool or board contract address (0x...)
 2. **target**: What to claim from - either `"pool"` or `"board"`
-3. **chainId**: Default is Base (8453). Options: 1 (Ethereum), 56 (BSC), 8453 (Base)
+3. **chainId**: Default is Base (8453). Options: 1 (Ethereum), 56 (BSC), 8453 (Base), 4663 (Robinhood Chain)
 
 **Confirmation:** Display fee amount estimate and require user confirmation before executing.
 
@@ -62,13 +62,13 @@ import { ClaimEvmFeesSdk } from 'schema/claim-fees/evm/sdk';
 // claimEvmFeesSdkSchema = z.object({
 //   address: evmAddressSchema,           // LBP/pool or board address
 //   target: z.enum(['pool', 'board']),   // what to claim fees from
-//   chainId: evmChainIdSchema,          // 1 | 56 | 8453
+//   chainId: evmChainIdSchema,          // 1 | 56 | 8453 | 4663
 // })
 ```
 
 | Parameter | Type     | Description                    | Constraints               |
 | --------- | -------- | ------------------------------ | ------------------------- |
-| `chainId` | `number` | Blockchain network ID          | Must be 1, 56, or 8453    |
+| `chainId` | `number` | Blockchain network ID          | Must be 1, 56, 8453, or 4663    |
 | `address` | `string` | Pool or board contract address | Valid EVM address (0x...) |
 | `target`  | `string` | Fee collection target          | `"pool"` or `"board"`     |
 
@@ -171,7 +171,7 @@ const receipt = await claimEvmFees({
 
 ## Sandbox Mode
 
-For EVM chains, `isSandboxMode` is accepted in the SDK schema but **has no effect** — all operations execute on mainnet of the target chain (Ethereum, BSC, or Base). The parameter exists for API consistency with Solana workflows.
+For EVM chains, `isSandboxMode` is accepted in the SDK schema but **has no effect** — all operations execute on mainnet of the target chain (Ethereum, BSC, Base, or Robinhood Chain). The parameter exists for API consistency with Solana workflows.
 
 When using Solana, setting `isSandboxMode: true` routes to **testnet.based.bid** instead of the mainnet based.bid app, allowing experimentation without real funds. EVM always uses mainnet regardless of this setting.
 

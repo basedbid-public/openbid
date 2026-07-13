@@ -28,7 +28,7 @@ When the user requests to create a board, collect these required inputs:
 
 **Optional:**
 - banner: Path to banner image file
-- chainId: Default is Base (8453). Options: 1 (Ethereum), 56 (BSC), 8453 (Base)
+- chainId: Default is Base (8453). Options: 1 (Ethereum), 56 (BSC), 8453 (Base), 4663 (Robinhood Chain)
 
 **Confirmation:** Display board details and require user confirmation before creating.
 
@@ -79,7 +79,7 @@ import { CreateEvmBoardSdk } from 'schema/board/evm/sdk';
 
 // Schema definition:
 // createEvmBoardSchema = z.object({
-//   chainId: evmChainIdSchema,      // 1 | 56 | 8453
+//   chainId: evmChainIdSchema,      // 1 | 56 | 8453 | 4663
 //   title: z.string().min(1).max(100),
 //   description: z.string().min(1).max(1000),
 //   logo: z.string(),              // file path to logo image
@@ -92,7 +92,7 @@ import { CreateEvmBoardSdk } from 'schema/board/evm/sdk';
 
 | Parameter     | Type     | Description               | Constraints                                    |
 | ------------- | -------- | ------------------------- | ---------------------------------------------- |
-| `chainId`     | `number` | Blockchain network ID     | Must be 1 (Ethereum), 56 (BSC), or 8453 (Base) |
+| `chainId`     | `number` | Blockchain network ID     | Must be 1 (Ethereum), 56 (BSC), 8453 (Base), or 4663 (Robinhood Chain) |
 | `title`       | `string` | Board name/title          | Required, 1-100 characters                     |
 | `description` | `string` | Public board description  | Required, 1-1000 characters                    |
 | `logo`        | `string` | File path to logo image   | Required, valid file path                      |
@@ -192,7 +192,7 @@ Common errors:
 | ---------------------------------------- | ----------------------------- | ------------------------------------------ |
 | `PRIVATE_KEY must not be empty`          | Missing or empty private key  | Add `PRIVATE_KEY` to `.env` file           |
 | `Invalid environment`                    | Invalid environment variables | Check `.env` configuration                 |
-| `Invalid chainId`                        | Unsupported chain ID          | Use 1 (Ethereum), 56 (BSC), or 8453 (Base) |
+| `Invalid chainId`                        | Unsupported chain ID          | Use 1 (Ethereum), 56 (BSC), 8453 (Base), or 4663 (Robinhood Chain) |
 | `Title is required`                      | Empty title                   | Provide a non-empty title                  |
 | `Title too long`                         | Title > 100 chars             | Shorten the title                          |
 | `Description is required`                | Empty description             | Provide a non-empty description            |
@@ -344,7 +344,7 @@ This metadata is immutable once created (stored on IPFS), so choose your content
 
 ## Sandbox Mode
 
-For EVM chains, `isSandboxMode` is accepted in the SDK schema but **has no effect** — all operations execute on mainnet of the target chain (Ethereum, BSC, or Base). The parameter exists for API consistency with Solana workflows.
+For EVM chains, `isSandboxMode` is accepted in the SDK schema but **has no effect** — all operations execute on mainnet of the target chain (Ethereum, BSC, Base, or Robinhood Chain). The parameter exists for API consistency with Solana workflows.
 
 When using Solana, setting `isSandboxMode: true` routes to **testnet.based.bid** instead of the mainnet based.bid app, allowing experimentation without real funds. EVM always uses mainnet regardless of this setting.
 

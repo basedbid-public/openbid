@@ -198,7 +198,7 @@ During execution, two debug files are created:
 ## Related Skills
 
 - `create-lbp-solana`: Create a token sale (LBP) on a Solana board
-- `create-board`: Create a board on EVM chains (Ethereum, BSC, Base)
+- `create-board`: Create a board on EVM chains (Ethereum, BSC, Base, Robinhood Chain)
 
 ## Example Integration
 

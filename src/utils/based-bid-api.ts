@@ -23,7 +23,9 @@ export class BasedBidApi {
   static paymasterApiUrl = 'https://cdn.based.bid/api/paymaster';
 
   static evmRpcUrl(chainId: number) {
-    return `${this.rpcApiUrl}/evm?chainId=${chainId}`;
+    return chainId === 4663
+      ? 'https://rpc.mainnet.chain.robinhood.com'
+      : `${this.rpcApiUrl}/evm?chainId=${chainId}`;
   }
 
   static solanaRpcUrl(chainId: number) {

@@ -24,6 +24,7 @@ npm run build && node dist/scripts/generate-wallet/evm.js
 |--------|-------------|---------|
 | `--chainId=1` | Ethereum Mainnet | - |
 | `--chainId=56` | BNB Smart Chain | - |
+| `--chainId=4663` | Robinhood Chain | - |
 | `--chainId=8453` | Base Mainnet | Base (8453) |
 
 ## Output
@@ -50,6 +51,7 @@ On-chain scripts use the BasedBid RPC proxy for the `chainId` in each config fil
 |-------|----------|
 | Ethereum | 1 |
 | BSC | 56 |
+| Robinhood Chain | 4663 |
 | Base | 8453 |
 
 ## Example Usage
@@ -131,7 +133,7 @@ npx ts-node src/scripts/evm/lbp-buy.ts
 | Error | Cause | Fix |
 |-------|-------|-----|
 | `.env file permission denied` | Cannot write to .env | Check file permissions |
-| `Invalid chainId` | Unsupported chain ID | Use 1, 56, or 8453 |
+| `Invalid chainId` | Unsupported chain ID | Use 1, 56, 8453, or 4663 |
 
 ## Wallet Security Best Practices
 

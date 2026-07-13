@@ -25,7 +25,7 @@ A private key is necessary for signing transactions that will get sent on the bl
 ```env
 # example .env file
 
-# EVM (Ethereum, Base, BSC)
+# EVM (Ethereum, Base, BSC, Robinhood Chain)
 PRIVATE_KEY=your_wallet_private_key
 
 # Solana
@@ -93,6 +93,7 @@ board api key required
 | 1 | Ethereum Mainnet |
 | 56 | BNB Smart Chain |
 | 8453 | Base Mainnet |
+| 4663 | Robinhood Chain |
 
 **Solana:**
 | Chain ID | Network |
