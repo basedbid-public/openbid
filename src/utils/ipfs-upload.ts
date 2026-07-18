@@ -1,6 +1,6 @@
-import { IpfsUploadType } from 'enums';
+import { IpfsUploadType } from '@enums';
+import { IpfsUploadApiResponse } from '@interfaces';
 import { readFileSync } from 'fs';
-import { IpfsUploadApiResponse } from 'interfaces/ipfs-upload';
 
 export class IpfsUpload {
   static async uploadMetadata(params: object, apiKey?: string) {

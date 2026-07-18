@@ -1,5 +1,5 @@
-import { OpenbidRunOptions, resolveRunMode } from 'interfaces/common';
-import { getSolanaEnvironment } from 'schema/environment';
+import { OpenbidRunOptions, resolveRunMode } from '@interfaces';
+import { getSolanaEnvironment } from '@schema/environment';
 import { ZodObject } from 'zod';
 
 export class SolanaValidator {

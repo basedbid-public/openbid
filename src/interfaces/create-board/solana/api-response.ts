@@ -1,4 +1,4 @@
-import { SolanaApiResponse } from 'interfaces/common';
+import { SolanaApiResponse } from '@interfaces';
 
 export interface CreateSolanaBoardApiResponse extends SolanaApiResponse {
   boardId: string;

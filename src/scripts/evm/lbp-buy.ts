@@ -1,20 +1,16 @@
-import tradeFacetAbi from 'constants/abi/TradeFacet.json';
-import { CHAIN_NAME_CONFIG, CHAIN_SLUG_CONFIG } from 'constants/chain-config';
-import 'dotenv/config';
-import { ApiType } from 'enums';
-import {
-  EvmApiResponse,
-  OpenbidRunOptions,
-  resolveRunMode,
-} from 'interfaces/common';
-import { BuyEvmSdk, buyEvmSdkSchema } from 'schema/buy/evm/sdk';
+import { CHAIN_NAME_CONFIG, CHAIN_SLUG_CONFIG } from '@constants';
+import tradeFacetAbi from '@constants/abi/TradeFacet.json';
+import { ApiType } from '@enums';
+import { EvmApiResponse, OpenbidRunOptions, resolveRunMode } from '@interfaces';
+import { BuyEvmSdk, buyEvmSdkSchema } from '@schema';
 import {
   BasedBidApi,
   EvmValidator,
   initEvmClients,
   LogHelper,
   sendTransaction,
-} from 'utils';
+} from '@utils';
+import 'dotenv/config';
 
 export const evmLbpBuy = async (
   args: BuyEvmSdk,

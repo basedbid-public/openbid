@@ -1,10 +1,10 @@
-import { SolanaFlashDexType } from 'enums';
+import { SolanaFlashDexType } from '@enums';
 import {
   metadataInputSchema,
   numberStringSchema,
   solanaAddressSchema,
-} from 'schema/common';
-import { solanaChainIdSchema } from 'schema/common/sdk-input';
+  solanaChainIdSchema,
+} from '@schema/common';
 import { z } from 'zod';
 
 /**

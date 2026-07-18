@@ -2,13 +2,13 @@ import {
   SOLANA_BASE_TOKEN_PAIR,
   SOLANA_DECIMALS,
   SOLANA_ZERO_ADDRESS,
-} from 'constants/solana';
-import { SolanaDexType } from 'enums';
+} from '@constants';
+import { SolanaDexType } from '@enums';
 import {
   numberStringSchema,
   saleTimeSchema,
   solanaDexFeeTierSchema,
-} from 'schema/common';
+} from '@schema/common';
 import { z } from 'zod';
 
 /**

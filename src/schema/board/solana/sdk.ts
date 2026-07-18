@@ -1,8 +1,8 @@
 import {
   boardFeePerLaunchPackageSchema,
   numberStringSchema,
-} from 'schema/common';
-import { solanaChainIdSchema } from 'schema/common/sdk-input';
+  solanaChainIdSchema,
+} from '@schema/common';
 import { z } from 'zod';
 
 /**

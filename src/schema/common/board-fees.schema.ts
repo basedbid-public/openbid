@@ -1,4 +1,4 @@
-import { DEFAULT_BOARD_FEES } from 'constants/default-board-fees';
+import { DEFAULT_BOARD_FEES } from '@constants';
 import z from 'zod';
 import { numberStringSchema } from './numeric-string.schema';
 

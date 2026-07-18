@@ -1,6 +1,6 @@
-import { evmAddressSchema, evmChainIdSchema } from 'schema/common';
-import { sellEvmApiSchema } from 'schema/sell/evm/api';
+import { evmAddressSchema, evmChainIdSchema } from '@schema/common';
 import z from 'zod';
+import { sellEvmApiSchema } from './api';
 
 /**
  * SDK-INPUT schema for `sell`. Extends the API schema (./api.ts) rather than mirroring

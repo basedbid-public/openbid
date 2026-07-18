@@ -4,6 +4,7 @@ export * from './get-launch-package-index';
 export * from './init-evm-rpc';
 export * from './ipfs-upload';
 export * from './log-helper';
+export * from './next-steps';
 export * from './normalize-abi';
 export * from './seed-generator';
 export * from './send-transaction';

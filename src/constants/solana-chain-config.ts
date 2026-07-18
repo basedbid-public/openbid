@@ -1,4 +1,4 @@
-import { SolanaChainId } from 'types/chain-id';
+import { SolanaChainId } from '@typedefs';
 
 export const SOLANA_CHAIN_SLUG_CONFIG: Record<SolanaChainId, string> = {
   501: 'sol',

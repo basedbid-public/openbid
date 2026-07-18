@@ -10,10 +10,24 @@
     "resolveJsonModule": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "baseUrl": "src",
     "rootDir": "src",
     "paths": {
-      "@constants/*": ["constants/index"]
+      "@constants": ["./src/constants/index.ts"],
+      "@constants/*": ["./src/constants/*"],
+      "@enums": ["./src/enums/index.ts"],
+      "@enums/*": ["./src/enums/*"],
+      "@helpers": ["./src/helpers/index.ts"],
+      "@helpers/*": ["./src/helpers/*"],
+      "@interfaces": ["./src/interfaces/index.ts"],
+      "@interfaces/*": ["./src/interfaces/*"],
+      "@schema": ["./src/schema/index.ts"],
+      "@schema/*": ["./src/schema/*"],
+      "@scripts": ["./src/scripts/index.ts"],
+      "@scripts/*": ["./src/scripts/*"],
+      "@typedefs": ["./src/types/index.ts"],
+      "@typedefs/*": ["./src/types/*"],
+      "@utils": ["./src/utils/index.ts"],
+      "@utils/*": ["./src/utils/*"]
     }
   },
   "ts-node": {

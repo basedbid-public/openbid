@@ -1,16 +1,19 @@
-import { EvmDexType } from 'enums';
 import {
   CooldownDurationType,
+  EvmDexType,
   PenaltyFeeType,
   RewardTokenType,
   VolatilityDecayPeriodType,
   VolatilityMultiplierType,
   VolatilityTriggerType,
-} from 'enums/fee-builder';
-import { evmChainIdSchema, metadataInputSchema } from 'schema/common';
-import { evmAddressSchema } from 'schema/common/evm-address.schema';
-import { v4BuyLimitsSchema } from 'schema/v4-fees/buy-limits';
-import { rewardTokenDividendsSchema } from 'schema/v4-fees/reward-token-dividends';
+} from '@enums';
+import {
+  evmAddressSchema,
+  evmChainIdSchema,
+  metadataInputSchema,
+  rewardTokenDividendsSchema,
+  v4BuyLimitsSchema,
+} from '@schema/common';
 import { z } from 'zod';
 import { distributionAmountUnitSchema } from './api';
 

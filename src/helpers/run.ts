@@ -12,23 +12,25 @@
  * into two operations - `solana-claim-lbp-fees` and `solana-claim-flash-fees` - because
  * LBP and Flash Token fee distribution use different config shapes on that chain.
  */
+import { OpenbidRunMode, OpenbidRunOptions } from '@interfaces';
 import 'dotenv/config';
 import { readFileSync } from 'fs';
-import { OpenbidRunMode, OpenbidRunOptions } from 'interfaces/common';
 
-import { CreateEvmBoardSdk } from 'schema/board/evm/sdk';
-import { CreateSolanaBoardSdk } from 'schema/board/solana/sdk';
-import { BuyEvmSdk } from 'schema/buy/evm/sdk';
-import { BuySolanaSdk } from 'schema/buy/solana/sdk';
-import { ClaimEvmFeesSdk } from 'schema/claim-fees/evm/sdk';
-import { ClaimSolanaFlashTokenFeesRequest } from 'schema/claim-fees/solana/flash-request';
-import { ClaimSolanaLbpFeesRequest } from 'schema/claim-fees/solana/lbp-request';
-import { CreateFlashTokenEvmSdk } from 'schema/flash-token/evm/sdk';
-import { CreateSolanaFlashInput } from 'schema/flash-token/solana/sdk';
-import { CreateLbpEvmSdk } from 'schema/lbp/evm/sdk';
-import { CreateSolanaLbpInput } from 'schema/lbp/solana/sdk-input';
-import { SellEvmSdk } from 'schema/sell/evm/sdk';
-import { SellSolanaSdk } from 'schema/sell/solana/sdk';
+import {
+  BuyEvmSdk,
+  BuySolanaSdk,
+  ClaimEvmFeesSdk,
+  ClaimSolanaFlashTokenFeesRequest,
+  ClaimSolanaLbpFeesRequest,
+  CreateEvmBoardSdk,
+  CreateFlashTokenEvmSdk,
+  CreateLbpEvmSdk,
+  CreateSolanaBoardSdk,
+  CreateSolanaFlashInput,
+  CreateSolanaLbpInput,
+  SellEvmSdk,
+  SellSolanaSdk,
+} from '@schema';
 
 import {
   claimEvmFees,
@@ -37,7 +39,7 @@ import {
   createEvmLbp,
   evmLbpBuy,
   evmLbpSell,
-} from 'scripts/evm';
+} from '@scripts/evm';
 import {
   claimSolanaFlashFees,
   claimSolanaLbpFees,
@@ -46,7 +48,7 @@ import {
   createSolanaLbp,
   solanaLbpBuy,
   solanaLbpSell,
-} from 'scripts/solana';
+} from '@scripts/solana';
 
 const [, , operation, configFile, ...extraArgs] = process.argv;
 

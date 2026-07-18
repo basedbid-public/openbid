@@ -1,14 +1,10 @@
 import 'dotenv/config';
 
-import subBoardFacetAbi from 'constants/abi/SubBoardFacet.json';
-import { CHAIN_NAME_CONFIG } from 'constants/chain-config';
-import { ApiType } from 'enums';
-import {
-  EvmApiResponse,
-  OpenbidRunOptions,
-  resolveRunMode,
-} from 'interfaces/common';
-import { createEvmBoardSchema, CreateEvmBoardSdk } from 'schema/board/evm/sdk';
+import { CHAIN_NAME_CONFIG } from '@constants';
+import subBoardFacetAbi from '@constants/abi/SubBoardFacet.json';
+import { ApiType } from '@enums';
+import { EvmApiResponse, OpenbidRunOptions, resolveRunMode } from '@interfaces';
+import { createEvmBoardSchema, CreateEvmBoardSdk } from '@schema';
 import {
   BasedBidApi,
   EvmValidator,
@@ -17,7 +13,7 @@ import {
   LogHelper,
   normalizeByAbi,
   sendTransaction,
-} from 'utils';
+} from '@utils';
 
 export const createEvmBoard = async (
   args: CreateEvmBoardSdk,

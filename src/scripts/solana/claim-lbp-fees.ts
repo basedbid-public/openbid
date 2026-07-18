@@ -1,16 +1,16 @@
+import { SOLANA_CHAIN_NAME_CONFIG, SOLANA_CHAIN_SLUG_CONFIG } from '@constants';
+import { ApiType } from '@enums';
 import {
-  SOLANA_CHAIN_NAME_CONFIG,
-  SOLANA_CHAIN_SLUG_CONFIG,
-} from 'constants/solana-chain-config';
-import 'dotenv/config';
-import { ApiType } from 'enums';
-import { ClaimSolanaFeeApiResponse } from 'interfaces/claim-fees';
-import { OpenbidRunOptions, resolveRunMode } from 'interfaces/common';
+  ClaimSolanaFeeApiResponse,
+  OpenbidRunOptions,
+  resolveRunMode,
+} from '@interfaces';
 import {
   ClaimSolanaLbpFeesRequest,
   claimSolanaLbpFeesRequestSchema,
-} from 'schema/claim-fees/solana/lbp-request';
-import { BasedBidApi, LogHelper, SolanaValidator, SolanaWrapper } from 'utils';
+} from '@schema';
+import { BasedBidApi, LogHelper, SolanaValidator, SolanaWrapper } from '@utils';
+import 'dotenv/config';
 
 export const claimSolanaLbpFees = async (
   args: ClaimSolanaLbpFeesRequest,

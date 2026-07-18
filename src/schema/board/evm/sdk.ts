@@ -1,4 +1,4 @@
-import { boardFeeSchema, evmChainIdSchema } from 'schema/common';
+import { boardFeeSchema, evmChainIdSchema } from '@schema/common';
 import { z } from 'zod';
 
 /**

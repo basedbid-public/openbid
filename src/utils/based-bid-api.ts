@@ -1,4 +1,4 @@
-import { ApiType } from 'enums';
+import { ApiType } from '@enums';
 import {
   getSolanaApiFailureHint,
   getSolanaEnvironmentHint,

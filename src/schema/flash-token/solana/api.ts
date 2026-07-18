@@ -1,11 +1,11 @@
-import { SOLANA_DECIMALS } from 'constants/solana';
-import { SolanaFlashDexType } from 'enums';
+import { SOLANA_DECIMALS } from '@constants';
+import { SolanaFlashDexType } from '@enums';
 import {
   metadataUrlSchema,
   numberStringSchema,
   solanaAddressSchema,
-} from 'schema/common';
-import { solanaChainIdSchema } from 'schema/common/sdk-input';
+  solanaChainIdSchema,
+} from '@schema/common';
 import { z } from 'zod';
 
 /**

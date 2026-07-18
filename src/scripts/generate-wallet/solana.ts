@@ -1,8 +1,8 @@
 import { createKeyPairSignerFromPrivateKeyBytes } from '@solana/kit';
+import { printNextSteps } from '@utils';
 import bs58 from 'bs58';
 import { randomBytes } from 'crypto';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
-import { printNextSteps } from 'utils/next-steps';
 
 export const generateSolanaWallet = async () => {
   const randomBytesBuffer = randomBytes(32);

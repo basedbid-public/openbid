@@ -1,23 +1,23 @@
 import 'dotenv/config';
 
-import { SOLANA_BASE_TOKEN_PAIR, SOLANA_DECIMALS } from 'constants/solana';
 import {
+  SOLANA_BASE_TOKEN_PAIR,
   SOLANA_CHAIN_NAME_CONFIG,
   SOLANA_CHAIN_SLUG_CONFIG,
-} from 'constants/solana-chain-config';
-import { ApiType, SolanaDexType } from 'enums';
-import { writeFileSync } from 'fs';
+  SOLANA_DECIMALS,
+} from '@constants';
+import { ApiType, SolanaDexType } from '@enums';
 import {
+  CreateSolanaLbpApiResponse,
   OpenbidRunOptions,
   resolveRunMode,
   SolanaVanityUpdateData,
-} from 'interfaces/common';
-import { CreateSolanaLbpApiResponse } from 'interfaces/create-lbp';
-import { solanaFeeDistributionApiPayloadSchema } from 'schema/lbp/solana/fee-distribution';
+} from '@interfaces';
 import {
   CreateSolanaLbpInput,
   createSolanaLbpInputSchema,
-} from 'schema/lbp/solana/sdk-input';
+  solanaFeeDistributionApiPayloadSchema,
+} from '@schema';
 import {
   BasedBidApi,
   getLaunchPackageIndex,
@@ -26,7 +26,7 @@ import {
   SeedGenerator,
   SolanaValidator,
   SolanaWrapper,
-} from 'utils';
+} from '@utils';
 
 let launchedToken: SolanaVanityUpdateData | null = null;
 
@@ -156,8 +156,6 @@ export const createSolanaLbp = async (
       },
     };
 
-    writeFileSync('api-payload.json', JSON.stringify(apiPayload, null, 2));
-
     if (printPayload) {
       LogHelper.printApiPayload('sol/create-lbp', apiPayload);
     }
@@ -273,10 +271,6 @@ export const createSolanaLbp = async (
       );
     }
 
-    writeFileSync(
-      'fee-distribution-payload.json',
-      JSON.stringify(solanaFeeDistributionValidated.data, null, 2),
-    );
     await BasedBidApi.invokeApi(
       ApiType.PLATFORM,
       'token/fee-distribution',

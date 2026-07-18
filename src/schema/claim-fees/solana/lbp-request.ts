@@ -1,5 +1,5 @@
-import { solanaAddressSchema } from 'schema/common';
-import { solanaChainIdSchema } from 'schema/common/sdk-input';
+import { solanaAddressSchema } from '@schema/common';
+import { solanaChainIdSchema } from '@schema/common/sdk-input';
 import z from 'zod';
 
 /**

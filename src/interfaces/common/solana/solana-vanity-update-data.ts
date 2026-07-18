@@ -1,4 +1,4 @@
-import { SolanaChainId } from 'types/chain-id';
+import { SolanaChainId } from '@typedefs';
 
 export interface SolanaVanityUpdateData {
   chainId: SolanaChainId;

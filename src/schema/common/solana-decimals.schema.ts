@@ -1,4 +1,4 @@
-import { SOLANA_DECIMALS } from 'constants/solana';
+import { SOLANA_DECIMALS } from '@constants';
 import z from 'zod';
 
 /** Token decimals on Solana. Locked to `SOLANA_DECIMALS` (9) - Solana SPL tokens don't support a custom value here like EVM's 18-decimal ERC20s do. */

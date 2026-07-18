@@ -1,3 +1,4 @@
+export * from '../v4-fees';
 export * from './board-fees.schema';
 export * from './evm-address.schema';
 export * from './metadata-url.schema';
@@ -6,6 +7,7 @@ export * from './sdk-input/evm-chain-id.schema';
 export * from './sdk-input/metadata.schema';
 export * from './sdk-input/package-index.schema';
 export * from './sdk-input/sale-time.schema';
+export * from './sdk-input/solana-chain-id.schema';
 export * from './slippage.schema';
 export * from './solana-address.schema';
 export * from './solana-decimals.schema';

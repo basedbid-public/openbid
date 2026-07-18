@@ -1,6 +1,9 @@
-import { SOLANA_ZERO_ADDRESS } from 'constants/solana';
-import { slippageSchema, solanaAddressSchema } from 'schema/common';
-import { solanaChainIdSchema } from 'schema/common/sdk-input';
+import { SOLANA_ZERO_ADDRESS } from '@constants';
+import {
+  slippageSchema,
+  solanaAddressSchema,
+  solanaChainIdSchema,
+} from '@schema/common';
 import { z } from 'zod';
 
 /**

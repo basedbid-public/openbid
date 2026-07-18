@@ -1,5 +1,5 @@
+import { getSolanaEnvironmentHint, printNextSteps } from '@utils';
 import bs58 from 'bs58';
-import { getSolanaEnvironmentHint, printNextSteps } from 'utils/next-steps';
 import { z } from 'zod';
 
 const optionalNonEmptyString = z.preprocess(

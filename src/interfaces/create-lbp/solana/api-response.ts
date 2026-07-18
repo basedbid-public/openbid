@@ -1,4 +1,4 @@
-import { SolanaApiResponse } from 'interfaces/common';
+import { SolanaApiResponse } from '@interfaces';
 
 export interface CreateSolanaLbpApiResponse extends SolanaApiResponse {
   mintAddress: string;

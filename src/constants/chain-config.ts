@@ -1,4 +1,4 @@
-import { EvmChainId } from 'types/chain-id';
+import { EvmChainId } from '@typedefs';
 import { base, bsc, Chain, mainnet, robinhood } from 'viem/chains';
 
 export const CHAIN_CONFIG: Record<EvmChainId, Chain> = {

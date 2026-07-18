@@ -1,13 +1,13 @@
-import { SOLANA_DECIMALS, SOLANA_ZERO_ADDRESS } from 'constants/solana';
-import { LaunchPackageType, SolanaDexType } from 'enums';
+import { SOLANA_DECIMALS, SOLANA_ZERO_ADDRESS } from '@constants';
+import { LaunchPackageType, SolanaDexType } from '@enums';
 import {
   metadataInputSchema,
   numberStringSchema,
   saleTimeSchema,
   solanaAddressSchema,
+  solanaChainIdSchema,
   solanaDexFeeTierSchema,
-} from 'schema/common';
-import { solanaChainIdSchema } from 'schema/common/sdk-input';
+} from '@schema/common';
 import { z } from 'zod';
 
 /**

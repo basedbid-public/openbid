@@ -1,4 +1,4 @@
-import { solanaAddressSchema } from 'schema/common';
+import { solanaAddressSchema } from '@schema/common';
 import { z } from 'zod';
 
 /**

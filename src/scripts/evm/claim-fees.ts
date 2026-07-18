@@ -1,23 +1,16 @@
-import collectFeeForLBPFacetAbi from 'constants/abi/CollectFeeForLBPFacet.json';
-import { CHAIN_NAME_CONFIG } from 'constants/chain-config';
-import 'dotenv/config';
-import { ApiType } from 'enums';
-import {
-  EvmApiResponse,
-  OpenbidRunOptions,
-  resolveRunMode,
-} from 'interfaces/common';
-import {
-  ClaimEvmFeesSdk,
-  claimEvmFeesSdkSchema,
-} from 'schema/claim-fees/evm/sdk';
+import { CHAIN_NAME_CONFIG } from '@constants';
+import collectFeeForLBPFacetAbi from '@constants/abi/CollectFeeForLBPFacet.json';
+import { ApiType } from '@enums';
+import { EvmApiResponse, OpenbidRunOptions, resolveRunMode } from '@interfaces';
+import { ClaimEvmFeesSdk, claimEvmFeesSdkSchema } from '@schema';
 import {
   BasedBidApi,
   EvmValidator,
   initEvmClients,
   LogHelper,
   sendTransaction,
-} from 'utils';
+} from '@utils';
+import 'dotenv/config';
 
 export const claimEvmFees = async (
   args: ClaimEvmFeesSdk,

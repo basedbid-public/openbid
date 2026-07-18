@@ -1,17 +1,20 @@
-import tradeFacetAbi from 'constants/abi/TradeFacet.json';
-import { CHAIN_NAME_CONFIG, CHAIN_SLUG_CONFIG } from 'constants/chain-config';
-import 'dotenv/config';
-import { ApiType } from 'enums';
-import { OpenbidRunOptions, resolveRunMode } from 'interfaces/common';
-import { EvmSellApiResponse } from 'interfaces/sell';
-import { SellEvmSdk, sellEvmSdkSchema } from 'schema/sell/evm/sdk';
+import { CHAIN_NAME_CONFIG, CHAIN_SLUG_CONFIG } from '@constants';
+import tradeFacetAbi from '@constants/abi/TradeFacet.json';
+import { ApiType } from '@enums';
+import {
+  EvmSellApiResponse,
+  OpenbidRunOptions,
+  resolveRunMode,
+} from '@interfaces';
+import { SellEvmSdk, sellEvmSdkSchema } from '@schema';
 import {
   BasedBidApi,
   EvmValidator,
   initEvmClients,
   LogHelper,
   sendTransaction,
-} from 'utils';
+} from '@utils';
+import 'dotenv/config';
 import { erc20Abi } from 'viem';
 
 export const evmLbpSell = async (
@@ -76,7 +79,7 @@ export const evmLbpSell = async (
     address: approveTx.address as `0x${string}`,
     abi: erc20Abi,
     functionName: 'approve',
-    args: [approveTx.args[0] as `0x${string}`, BigInt(approveTx.args[1])],
+    args: [approveTx.args[0], BigInt(approveTx.args[1])],
     value: BigInt(approveTx.value),
     errorLabel: 'Approve',
     skipConfirmation: args.isSandboxMode,

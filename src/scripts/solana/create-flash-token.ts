@@ -1,31 +1,28 @@
 import 'dotenv/config';
 
-import { KeyPairSigner } from '@solana/kit';
-import { SOLANA_CHAIN_NAME_CONFIG } from 'constants/solana-chain-config';
-import { ApiType, SolanaFlashDexType } from 'enums';
-import { writeFileSync } from 'fs';
+import { SOLANA_CHAIN_NAME_CONFIG } from '@constants';
+import { ApiType, SolanaFlashDexType } from '@enums';
 import {
+  CreateSolanaFlashTx1ApiResponse,
   OpenbidRunOptions,
   resolveRunMode,
   SolanaVanityUpdateData,
-} from 'interfaces/common';
-import { CreateSolanaFlashTx1ApiResponse } from 'interfaces/create-flash-token';
-import {
-  CreateSolanaFlashTx1Api,
-  CreateSolanaFlashTx2Api,
-} from 'schema/flash-token/solana/api';
+} from '@interfaces';
 import {
   CreateSolanaFlashInput,
   createSolanaFlashInputSchema,
-} from 'schema/flash-token/solana/sdk';
-import { solanaFeeDistributionApiPayloadSchema } from 'schema/lbp/solana/fee-distribution';
+  CreateSolanaFlashTx1Api,
+  CreateSolanaFlashTx2Api,
+  solanaFeeDistributionApiPayloadSchema,
+} from '@schema';
+import { KeyPairSigner } from '@solana/kit';
 import {
   BasedBidApi,
   IpfsUpload,
   LogHelper,
   SolanaValidator,
   SolanaWrapper,
-} from 'utils';
+} from '@utils';
 
 let launchedToken: SolanaVanityUpdateData | null = null;
 
@@ -296,11 +293,6 @@ export const createSolanaFlashToken = async (
           fees.feeDistributionPayoutCustomMint ?? '',
         rewardToken: fees.rewardToken ?? '',
       };
-
-      writeFileSync(
-        'fee-distribution-payload.json',
-        JSON.stringify(feeDistributionPayload, null, 2),
-      );
 
       const solanaFeeDistributionValidated =
         solanaFeeDistributionApiPayloadSchema.safeParse(feeDistributionPayload);

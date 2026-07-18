@@ -1,18 +1,19 @@
-import { EvmDexType, LaunchPackageType } from 'enums';
 import {
   CooldownDurationType,
+  EvmDexType,
+  LaunchPackageType,
   PenaltyFeeType,
   RewardTokenType,
   VolatilityDecayPeriodType,
   VolatilityMultiplierType,
   VolatilityTriggerType,
-} from 'enums/fee-builder';
+} from '@enums';
 import {
   evmChainIdSchema,
   metadataInputSchema,
   saleTimeSchema,
-} from 'schema/common';
-import { v4BuyLimitsSchema } from 'schema/v4-fees/buy-limits';
+  v4BuyLimitsSchema,
+} from '@schema/common';
 import { z } from 'zod';
 
 /**

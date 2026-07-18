@@ -1,13 +1,16 @@
-import { SOLANA_CHAIN_NAME_CONFIG } from 'constants/solana-chain-config';
-import 'dotenv/config';
-import { ApiType } from 'enums';
-import { ClaimSolanaFeeApiResponse } from 'interfaces/claim-fees';
-import { OpenbidRunOptions, resolveRunMode } from 'interfaces/common';
+import { SOLANA_CHAIN_NAME_CONFIG } from '@constants';
+import { ApiType } from '@enums';
+import {
+  ClaimSolanaFeeApiResponse,
+  OpenbidRunOptions,
+  resolveRunMode,
+} from '@interfaces';
 import {
   ClaimSolanaFlashTokenFeesRequest,
   claimSolanaFlashTokenFeesRequestSchema,
-} from 'schema/claim-fees/solana/flash-request';
-import { BasedBidApi, LogHelper, SolanaValidator, SolanaWrapper } from 'utils';
+} from '@schema';
+import { BasedBidApi, LogHelper, SolanaValidator, SolanaWrapper } from '@utils';
+import 'dotenv/config';
 
 export const claimSolanaFlashFees = async (
   args: ClaimSolanaFlashTokenFeesRequest,

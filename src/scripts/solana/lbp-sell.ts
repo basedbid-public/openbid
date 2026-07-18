@@ -1,17 +1,13 @@
-import {
-  SOLANA_CHAIN_NAME_CONFIG,
-  SOLANA_CHAIN_SLUG_CONFIG,
-} from 'constants/solana-chain-config';
-import 'dotenv/config';
-import { ApiType } from 'enums';
+import { SOLANA_CHAIN_NAME_CONFIG, SOLANA_CHAIN_SLUG_CONFIG } from '@constants';
+import { ApiType } from '@enums';
 import {
   OpenbidRunOptions,
   resolveRunMode,
   SolanaApiResponse,
-} from 'interfaces/common';
-import { SellSolanaApi } from 'schema/sell/solana/api';
-import { SellSolanaSdk, sellSolanaSdkSchema } from 'schema/sell/solana/sdk';
-import { BasedBidApi, LogHelper, SolanaValidator, SolanaWrapper } from 'utils';
+} from '@interfaces';
+import { SellSolanaApi, SellSolanaSdk, sellSolanaSdkSchema } from '@schema';
+import { BasedBidApi, LogHelper, SolanaValidator, SolanaWrapper } from '@utils';
+import 'dotenv/config';
 
 export const solanaLbpSell = async (
   args: SellSolanaSdk,

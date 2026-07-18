@@ -1,4 +1,4 @@
-import { AbiInput } from 'interfaces/common';
+import { AbiInput } from '@interfaces';
 
 const defaultForNullAbiValue = (input: AbiInput, path: string): unknown => {
   const { type } = input;

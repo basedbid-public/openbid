@@ -1,12 +1,11 @@
-import { SOLANA_CHAIN_NAME_CONFIG } from 'constants/solana-chain-config';
-import 'dotenv/config';
-import { ApiType } from 'enums';
-import { OpenbidRunOptions, resolveRunMode } from 'interfaces/common';
-import { CreateSolanaBoardApiResponse } from 'interfaces/create-board';
+import { SOLANA_CHAIN_NAME_CONFIG } from '@constants';
+import { ApiType } from '@enums';
 import {
-  CreateSolanaBoardSdk,
-  createSolanaBoardSdkSchema,
-} from 'schema/board/solana/sdk';
+  CreateSolanaBoardApiResponse,
+  OpenbidRunOptions,
+  resolveRunMode,
+} from '@interfaces';
+import { CreateSolanaBoardSdk, createSolanaBoardSdkSchema } from '@schema';
 import {
   BasedBidApi,
   IpfsUpload,
@@ -14,7 +13,8 @@ import {
   SeedGenerator,
   SolanaValidator,
   SolanaWrapper,
-} from 'utils';
+} from '@utils';
+import 'dotenv/config';
 
 export const createSolanaBoard = async (
   args: CreateSolanaBoardSdk,

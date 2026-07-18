@@ -1,14 +1,8 @@
-import creationFacetAbi from 'constants/abi/CreationFacet.json';
-import { CHAIN_NAME_CONFIG, CHAIN_SLUG_CONFIG } from 'constants/chain-config';
-import 'dotenv/config';
-import { ApiType } from 'enums';
-import {
-  EvmApiResponse,
-  OpenbidRunOptions,
-  resolveRunMode,
-} from 'interfaces/common';
-import { CreateLbpEvmApi } from 'schema/lbp/evm/api';
-import { CreateLbpEvmSdk, evmLbpCreateSchema } from 'schema/lbp/evm/sdk';
+import { CHAIN_NAME_CONFIG, CHAIN_SLUG_CONFIG } from '@constants';
+import creationFacetAbi from '@constants/abi/CreationFacet.json';
+import { ApiType } from '@enums';
+import { EvmApiResponse, OpenbidRunOptions, resolveRunMode } from '@interfaces';
+import { CreateLbpEvmApi, CreateLbpEvmSdk, evmLbpCreateSchema } from '@schema';
 import {
   BasedBidApi,
   EvmValidator,
@@ -18,7 +12,8 @@ import {
   LogHelper,
   normalizeByAbi,
   sendTransaction,
-} from 'utils';
+} from '@utils';
+import 'dotenv/config';
 
 export const createEvmLbp = async (
   args: CreateLbpEvmSdk,

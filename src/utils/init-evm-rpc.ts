@@ -1,5 +1,5 @@
-import { CHAIN_CONFIG } from '@constants/index';
-import { EvmChainId } from 'types/chain-id';
+import { CHAIN_CONFIG } from '@constants';
+import { EvmChainId } from '@typedefs';
 import { createWalletClient, http } from 'viem';
 import {
   createBundlerClient,

@@ -1,5 +1,5 @@
-import { OpenbidRunOptions, resolveRunMode } from 'interfaces/common';
-import { getEvmEnvironment } from 'schema/environment';
+import { OpenbidRunOptions, resolveRunMode } from '@interfaces';
+import { getEvmEnvironment } from '@schema/environment';
 import { ZodObject } from 'zod';
 
 export class EvmValidator {

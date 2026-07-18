@@ -1,5 +1,5 @@
+import { SendContractTransactionParams } from '@typedefs';
 import { createInterface } from 'readline';
-import { SendContractTransactionParams } from 'types/send-contract-parameters';
 import type { Abi, TransactionReceipt, WriteContractParameters } from 'viem';
 import { encodeFunctionData } from 'viem';
 

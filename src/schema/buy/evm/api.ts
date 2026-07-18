@@ -1,4 +1,4 @@
-import { evmAddressSchema, evmChainIdSchema } from 'schema/common';
+import { evmAddressSchema, evmChainIdSchema } from '@schema/common';
 import z from 'zod';
 
 /**

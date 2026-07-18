@@ -1,4 +1,4 @@
-import { SolanaApiResponse } from 'interfaces/common';
+import { SolanaApiResponse } from '@interfaces';
 
 export interface CreateSolanaFlashTxApiResponse extends SolanaApiResponse {
   mintAddress: string;
@@ -15,8 +15,7 @@ export interface CreateSolanaFlashTxApiResponse extends SolanaApiResponse {
   };
 }
 
-export interface CreateSolanaFlashTx1ApiResponse
-  extends CreateSolanaFlashTxApiResponse {
+export interface CreateSolanaFlashTx1ApiResponse extends CreateSolanaFlashTxApiResponse {
   meteoraTokenAccountSeed?: string;
   positionNftMintAddress?: string;
 }
