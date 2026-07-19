@@ -5,7 +5,11 @@ import {
   OpenbidRunOptions,
   resolveRunMode,
 } from '@interfaces';
-import { CreateSolanaBoardSdk, createSolanaBoardSdkSchema } from '@schema';
+import {
+  CreateSolanaBoardSdk,
+  createSolanaBoardApiSchema,
+  createSolanaBoardSdkSchema,
+} from '@schema';
 import {
   BasedBidApi,
   IpfsUpload,
@@ -58,12 +62,23 @@ export const createSolanaBoard = async (
 
   const metadata = {
     title: data.title,
-    description: data.description,
     logo: logoUrl,
     banner: bannerUrl,
+    description: data.description,
+    website: data.website,
+    telegram: data.telegram,
+    twitter: data.twitter,
+    gitbook: data.gitbook,
+    tiktok: data.tiktok,
+    youtube: data.youtube,
+    isAllowed: data.isAllowed,
+    apiPackageIndex: data.apiPackageIndex,
+    privacyMode: data.privacyMode,
+    isPublicBoard: data.isPublicBoard,
+    allowRequests: data.allowRequests,
   };
 
-  let metadataUrl = '';
+  let metadataUrl = 'https://ipfs.based.bid/ipfs/null';
   if (dryRun) {
     console.log('Skipping IPFS metadata upload (dry-run mode)');
     console.log('Metadata to upload:', JSON.stringify(metadata, null, 2));
@@ -73,14 +88,24 @@ export const createSolanaBoard = async (
 
   const seed = SeedGenerator.generateBoardSeed();
 
-  const apiPayload = {
+  const apiPayloadResult = createSolanaBoardApiSchema.safeParse({
     chainId: data.chainId,
     signer: solanaWrapper.publicKey,
     seed,
     metaData: metadataUrl,
     flashLaunchFeePer: data.flashLaunchFeePer,
     fees: data.fees,
-  };
+    isSandboxMode: data.isSandboxMode,
+  });
+
+  if (!apiPayloadResult.success) {
+    throw new Error(
+      'Invalid Solana create-board API payload: ' +
+        apiPayloadResult.error.message,
+    );
+  }
+
+  const apiPayload = apiPayloadResult.data;
 
   if (printPayload) {
     LogHelper.printApiPayload('sol/apply-sub-board', apiPayload);
@@ -116,9 +141,6 @@ export const createSolanaBoard = async (
   await solanaWrapper.awaitTxConfirmation(signature);
 
   const result = {
-    boardId: json.boardId ?? 'not returned by API',
-    boardTitle: json.boardTitle ?? args.title,
-    metadataUrl: json.metadataUrl ?? metadataUrl,
     signature,
   };
 
@@ -126,10 +148,9 @@ export const createSolanaBoard = async (
     ok: true,
     type: 'board',
     network: SOLANA_CHAIN_NAME_CONFIG[data.chainId],
-    boardId: result.boardId,
     signature: result.signature,
-    metadataUrl: result.metadataUrl,
-    basedBidUrl: `${BasedBidApi.platformApiUrl(args.isSandboxMode)}/b/${result.boardId}`,
+    metadataUrl: metadataUrl,
+    basedBidUrl: `${BasedBidApi.platformApiUrl(args.isSandboxMode)}/b/${data.title}`,
   });
 
   return result;

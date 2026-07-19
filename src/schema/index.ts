@@ -4,6 +4,20 @@ export type { CreateEvmBoardSdk } from './board/evm/sdk';
 export { createSolanaBoardSdkSchema } from './board/solana/sdk';
 export type { CreateSolanaBoardSdk } from './board/solana/sdk';
 
+export { createSolanaBoardApiSchema } from './board/solana/api';
+export type { CreateSolanaBoardApi } from './board/solana/api';
+
+export {
+  boardPrivacyModeSchema,
+  boardProfileSchema,
+  boardSocialsSchema,
+} from './common/board-profile.schema';
+export type {
+  BoardPrivacyMode,
+  BoardProfile,
+  BoardSocials,
+} from './common/board-profile.schema';
+
 export { buyEvmSdkSchema } from './buy/evm/sdk';
 export type { BuyEvmSdk } from './buy/evm/sdk';
 

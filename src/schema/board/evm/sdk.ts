@@ -1,4 +1,9 @@
-import { boardFeeSchema, evmChainIdSchema } from '@schema/common';
+import {
+  boardFeeSchema,
+  boardProfileSchema,
+  evmChainIdSchema,
+  flashLaunchFeePerSchema,
+} from '@schema/common';
 import { z } from 'zod';
 
 /**
@@ -6,6 +11,16 @@ import { z } from 'zod';
  * operation (unlike flash-token/lbp/buy/sell) - `createBoard` posts a payload built
  * directly from this validated input plus the derived `account` (from `PRIVATE_KEY`)
  * and uploaded IPFS URLs for `logo`/`banner`.
+ *
+ * Fee model:
+ * - `flashLaunchFeePer` (top-level) — board share of DEX volume fees from flash tokens
+ *   launched under this board.
+ * - `fees` (optional array) — per launch-package schedule for listing / buy / sell /
+ *   finalize / after-launch cuts (mainly LBP-oriented).
+ *
+ * Profile / access (also written into IPFS board metadata):
+ * - socials, `privacyMode`, `isPublicBoard`, `allowRequests`, etc.
+ *   Board identity uses `title`.
  */
 export const createEvmBoardSchema = z.object({
   isSandboxMode: z
@@ -18,9 +33,9 @@ export const createEvmBoardSchema = z.object({
   title: z
     .string()
     .min(1, 'Title is required')
-    .max(100, 'Title too long')
+    .max(48, 'Title must be 48 characters or less')
     .describe(
-      'Board name/title, shown publicly and used as the board identifier',
+      'Board name/title, shown publicly and used as the board identifier (max 48 characters)',
     ),
   description: z
     .string()
@@ -35,12 +50,15 @@ export const createEvmBoardSchema = z.object({
     .string()
     .min(1, 'Banner file path is required')
     .describe('Local file path to the board banner image (wide, max 1MB)'),
+  flashLaunchFeePer: flashLaunchFeePerSchema,
   fees: z
     .array(boardFeeSchema)
     .optional()
     .describe(
-      'Custom fee schedule per launch package tier; omit to use platform defaults',
+      'Custom fee schedule per launch package tier; omit to use platform defaults. ' +
+        'Does not include flash-token volume fees — use top-level `flashLaunchFeePer` for that.',
     ),
+  ...boardProfileSchema.shape,
 });
 
 export type CreateEvmBoardSdk = z.infer<typeof createEvmBoardSchema>;

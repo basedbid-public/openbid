@@ -5,8 +5,8 @@ export const DEFAULT_BOARD_FEES = [
     buyFeePer: '0.75',
     sellFeePer: '0.75',
     finalizeFeePer: '1',
-    flashLaunchFeePer: '50',
     tradingFeeAfterLaunchPer: '50',
+    flashLaunchFeePer: '20',
   },
   {
     listingFee: '0.5',
@@ -14,8 +14,8 @@ export const DEFAULT_BOARD_FEES = [
     buyFeePer: '0.75',
     sellFeePer: '0.75',
     finalizeFeePer: '1',
-    flashLaunchFeePer: '50',
     tradingFeeAfterLaunchPer: '50',
+    flashLaunchFeePer: '20',
   },
   {
     listingFee: '1',
@@ -23,7 +23,7 @@ export const DEFAULT_BOARD_FEES = [
     buyFeePer: '0.75',
     sellFeePer: '0.75',
     finalizeFeePer: '1',
-    flashLaunchFeePer: '50',
     tradingFeeAfterLaunchPer: '50',
+    flashLaunchFeePer: '20',
   },
 ];

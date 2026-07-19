@@ -1,6 +1,4 @@
-import 'dotenv/config';
-
-import { CHAIN_NAME_CONFIG } from '@constants';
+import { CHAIN_NAME_CONFIG, DEFAULT_BOARD_FEES } from '@constants';
 import subBoardFacetAbi from '@constants/abi/SubBoardFacet.json';
 import { ApiType } from '@enums';
 import { EvmApiResponse, OpenbidRunOptions, resolveRunMode } from '@interfaces';
@@ -14,6 +12,7 @@ import {
   normalizeByAbi,
   sendTransaction,
 } from '@utils';
+import 'dotenv/config';
 
 export const createEvmBoard = async (
   args: CreateEvmBoardSdk,
@@ -54,9 +53,20 @@ export const createEvmBoard = async (
 
   const metadata = {
     title: data.title,
-    description: data.description,
     logo: logoUrl,
     banner: bannerUrl,
+    description: data.description,
+    website: data.website,
+    telegram: data.telegram,
+    twitter: data.twitter,
+    gitbook: data.gitbook,
+    tiktok: data.tiktok,
+    youtube: data.youtube,
+    isAllowed: data.isAllowed,
+    apiPackageIndex: data.apiPackageIndex,
+    privacyMode: data.privacyMode,
+    isPublicBoard: data.isPublicBoard,
+    allowRequests: data.allowRequests,
   };
 
   let metadataUrl = 'https://ipfs.based.bid/ipfs/null';
@@ -77,10 +87,22 @@ export const createEvmBoard = async (
     chainId: data.chainId,
     title: data.title,
     description: data.description,
-    fees: data.fees,
+    flashLaunchFeePer: data.flashLaunchFeePer,
+    fees: DEFAULT_BOARD_FEES,
     logoUrl,
     bannerUrl,
     metaUri: metadataUrl,
+    website: data.website,
+    telegram: data.telegram,
+    twitter: data.twitter,
+    gitbook: data.gitbook,
+    tiktok: data.tiktok,
+    youtube: data.youtube,
+    isAllowed: data.isAllowed,
+    apiPackageIndex: data.apiPackageIndex,
+    privacyMode: data.privacyMode,
+    isPublicBoard: data.isPublicBoard,
+    allowRequests: data.allowRequests,
   };
 
   if (printPayload) {
@@ -137,7 +159,7 @@ export const createEvmBoard = async (
     boardAddress: json.address,
     signature: result.transactionHash,
     metadataUrl,
-    basedBidUrl: `${BasedBidApi.platformApiUrl(args.isSandboxMode)}/b/${data.title.toLowerCase()}`,
+    basedBidUrl: `${BasedBidApi.platformApiUrl(args.isSandboxMode)}/b/${data.title}`,
   });
 
   return result;

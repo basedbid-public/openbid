@@ -1,5 +1,6 @@
 export * from '../v4-fees';
 export * from './board-fees.schema';
+export * from './board-profile.schema';
 export * from './evm-address.schema';
 export * from './metadata-url.schema';
 export * from './numeric-string.schema';

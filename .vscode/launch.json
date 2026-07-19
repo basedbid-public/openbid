@@ -58,6 +58,44 @@
       "cwd": "${workspaceFolder}",
       "envFile": "${workspaceFolder}/.env",
       "console": "integratedTerminal"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Solana: create-board",
+      "program": "${workspaceFolder}/src/helpers/run.ts",
+      "runtimeArgs": [
+        "-r",
+        "ts-node/register",
+        "-r",
+        "tsconfig-paths/register"
+      ],
+      "args": [
+        "solana-create-board",
+        "./src/helpers/configs/solana/create-board.json"
+      ],
+      "cwd": "${workspaceFolder}",
+      "envFile": "${workspaceFolder}/.env",
+      "console": "integratedTerminal"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "EVM: create-board",
+      "program": "${workspaceFolder}/src/helpers/run.ts",
+      "runtimeArgs": [
+        "-r",
+        "ts-node/register",
+        "-r",
+        "tsconfig-paths/register"
+      ],
+      "args": [
+        "evm-create-board",
+        "./src/helpers/configs/evm/create-board.json"
+      ],
+      "cwd": "${workspaceFolder}",
+      "envFile": "${workspaceFolder}/.env",
+      "console": "integratedTerminal"
     }
   ]
 }

@@ -9,6 +9,7 @@ import {
 } from '@enums';
 import {
   evmChainIdSchema,
+  metadataUrlSchema,
   packageIndexSchema,
   rewardTokenDividendsSchema,
   saleTimeSchema,
@@ -32,12 +33,7 @@ export const evmLbpCreateApiSchema = z.object({
       .max(100, 'Token symbol must be less than 100 characters'),
     totalSupply: z.number().min(1, 'Total supply must be greater than 0'),
     initialBuyAmount: z.number().min(0),
-    metadataUrl: z
-      .string()
-      .regex(
-        /^https:\/\/ipfs.based.bid\/ipfs\/.+/,
-        'Metadata must be a valid ipfs.based.bid URL',
-      ),
+    metadataUrl: metadataUrlSchema,
   }),
   sale: z.object({
     boardTitle: z

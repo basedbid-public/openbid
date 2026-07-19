@@ -5,6 +5,7 @@ import {
 } from '@constants';
 import { SolanaDexType } from '@enums';
 import {
+  metadataUrlSchema,
   numberStringSchema,
   saleTimeSchema,
   solanaDexFeeTierSchema,
@@ -28,12 +29,7 @@ export const createLbpSolanaApiPayloadSchema = z.object({
     token: z.object({
       name: z.string().min(1).max(100),
       symbol: z.string().min(1).max(100),
-      metadataUrl: z
-        .string()
-        .regex(
-          /^https:\/\/ipfs.based.bid\/ipfs\/.+/,
-          'Metadata must be a valid ipfs.based.bid URL',
-        ),
+      metadataUrl: metadataUrlSchema,
       decimals: z.literal(SOLANA_DECIMALS),
       totalSupply: numberStringSchema(),
       initialBuyAmount: numberStringSchema(),

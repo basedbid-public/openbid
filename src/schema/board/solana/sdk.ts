@@ -1,6 +1,7 @@
 import {
   boardFeePerLaunchPackageSchema,
-  numberStringSchema,
+  boardProfileSchema,
+  flashLaunchFeePerSchema,
   solanaChainIdSchema,
 } from '@schema/common';
 import { z } from 'zod';
@@ -10,6 +11,16 @@ import { z } from 'zod';
  * for `logo`/`banner`, no `signer`/`seed` (those are derived internally). See `./api.ts`
  * for the backend payload shape, which replaces `logo`/`banner` with an uploaded
  * `metaData` URL and adds `signer`/`seed`.
+ *
+ * Fee model:
+ * - `flashLaunchFeePer` (top-level) — board share of DEX volume fees from flash tokens
+ *   launched under this board.
+ * - `fees` — per launch-package schedule for listing / buy / sell / finalize /
+ *   after-launch cuts (mainly LBP-oriented).
+ *
+ * Profile / access (also written into IPFS board metadata):
+ * - socials, `privacyMode`, `isPublicBoard`, `allowRequests`, etc.
+ *   Board identity uses `title`.
  */
 export const createSolanaBoardSdkSchema = z.object({
   isSandboxMode: z
@@ -22,9 +33,12 @@ export const createSolanaBoardSdkSchema = z.object({
   title: z
     .string()
     .min(1, 'Title is required')
-    .max(100, 'Title too long')
+    .refine(
+      (value) => Buffer.byteLength(value, 'utf8') <= 32,
+      'Board name must be at most 32 bytes',
+    )
     .describe(
-      'Board name/title, shown publicly and used as the board identifier',
+      'Board name/title, shown publicly and used as the board identifier (max 32 UTF-8 bytes)',
     ),
   description: z
     .string()
@@ -39,10 +53,9 @@ export const createSolanaBoardSdkSchema = z.object({
     .string()
     .min(1, 'Banner file path is required')
     .describe('Local file path to the board banner image'),
+  flashLaunchFeePer: flashLaunchFeePerSchema,
   fees: boardFeePerLaunchPackageSchema,
-  flashLaunchFeePer: numberStringSchema().describe(
-    'Fee (%) the board takes on Flash Token launches, as a numeric string',
-  ),
+  ...boardProfileSchema.shape,
 });
 
 export type CreateSolanaBoardSdk = z.infer<typeof createSolanaBoardSdkSchema>;

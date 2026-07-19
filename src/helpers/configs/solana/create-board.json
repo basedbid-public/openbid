@@ -1,38 +1,20 @@
 {
   "isSandboxMode": true,
   "chainId": 5011,
-  "title": "My Board",
+  "title": "Dante Private Board SDK 12",
   "description": "A test board description",
   "logo": "./assets/placeholder.png",
   "banner": "./assets/placeholder_banner.png",
-  "fees": [
-    {
-      "listingFee": "0",
-      "listingReferralFee": "0",
-      "buyFeePer": "0.75",
-      "sellFeePer": "0.75",
-      "finalizeFeePer": "1",
-      "flashLaunchFeePer": "1",
-      "tradingFeeAfterLaunchPer": "50"
-    },
-    {
-      "listingFee": "0.5",
-      "listingReferralFee": "0",
-      "buyFeePer": "0.75",
-      "sellFeePer": "0.75",
-      "finalizeFeePer": "1",
-      "flashLaunchFeePer": "1",
-      "tradingFeeAfterLaunchPer": "50"
-    },
-    {
-      "listingFee": "1",
-      "listingReferralFee": "0",
-      "buyFeePer": "0.75",
-      "sellFeePer": "0.75",
-      "finalizeFeePer": "1",
-      "flashLaunchFeePer": "1",
-      "tradingFeeAfterLaunchPer": "50"
-    }
-  ],
-  "flashLaunchFeePer": "0.001"
+  "website": "https://www.based.bid/",
+  "telegram": "https://t.me/basedbid",
+  "twitter": "https://x.com/QuantHoodApp",
+  "gitbook": "https://basedinc.gitbook.io/basedbid",
+  "tiktok": "https://www.tiktok.com/@openbid",
+  "youtube": "https://www.youtube.com/@OpenBid",
+  "isAllowed": true,
+  "apiPackageIndex": 1,
+  "privacyMode": "private",
+  "isPublicBoard": false,
+  "allowRequests": false,
+  "flashLaunchFeePer": "90"
 }
