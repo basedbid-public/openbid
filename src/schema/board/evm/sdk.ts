@@ -7,10 +7,10 @@ import {
 import { z } from 'zod';
 
 /**
- * SDK-INPUT schema for `createBoard`. There is no separate API-wire schema for this
- * operation (unlike flash-token/lbp/buy/sell) - `createBoard` posts a payload built
- * directly from this validated input plus the derived `account` (from `PRIVATE_KEY`)
- * and uploaded IPFS URLs for `logo`/`banner`.
+ * SDK-INPUT schema for `createEvmBoard`. Caller/agent-facing input - local file paths
+ * for `logo`/`banner`, no `account` (derived from `PRIVATE_KEY`). See `./api.ts` for
+ * the backend payload shape, which replaces local paths with uploaded `logoUrl` /
+ * `bannerUrl` / `metaUri` and adds `account`.
  *
  * Fee model:
  * - `flashLaunchFeePer` (top-level) — board share of DEX volume fees from flash tokens

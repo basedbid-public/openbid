@@ -1,8 +1,12 @@
-import { CHAIN_NAME_CONFIG, DEFAULT_BOARD_FEES } from '@constants';
+import { CHAIN_NAME_CONFIG } from '@constants';
 import subBoardFacetAbi from '@constants/abi/SubBoardFacet.json';
 import { ApiType } from '@enums';
 import { EvmApiResponse, OpenbidRunOptions, resolveRunMode } from '@interfaces';
-import { createEvmBoardSchema, CreateEvmBoardSdk } from '@schema';
+import {
+  createEvmBoardApiSchema,
+  createEvmBoardSchema,
+  CreateEvmBoardSdk,
+} from '@schema';
 import {
   BasedBidApi,
   EvmValidator,
@@ -82,13 +86,13 @@ export const createEvmBoard = async (
     env.PRIVATE_KEY,
   );
 
-  const apiPayload = {
+  const apiPayloadResult = createEvmBoardApiSchema.safeParse({
     account: account.address,
     chainId: data.chainId,
     title: data.title,
     description: data.description,
     flashLaunchFeePer: data.flashLaunchFeePer,
-    fees: DEFAULT_BOARD_FEES,
+    fees: data.fees,
     logoUrl,
     bannerUrl,
     metaUri: metadataUrl,
@@ -103,7 +107,15 @@ export const createEvmBoard = async (
     privacyMode: data.privacyMode,
     isPublicBoard: data.isPublicBoard,
     allowRequests: data.allowRequests,
-  };
+  });
+
+  if (!apiPayloadResult.success) {
+    throw new Error(
+      'Invalid EVM create-board API payload: ' + apiPayloadResult.error.message,
+    );
+  }
+
+  const apiPayload = apiPayloadResult.data;
 
   if (printPayload) {
     LogHelper.printApiPayload('create-board', apiPayload);

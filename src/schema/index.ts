@@ -1,6 +1,9 @@
 export { createEvmBoardSchema } from './board/evm/sdk';
 export type { CreateEvmBoardSdk } from './board/evm/sdk';
 
+export { createEvmBoardApiSchema } from './board/evm/api';
+export type { CreateEvmBoardApi } from './board/evm/api';
+
 export { createSolanaBoardSdkSchema } from './board/solana/sdk';
 export type { CreateSolanaBoardSdk } from './board/solana/sdk';
 
