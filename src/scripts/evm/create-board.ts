@@ -1,7 +1,11 @@
 import { CHAIN_NAME_CONFIG } from '@constants';
-import subBoardFacetAbi from '@constants/abi/SubBoardFacet.json';
 import { ApiType } from '@enums';
-import { EvmApiResponse, OpenbidRunOptions, resolveRunMode } from '@interfaces';
+import {
+  AbiInput,
+  EvmApiResponse,
+  OpenbidRunOptions,
+  resolveRunMode,
+} from '@interfaces';
 import {
   createEvmBoardApiSchema,
   createEvmBoardSchema,
@@ -10,6 +14,7 @@ import {
 import {
   BasedBidApi,
   EvmValidator,
+  getSubBoardFacetAbi,
   initEvmClients,
   IpfsUpload,
   LogHelper,
@@ -138,7 +143,8 @@ export const createEvmBoard = async (
 
   const txValue = BigInt(json.value);
 
-  const applySubBoardAbi = subBoardFacetAbi.abi.find(
+  const subBoardFacetAbi = getSubBoardFacetAbi(data.chainId);
+  const applySubBoardAbi = subBoardFacetAbi.find(
     (item) => item.type === 'function' && item.name === json.functionName,
   );
 
@@ -149,7 +155,7 @@ export const createEvmBoard = async (
   }
 
   const tupleArgs = applySubBoardAbi.inputs.map((input, index) =>
-    normalizeByAbi(json.args[index], input, `args[${index}]`),
+    normalizeByAbi(json.args[index], input as AbiInput, `args[${index}]`),
   );
 
   const result = await sendTransaction({
@@ -157,7 +163,7 @@ export const createEvmBoard = async (
     walletClient,
     account,
     address: json.address,
-    abi: subBoardFacetAbi.abi,
+    abi: subBoardFacetAbi,
     functionName: json.functionName,
     args: tupleArgs,
     value: txValue,

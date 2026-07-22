@@ -1,5 +1,4 @@
 import { CHAIN_NAME_CONFIG, CHAIN_SLUG_CONFIG } from '@constants';
-import tradeFacetAbi from '@constants/abi/TradeFacet.json';
 import { ApiType } from '@enums';
 import {
   EvmSellApiResponse,
@@ -10,6 +9,7 @@ import { SellEvmSdk, sellEvmSdkSchema } from '@schema';
 import {
   BasedBidApi,
   EvmValidator,
+  getTradeFacetAbi,
   initEvmClients,
   LogHelper,
   sendTransaction,
@@ -96,7 +96,7 @@ export const evmLbpSell = async (
     walletClient,
     account,
     address: sellTx.address as `0x${string}`,
-    abi: tradeFacetAbi,
+    abi: getTradeFacetAbi(data.chainId),
     functionName: sellTx.functionName,
     args: sellTx.args,
     value: BigInt(sellTx.value),

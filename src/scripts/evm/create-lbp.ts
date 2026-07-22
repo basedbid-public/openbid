@@ -1,11 +1,16 @@
 import { CHAIN_NAME_CONFIG, CHAIN_SLUG_CONFIG } from '@constants';
-import creationFacetAbi from '@constants/abi/CreationFacet.json';
 import { ApiType } from '@enums';
-import { EvmApiResponse, OpenbidRunOptions, resolveRunMode } from '@interfaces';
+import {
+  AbiInput,
+  EvmApiResponse,
+  OpenbidRunOptions,
+  resolveRunMode,
+} from '@interfaces';
 import { CreateLbpEvmApi, CreateLbpEvmSdk, evmLbpCreateSchema } from '@schema';
 import {
   BasedBidApi,
   EvmValidator,
+  getCreationFacetAbi,
   getLaunchPackageIndex,
   initEvmClients,
   IpfsUpload,
@@ -133,6 +138,7 @@ export const createEvmLbp = async (
 
   const txValue = BigInt(json.value);
 
+  const creationFacetAbi = getCreationFacetAbi(data.chainId);
   const createMemeAbi = creationFacetAbi.find(
     (item) => item.type === 'function' && item.name === json.functionName,
   );
@@ -144,7 +150,7 @@ export const createEvmLbp = async (
   }
 
   const tupleArgs = createMemeAbi.inputs.map((input, index) =>
-    normalizeByAbi(json.args[index], input, `args[${index}]`),
+    normalizeByAbi(json.args[index], input as AbiInput, `args[${index}]`),
   );
 
   const result = await sendTransaction({

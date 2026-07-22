@@ -2,8 +2,10 @@
   "isSandboxMode": true,
   "package": "based",
   "chainId": 5011,
+  "board": "Grisbi",
+  "boardOwner": "2FvpCkUWdiFKdta8HbEo6oid1eEJQp7ooaxhXxcKCLVY",
   "token": {
-    "name": "messi out",
+    "name": "Garfield",
     "symbol": "dante",
     "totalSupply": "1000000000",
     "initialBuyAmount": "0",

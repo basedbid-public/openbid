@@ -1,10 +1,13 @@
 import 'dotenv/config';
 
 import { CHAIN_NAME_CONFIG } from '@constants';
-import flashLaunchV3Abi from '@constants/abi/FlashLaunchForV3Facet.json';
-import flashLaunchV4Abi from '@constants/abi/FlashLaunchForV4Facet.json';
 import { ApiType, EvmDexType } from '@enums';
-import { EvmApiResponse, OpenbidRunOptions, resolveRunMode } from '@interfaces';
+import {
+  AbiInput,
+  EvmApiResponse,
+  OpenbidRunOptions,
+  resolveRunMode,
+} from '@interfaces';
 import {
   createEvmFlashTokenSchema,
   CreateFlashTokenEvmApi,
@@ -13,11 +16,15 @@ import {
 import {
   BasedBidApi,
   EvmValidator,
+  getFlashLaunchV3Abi,
+  getFlashLaunchV4Abi,
   initEvmClients,
   IpfsUpload,
   LogHelper,
   normalizeByAbi,
   patchFlashLaunchApiArgs,
+  patchRobinhoodFlashLaunchV4Args,
+  ROBINHOOD_CHAIN_ID,
   sendTransaction,
 } from '@utils';
 
@@ -43,6 +50,16 @@ export const createEvmFlashToken = async (
     console.log('Validation passed');
     return;
   }
+
+  // Holder-reward dividend bytecode works on Base but reverts on Robinhood Chain
+  // (empty 0x revert from customFlashLaunchV4). Liquidity/buyback-only launches succeed.
+  if (data.chainId === ROBINHOOD_CHAIN_ID && data.fees?.v4?.reward) {
+    throw new Error(
+      'fees.v4.reward is not supported on Robinhood Chain (4663) yet. ' +
+        'Remove the reward block and route that share into liquidity/buyback instead.',
+    );
+  }
+
   const { publicClient, walletClient, account, sponsored } = initEvmClients(
     data.chainId,
     env.PRIVATE_KEY,
@@ -145,10 +162,15 @@ export const createEvmFlashToken = async (
     EvmDexType.UNISWAP_V4,
     EvmDexType.PANCAKESWAP_V4,
   ].includes(data.dex.version)
-    ? flashLaunchV4Abi
-    : flashLaunchV3Abi;
+    ? getFlashLaunchV4Abi(data.chainId)
+    : getFlashLaunchV3Abi(data.chainId);
 
   patchFlashLaunchApiArgs(json.functionName, json.args, sale.marketCap);
+  json.args = patchRobinhoodFlashLaunchV4Args(
+    data.chainId,
+    json.functionName,
+    json.args,
+  );
 
   const createFlashAbi = flashLaunchAbi.find(
     (item) => item.type === 'function' && item.name === json.functionName,
@@ -161,7 +183,7 @@ export const createEvmFlashToken = async (
   }
 
   const tupleArgs = createFlashAbi.inputs.map((input, index) =>
-    normalizeByAbi(json.args[index], input, `args[${index}]`),
+    normalizeByAbi(json.args[index], input as AbiInput, `args[${index}]`),
   );
 
   const skipConfirmation = process.env.SKIP_TX_CONFIRMATION === 'true';

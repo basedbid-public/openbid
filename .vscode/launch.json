@@ -23,7 +23,7 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "EVM: create-lbp (dry-run)",
+      "name": "EVM: create-lbp",
       "program": "${workspaceFolder}/src/helpers/run.ts",
       "runtimeArgs": [
         "-r",
@@ -31,11 +31,7 @@
         "-r",
         "tsconfig-paths/register"
       ],
-      "args": [
-        "evm-create-lbp",
-        "./src/helpers/configs/evm/create-lbp.json",
-        "--dry-run"
-      ],
+      "args": ["evm-create-lbp", "./src/helpers/configs/evm/create-lbp.json"],
       "cwd": "${workspaceFolder}",
       "envFile": "${workspaceFolder}/.env",
       "console": "integratedTerminal"

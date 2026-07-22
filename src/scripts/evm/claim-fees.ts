@@ -1,11 +1,11 @@
 import { CHAIN_NAME_CONFIG } from '@constants';
-import collectFeeForLBPFacetAbi from '@constants/abi/CollectFeeForLBPFacet.json';
 import { ApiType } from '@enums';
 import { EvmApiResponse, OpenbidRunOptions, resolveRunMode } from '@interfaces';
 import { ClaimEvmFeesSdk, claimEvmFeesSdkSchema } from '@schema';
 import {
   BasedBidApi,
   EvmValidator,
+  getCollectFeeForLBPFacetAbi,
   initEvmClients,
   LogHelper,
   sendTransaction,
@@ -70,7 +70,7 @@ export const claimEvmFees = async (
     walletClient,
     account,
     address: json.address,
-    abi: collectFeeForLBPFacetAbi,
+    abi: getCollectFeeForLBPFacetAbi(data.chainId),
     functionName: json.functionName,
     args: json.args,
     value: txValue,

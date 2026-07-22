@@ -1,11 +1,11 @@
 import { CHAIN_NAME_CONFIG, CHAIN_SLUG_CONFIG } from '@constants';
-import tradeFacetAbi from '@constants/abi/TradeFacet.json';
 import { ApiType } from '@enums';
 import { EvmApiResponse, OpenbidRunOptions, resolveRunMode } from '@interfaces';
 import { BuyEvmSdk, buyEvmSdkSchema } from '@schema';
 import {
   BasedBidApi,
   EvmValidator,
+  getTradeFacetAbi,
   initEvmClients,
   LogHelper,
   sendTransaction,
@@ -73,7 +73,7 @@ export const evmLbpBuy = async (
     walletClient,
     account,
     address: json.address,
-    abi: tradeFacetAbi,
+    abi: getTradeFacetAbi(data.chainId),
     functionName: json.functionName,
     args: json.args,
     value: txValue,

@@ -300,7 +300,7 @@ export const createSolanaLbpInputSchema = z
         return false;
       }
 
-      return data.board === undefined && data.boardOwner === undefined;
+      return data.board !== undefined && data.boardOwner !== undefined;
     },
     {
       message:
