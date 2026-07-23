@@ -52,11 +52,25 @@ export class BasedBidApi {
       ...(apiKey && { 'x-api-key': apiKey }),
     };
 
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(payload),
-    });
+    // Board-referencing requests without an API key are limited to 1 req/s
+    // server-side, and the preceding IPFS metadata upload (same board in its
+    // body) can consume that slot - retry briefly on 429 instead of failing.
+    const RETRY_DELAYS_MS = [1500, 3000];
+    let response!: Response;
+    for (let attempt = 0; attempt <= RETRY_DELAYS_MS.length; attempt++) {
+      response = await fetch(endpoint, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(payload),
+      });
+      if (response.status !== 429 || attempt === RETRY_DELAYS_MS.length) {
+        break;
+      }
+      console.log(
+        `Rate limited by basedbid API (429), retrying in ${RETRY_DELAYS_MS[attempt]! / 1000}s...`,
+      );
+      await new Promise((r) => setTimeout(r, RETRY_DELAYS_MS[attempt]!));
+    }
 
     if (!response.ok) {
       const errorBody = await response.text();

@@ -185,12 +185,29 @@ export const createSolanaFlashToken = async (
 
     await solanaWrapper.awaitTxConfirmation(tx1Signature);
 
-    console.log('\nStep 2 of 3: Initializing the Flash Token market');
-    console.log(
-      'This connects the new token to the selected DEX trading setup.',
-    );
+    // For Meteora, tx2 is only the optional initial-buy swap. The server
+    // resolves the effective buy amount and reports `tx2Required: false` when
+    // it is 0 (e.g. tiny virtualUsd rounds the swap input to 0 lamports) -
+    // in that case skip straight to confirm-launch.
+    let tx2Signature: Awaited<
+      ReturnType<typeof solanaWrapper.sendTransaction>
+    > | null = null;
 
-    const tx2Payload: CreateSolanaFlashTx2Api = {
+    if (tx1Response.tx2Required === false) {
+      console.log(
+        '\nStep 2 of 3: Skipping market initialization (server reported tx2 not required - no initial swap resolved)',
+      );
+    } else {
+      console.log('\nStep 2 of 3: Initializing the Flash Token market');
+      console.log(
+        'This connects the new token to the selected DEX trading setup.',
+      );
+
+      tx2Signature = await runFlashTx2();
+    }
+
+    async function runFlashTx2() {
+      const tx2Payload: CreateSolanaFlashTx2Api = {
       chainId: args.chainId,
       signer: solanaWrapper.publicKey,
       flashDex: data.flashDex,
@@ -248,7 +265,7 @@ export const createSolanaFlashToken = async (
       tx2Signers.push(tx2PositionNftSigner.keyPair);
     }
 
-    const tx2Signature = await solanaWrapper.sendTransaction(
+    const signature = await solanaWrapper.sendTransaction(
       tx2Response.transaction,
       tx2Response.blockhash,
       tx2Response.lastValidBlockHeight,
@@ -260,7 +277,10 @@ export const createSolanaFlashToken = async (
       },
     );
 
-    await solanaWrapper.awaitTxConfirmation(tx2Signature);
+    await solanaWrapper.awaitTxConfirmation(signature);
+
+    return signature;
+    }
 
     console.log(
       `\nStep 3 of ${fees?.feeDistribution ? '4' : '3'}: Confirming the launch with basedbid`,
@@ -326,7 +346,7 @@ export const createSolanaFlashToken = async (
       type: 'flash-token',
       network: SOLANA_CHAIN_NAME_CONFIG[args.chainId],
       mintAddress: result.mintAddress,
-      signature: result.tx2Signature,
+      signature: result.tx2Signature ?? result.tx1Signature,
       metadataUrl: result.metadataUrl,
     });
 

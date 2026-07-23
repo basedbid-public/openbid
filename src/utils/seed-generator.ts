@@ -17,6 +17,9 @@ export class SeedGenerator {
   /**
    * Generates a random board seed in format: xxxxxxxx-yyyyyyyy
    * Example: "mpd06g4a-t2hj72po"
+   * @deprecated Prefer {@link boardSeedFromTitle} - modern boards use the
+   * display title as the on-chain id, which makes server-side duplicate-title
+   * checks and title-based board lookups work.
    */
   static generateBoardSeed(
     prefixLength: number = 8,
@@ -25,6 +28,15 @@ export class SeedGenerator {
     const prefix = this.generateRandomString(prefixLength);
     const suffix = this.generateRandomString(suffixLength);
     return `${prefix}-${suffix}`;
+  }
+
+  /**
+   * On-chain board id derived from the display title (spaces -> dashes,
+   * truncated to the 32-byte Solana PDA seed limit) - same rule as the
+   * basedbid webapp's `subBoardIdFromTitle`.
+   */
+  static boardSeedFromTitle(title: string): string {
+    return title.trim().replace(/\s+/g, '-').slice(0, 32);
   }
 
   static generateNumericSeed(length: number = 8): string {

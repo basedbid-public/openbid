@@ -192,10 +192,14 @@ export class SolanaWrapper {
   }
 
   async awaitTxConfirmation(signature: Signature) {
-    const POLL_INTERVAL_MS = 1000;
-    const TIMEOUT_MS = 90_000;
+    const POLL_INTERVAL_MS = 2000;
+    const TIMEOUT_MS = 120_000;
+    // Transient RPC failures (rate-limited devnet proxy returning 429/502)
+    // must not kill the poll loop - the tx may already be finalized on-chain.
+    const MAX_CONSECUTIVE_POLL_ERRORS = 10;
     const startedAt = Date.now();
     let pollCount = 0;
+    let consecutiveErrors = 0;
 
     console.log('\nWaiting for TX confirmation...');
 
@@ -218,10 +222,24 @@ export class SolanaWrapper {
         console.log(`Checking status... ${this.formatElapsed(startedAt)}`);
       }
 
-      const { value } = await this.rpc
-        .getSignatureStatuses([signature], { searchTransactionHistory: true })
-        .send();
-      const status = value[0];
+      let status;
+      try {
+        const { value } = await this.rpc
+          .getSignatureStatuses([signature], { searchTransactionHistory: true })
+          .send();
+        status = value[0];
+        consecutiveErrors = 0;
+      } catch (pollErr) {
+        consecutiveErrors += 1;
+        if (consecutiveErrors >= MAX_CONSECUTIVE_POLL_ERRORS) {
+          if (process.stdout.isTTY) {
+            process.stdout.write('\n');
+          }
+          throw pollErr;
+        }
+        await new Promise((r) => setTimeout(r, POLL_INTERVAL_MS));
+        continue;
+      }
 
       if (status?.err) {
         if (process.stdout.isTTY) {

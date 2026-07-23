@@ -86,7 +86,9 @@ export const createSolanaBoard = async (
     metadataUrl = await IpfsUpload.uploadMetadata(metadata);
   }
 
-  const seed = SeedGenerator.generateBoardSeed();
+  // Title-derived seed (webapp parity): enables the server's duplicate-title
+  // check and lets launches reference this board by its title.
+  const seed = SeedGenerator.boardSeedFromTitle(data.title);
 
   const apiPayloadResult = createSolanaBoardApiSchema.safeParse({
     chainId: data.chainId,

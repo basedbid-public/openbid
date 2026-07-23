@@ -292,16 +292,9 @@ export const createSolanaLbpInputSchema = z
       ),
   })
   .refine(
-    (data) => {
-      if (data.board && !data.boardOwner) {
-        return false;
-      }
-      if (!data.board && data.boardOwner) {
-        return false;
-      }
-
-      return data.board !== undefined && data.boardOwner !== undefined;
-    },
+    // Both set or neither set ("both or neither" - the previous version also
+    // rejected the both-set case, making board launches impossible via SDK).
+    (data) => Boolean(data.board) === Boolean(data.boardOwner),
     {
       message:
         'board and boardOwner must both be defined if one of them is defined',

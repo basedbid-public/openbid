@@ -153,6 +153,11 @@ export const createSolanaLbp = async (
             graduation: fees.graduation,
           },
         }),
+        // Custom board launches: the server validates the board exists and
+        // derives the on-chain board seed from these fields. Previously they
+        // were only embedded in IPFS metadata, so the API silently launched
+        // on the default board instead.
+        ...(board && boardOwner && { board, boardOwner }),
       },
     };
 
