@@ -1,4 +1,5 @@
 import z from 'zod';
+import { httpsWebsiteUrlRegex } from '../board-profile.schema';
 
 /**
  * Token metadata that gets uploaded to IPFS as JSON before launch. `logo` is a local file
@@ -35,12 +36,7 @@ export const metadataInputSchema = z.object({
   website: z
     .union([
       z.literal(''),
-      z
-        .string()
-        .regex(
-          /^https:\/\/[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+$/,
-          'Invalid website URL',
-        ),
+      z.string().regex(httpsWebsiteUrlRegex, 'Invalid website URL'),
     ])
     .optional()
     .default('')

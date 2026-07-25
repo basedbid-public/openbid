@@ -14,6 +14,10 @@ export const boardPrivacyModeSchema = z
     'Board privacy mode: request_to_join | public | private | limited_visibility',
   );
 
+/** https website/docs URL — allows subdomains, path, and trailing slash (e.g. https://www.based.bid/). */
+export const httpsWebsiteUrlRegex =
+  /^https:\/\/[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?)+(\/[^\s]*)?\/?$/;
+
 const optionalHttpsUrl = (regex: RegExp, message: string, describe: string) =>
   z
     .union([z.literal(''), z.string().regex(regex, message)])
@@ -24,7 +28,7 @@ const optionalHttpsUrl = (regex: RegExp, message: string, describe: string) =>
 /** Optional board social links — omit or pass '' when unused. */
 export const boardSocialsSchema = z.object({
   website: optionalHttpsUrl(
-    /^https:\/\/[a-zA-Z0-9][a-zA-Z0-9.-]*\.[a-zA-Z]{2,}(\/[^\s]*)?$/,
+    httpsWebsiteUrlRegex,
     'Invalid website URL',
     "Project website URL (https://...), or '' if none",
   ),
@@ -39,7 +43,7 @@ export const boardSocialsSchema = z.object({
     "Twitter/X profile URL (https://x.com/...), or '' if none",
   ),
   gitbook: optionalHttpsUrl(
-    /^https:\/\/[a-zA-Z0-9][a-zA-Z0-9.-]*\.[a-zA-Z]{2,}(\/[^\s]*)?$/,
+    httpsWebsiteUrlRegex,
     'Invalid GitBook URL',
     "GitBook / docs URL (https://...), or '' if none",
   ),
