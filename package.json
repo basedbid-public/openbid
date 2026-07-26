@@ -3,6 +3,9 @@
   "private": true,
   "scripts": {
     "build": "tsc",
+    "test:skill": "node --test tests/*.test.mjs",
+    "validate:solana-example": "ts-node ./src/helpers/run.ts solana-create-lbp ./src/helpers/configs/solana/create-lbp.json --validate",
+    "check": "npm run build && npm run test:skill && npm run validate:solana-example",
     "format": "prettier --write src/",
     "wallet:evm": "ts-node ./src/scripts/generate-wallet/evm.ts",
     "wallet:solana": "ts-node ./src/scripts/generate-wallet/solana.ts",

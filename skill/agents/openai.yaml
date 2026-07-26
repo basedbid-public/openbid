@@ -1,0 +1,4 @@
+interface:
+  display_name: "OpenBid Solana Launches"
+  short_description: "Design and safely run Solana token launches"
+  default_prompt: "Use $openbid-solana-launches to design and validate a sustainable Solana token launch."
