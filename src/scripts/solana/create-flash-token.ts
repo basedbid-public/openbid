@@ -55,12 +55,11 @@ export const createSolanaFlashToken = async (
     const solanaWrapper = new SolanaWrapper(env.SOLANA_PRIVATE_KEY);
     await solanaWrapper.init(data.chainId);
 
-    const { token, raydium, meteora, board, boardOwner, fees, flashDex } = data;
+    const { token, raydium, meteora, board, fees, flashDex } = data;
 
     const skipConfirmation = process.env.SKIP_TX_CONFIRMATION === 'true';
 
-    const apiKey =
-      board || boardOwner ? process.env.BASEDBID_API_KEY : undefined;
+    const apiKey = board ? process.env.BASEDBID_API_KEY : undefined;
 
     let logoUrl = 'https://ipfs.based.bid/ipfs/null';
     if (dryRun) {
@@ -82,7 +81,6 @@ export const createSolanaFlashToken = async (
       discord: token.metadata.discord ?? '',
       description: token.metadata.description,
       ...(board && { board }),
-      ...(boardOwner && { boardOwner }),
     };
 
     let metadataUrl = 'https://ipfs.based.bid/ipfs/null';
@@ -208,78 +206,79 @@ export const createSolanaFlashToken = async (
 
     async function runFlashTx2() {
       const tx2Payload: CreateSolanaFlashTx2Api = {
-      chainId: args.chainId,
-      signer: solanaWrapper.publicKey,
-      flashDex: data.flashDex,
-      tx1Signature,
-      flashSeed: tx1Response.flashSeed,
-      mintAddress: tx1Response.mintAddress,
-      baseTokenMint: 'So11111111111111111111111111111111111111112',
-      raiseTokenDecimals: 9,
-      token: {
-        totalSupply: args.token.totalSupply,
-        decimals: 9,
-        initialBuySupplyPercent: token.initialBuySupplyPercent,
-      },
-      ...(data.flashDex === SolanaFlashDexType.RAYDIUM &&
-        args.raydium && {
-          raydiumFeeTierIndex: args.raydium.feeTierIndex,
-          finalStartPrice: args.raydium.finalStartPrice,
-        }),
-      ...(data.flashDex === SolanaFlashDexType.METEORA &&
-        args.meteora && {
-          virtualUsd: args.meteora.virtualUsd,
-          meteoraFeeTierIndex: args.meteora.feeTierIndex,
-          meteoraTokenAccountSeed: tx1Response.meteoraTokenAccountSeed,
-          finalStartPrice: args.meteora.finalStartPrice,
-        }),
-    };
+        chainId: args.chainId,
+        signer: solanaWrapper.publicKey,
+        flashDex: data.flashDex,
+        tx1Signature,
+        flashSeed: tx1Response.flashSeed,
+        mintAddress: tx1Response.mintAddress,
+        baseTokenMint: 'So11111111111111111111111111111111111111112',
+        raiseTokenDecimals: 9,
+        token: {
+          totalSupply: args.token.totalSupply,
+          decimals: 9,
+          initialBuySupplyPercent: token.initialBuySupplyPercent,
+        },
+        ...(data.flashDex === SolanaFlashDexType.RAYDIUM &&
+          args.raydium && {
+            raydiumFeeTierIndex: args.raydium.feeTierIndex,
+            finalStartPrice: args.raydium.finalStartPrice,
+          }),
+        ...(data.flashDex === SolanaFlashDexType.METEORA &&
+          args.meteora && {
+            virtualUsd: args.meteora.virtualUsd,
+            meteoraFeeTierIndex: args.meteora.feeTierIndex,
+            meteoraTokenAccountSeed: tx1Response.meteoraTokenAccountSeed,
+            finalStartPrice: args.meteora.finalStartPrice,
+          }),
+      };
 
-    console.log(
-      'Requesting market initialization transaction from basedbid...',
-    );
-    const tx2Response =
-      await BasedBidApi.invokeApi<CreateSolanaFlashTx1ApiResponse>(
-        ApiType.SDK,
-        'sol/create-flash-tx2',
-        tx2Payload,
-        'Failed to create flash token market transaction',
-        args.isSandboxMode,
+      console.log(
+        'Requesting market initialization transaction from basedbid...',
+      );
+      const tx2Response =
+        await BasedBidApi.invokeApi<CreateSolanaFlashTx1ApiResponse>(
+          ApiType.SDK,
+          'sol/create-flash-tx2',
+          tx2Payload,
+          'Failed to create flash token market transaction',
+          args.isSandboxMode,
+        );
+
+      if (!tx2Response || !tx2Response.transaction) {
+        throw new Error(
+          'basedbid API Error: Failed to create flash token market transaction',
+        );
+      }
+
+      console.log('Market initialization transaction received.');
+
+      const tx2Signers = [];
+
+      if (tx2Response.positionNftSignerSecretHex) {
+        const tx2PositionNftSigner =
+          await solanaWrapper.getSignerFromPrivateKey(
+            tx2Response.positionNftSignerSecretHex,
+          );
+
+        tx2Signers.push(tx2PositionNftSigner.keyPair);
+      }
+
+      const signature = await solanaWrapper.sendTransaction(
+        tx2Response.transaction,
+        tx2Response.blockhash,
+        tx2Response.lastValidBlockHeight,
+        undefined,
+        tx2Signers,
+        {
+          description: 'Initialize Flash Token Market',
+          skipConfirmation,
+        },
       );
 
-    if (!tx2Response || !tx2Response.transaction) {
-      throw new Error(
-        'basedbid API Error: Failed to create flash token market transaction',
-      );
-    }
+      await solanaWrapper.awaitTxConfirmation(signature);
 
-    console.log('Market initialization transaction received.');
-
-    const tx2Signers = [];
-
-    if (tx2Response.positionNftSignerSecretHex) {
-      const tx2PositionNftSigner = await solanaWrapper.getSignerFromPrivateKey(
-        tx2Response.positionNftSignerSecretHex,
-      );
-
-      tx2Signers.push(tx2PositionNftSigner.keyPair);
-    }
-
-    const signature = await solanaWrapper.sendTransaction(
-      tx2Response.transaction,
-      tx2Response.blockhash,
-      tx2Response.lastValidBlockHeight,
-      undefined,
-      tx2Signers,
-      {
-        description: 'Initialize Flash Token Market',
-        skipConfirmation,
-      },
-    );
-
-    await solanaWrapper.awaitTxConfirmation(signature);
-
-    return signature;
+      return signature;
     }
 
     console.log(

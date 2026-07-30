@@ -16,17 +16,20 @@ Unlike the EVM flow, the Solana LBP creation involves:
 When the user requests an LBP launch on Solana, ALWAYS ask them to choose a mode:
 
 **"Would you like a Simple or Advanced launch?"**
+
 - **Simple** (default): Name, symbol, logo only. Uses recommended defaults. Bypasses transaction confirmation.
 - **Advanced**: Full control over all parameters. Requires explicit confirmation before transaction.
 
 Use `simple` if no preference specified.
 
 **For Simple mode:**
+
 - Collect: name, symbol, logo_url
 - All other parameters use defaults (chainId: 5011 devnet, meteora DEX)
 - Execute with `SKIP_TX_CONFIRMATION=true`
 
 **For Advanced mode:**
+
 - Follow the full Parameters section below
 - Require user confirmation before transaction
 
@@ -70,6 +73,7 @@ Generate this config, replacing the marked values with user input:
 ```
 
 **To execute (simple mode):**
+
 ```bash
 SKIP_TX_CONFIRMATION=true npm run solana:create-lbp -- solana-create-lbp <config_file> --dry-run
 # Then run without --dry-run to execute
@@ -103,13 +107,10 @@ import { CreateSolanaLbpInput } from 'schema/lbp/solana/sdk-input';
 | ------------ | ------------------- | -------- | --------------------------------------------------------------------------------------- |
 | `package`    | `LaunchPackageType` | Yes      | `BASED` (0), `SUPER_BASED` (1), or `ULTRA_BASED` (2)                                    |
 | `board`      | `string`            | No       | **Optional.** Custom board title. Only include if user explicitly wants a custom board. |
-| `boardOwner` | `string`            | No       | Board owner Solana address (required if `board` is set)                                 |
 | `token`      | `object`            | Yes      | Token configuration (see below)                                                         |
 | `sale`       | `object`            | No       | Sale configuration (see below)                                                          |
 | `dex`        | `object`            | Yes      | DEX configuration (see below)                                                           |
 | `fees`       | `object`            | No       | Fee distribution configuration (see below)                                              |
-
-**Validation rule:** `board` and `boardOwner` must both be defined or both omitted.
 
 **Initial buy:** Use either `initialBuyAmount` (fixed SOL spend) or `initialBuySupplyPercent` (target % of total supply). Set the unused field to `'0'`. When `initialBuySupplyPercent` is `'0'`, no supply-percent initial buy is performed.
 
@@ -117,15 +118,15 @@ import { CreateSolanaLbpInput } from 'schema/lbp/solana/sdk-input';
 
 ### Token Configuration
 
-| Field              | Type     | Required | Description                                       |
-| ------------------ | -------- | -------- | ------------------------------------------------- |
-| `name`             | `string` | Yes      | Token name (max 100 chars)                        |
-| `symbol`           | `string` | Yes      | Token symbol (max 100 chars)                      |
-| `totalSupply`      | `string` | Yes      | Total supply as numeric string                    |
-| `decimals`         | `number` | No       | Defaults to `9` (Solana standard)                 |
-| `initialBuyAmount`         | `string` | Yes      | Fixed SOL amount (raise token) for the creator's initial buy at launch. Use `'0'` when using `initialBuySupplyPercent` instead. |
-| `initialBuySupplyPercent`  | `string` | No       | Percentage of total supply the creator buys at launch (e.g. `'0.1'` = 0.1%). Defaults to `'0'`. Backend calculates required SOL from the LBP curve. |
-| `metadata`                 | `object` | Yes      | Metadata (see below)                                                                                                              |
+| Field                     | Type     | Required | Description                                                                                                                                         |
+| ------------------------- | -------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                    | `string` | Yes      | Token name (max 100 chars)                                                                                                                          |
+| `symbol`                  | `string` | Yes      | Token symbol (max 100 chars)                                                                                                                        |
+| `totalSupply`             | `string` | Yes      | Total supply as numeric string                                                                                                                      |
+| `decimals`                | `number` | No       | Defaults to `9` (Solana standard)                                                                                                                   |
+| `initialBuyAmount`        | `string` | Yes      | Fixed SOL amount (raise token) for the creator's initial buy at launch. Use `'0'` when using `initialBuySupplyPercent` instead.                     |
+| `initialBuySupplyPercent` | `string` | No       | Percentage of total supply the creator buys at launch (e.g. `'0.1'` = 0.1%). Defaults to `'0'`. Backend calculates required SOL from the LBP curve. |
+| `metadata`                | `object` | Yes      | Metadata (see below)                                                                                                                                |
 
 ### Token Metadata
 
@@ -228,7 +229,7 @@ The SDK automatically includes the `x-api-key` header in BasedBid API requests a
 3. **Solana Wrapper Init** - Creates RPC connection (BasedBid proxy) and signer from `SOLANA_PRIVATE_KEY`
 4. **Logo Upload** - Uploads logo to IPFS via `IpfsUpload.uploadImage()`
 5. **Seed Generation** - Generates a 5-digit numeric seed for metadata uniqueness
-6. **Metadata Preparation** - Builds metadata JSON with token info, social links, whitelist, and seed. `board` and `boardOwner` are only included if the user explicitly provided them.
+6. **Metadata Preparation** - Builds metadata JSON with token info, social links, whitelist, and seed. `board` is only included if the user explicitly provided it.
 7. **Metadata Upload** - Uploads metadata to IPFS via `IpfsUpload.uploadMetadata()`
 8. **API Request** - Payload sent to `${API_URL}/sol/create-lbp`:
    - `package` mapped to numeric index via `getLaunchPackageIndex()`
@@ -321,7 +322,6 @@ await createLbpSolana({
   },
   package: LaunchPackageType.SUPER_BASED,
   board: 'my-awesome-board',
-  boardOwner: 'your_wallet_address',
   dex: {
     version: SolanaDexType.RAYDIUM,
     feeTier: '2',
@@ -365,7 +365,6 @@ await createLbpSolana({
 | `board api key required`                      | Custom board specified but no API key | Add `BASEDBID_API_KEY` to `.env`             |
 | `Invalid input arguments`                     | Zod schema validation failed          | Check all required fields and constraints    |
 | `Failed to create LBP on Solana`              | API error                             | Check API availability and network           |
-| `board and boardOwner must both be defined`   | Only one of them provided             | Provide both or neither                      |
 | `endTime is required when softCap is defined` | Missing `endTime` with `softCap`      | Add `endTime` or remove `softCap`            |
 | `marketingWalletAddress is required`          | `marketingPercent > 0` but no wallet  | Add `marketingWalletAddress`                 |
 | `rewardToken is required`                     | `rewardPercent > 0` but no token      | Add `rewardToken`                            |
@@ -376,7 +375,7 @@ await createLbpSolana({
 
 | Aspect           | EVM                        | Solana                                                     |
 | ---------------- | -------------------------- | ---------------------------------------------------------- |
-| Chain ID         | 1 / 56 / 8453 / 4663              | 5011 (devnet)                                              |
+| Chain ID         | 1 / 56 / 8453 / 4663       | 5011 (devnet)                                              |
 | Transaction type | ABI-encoded contract call  | Base64 compiled VersionedTransaction                       |
 | Signers          | Single wallet              | Wallet + mint keypair (order matters!)                     |
 | Seed             | N/A                        | 5-digit numeric seed in metadata                           |

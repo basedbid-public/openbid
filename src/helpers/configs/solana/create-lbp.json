@@ -3,7 +3,6 @@
   "package": "based",
   "chainId": 5011,
   "board": "Grisbi",
-  "boardOwner": "2FvpCkUWdiFKdta8HbEo6oid1eEJQp7ooaxhXxcKCLVY",
   "token": {
     "name": "Garfield",
     "symbol": "dante",

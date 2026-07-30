@@ -12,7 +12,7 @@ import { z } from 'zod';
  * two-transaction Flash Token launch (see `./api.ts` - `createSolanaFlashTx1ApiSchema`
  * and `createSolanaFlashTx2ApiSchema` - for the two backend payloads built from this
  * input across TX1/TX2). Exactly one of `raydium`/`meteora` must be set, matching
- * `flashDex`; `board`/`boardOwner` must both be set or both omitted.
+ * `flashDex`.
  */
 export const createSolanaFlashInputSchema = z
   .object({
@@ -36,12 +36,7 @@ export const createSolanaFlashInputSchema = z
       .optional()
       .describe(
         'Custom board title. Omit entirely for no board affiliation - only set when the ' +
-          'user explicitly names a custom board. Must be set together with boardOwner (both or neither).',
-      ),
-    boardOwner: solanaAddressSchema
-      .optional()
-      .describe(
-        'Wallet address of the custom board owner; required if board is set',
+          'user explicitly names a custom board.',
       ),
     token: z.object({
       name: z
@@ -251,22 +246,6 @@ export const createSolanaFlashInputSchema = z
     {
       message:
         'Raydium or Meteora parameters must be provided based on chosen DEX',
-    },
-  )
-  .refine(
-    (data) => {
-      if (data.board && data.board.length > 0 && !data.boardOwner) {
-        return false;
-      }
-      if (!data.board && data.boardOwner && data.boardOwner.length > 0) {
-        return false;
-      }
-
-      return data.board === undefined && data.boardOwner === undefined;
-    },
-    {
-      message:
-        'board and boardOwner must both be defined if one of them is defined',
     },
   );
 

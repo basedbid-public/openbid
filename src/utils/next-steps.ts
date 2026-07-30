@@ -73,7 +73,7 @@ export function getSolanaApiFailureHint(errorBody: string) {
 
   if (normalizedError.includes('board api key required')) {
     return [
-      'If you are launching without a Board, omit board and boardOwner fields.',
+      'If you are launching without a Board, omit the board field.',
       'If you are launching under a Board, add OPENBID_API_KEY=<key> to .env.',
       'Then rerun the same solana:* command.',
     ];

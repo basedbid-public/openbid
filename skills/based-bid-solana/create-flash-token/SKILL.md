@@ -16,17 +16,20 @@ Both transactions are base64-encoded compiled VersionedTransactions returned by 
 When the user requests a Flash Token launch on Solana, ALWAYS ask them to choose a mode:
 
 **"Would you like a Simple or Advanced launch?"**
+
 - **Simple** (default): Name, symbol, logo only. Uses recommended defaults. Bypasses transaction confirmation.
 - **Advanced**: Full control over all parameters. Requires explicit confirmation before transaction.
 
 Use `simple` if no preference specified.
 
 **For Simple mode:**
+
 - Collect: name, symbol, logo_url
 - All other parameters use defaults (chainId: 5011 devnet, `flashDex: 1` for Meteora)
 - Execute with `SKIP_TX_CONFIRMATION=true`
 
 **For Advanced mode:**
+
 - Follow the full Parameters section below
 - Require user confirmation before transaction
 
@@ -74,6 +77,7 @@ Generate this config, replacing the marked values with user input:
 ```
 
 **To execute (simple mode):**
+
 ```bash
 SKIP_TX_CONFIRMATION=true npm run solana:create-flash-token -- solana-create-flash-token <config_file> --dry-run
 # Then run without --dry-run to execute
@@ -107,7 +111,6 @@ import { CreateSolanaFlashInput } from 'schema/flash-token/solana/sdk';
 | ------------ | -------- | -------- | --------------------------------------------------------------------------------------- |
 | `flashDex`   | `number` | Yes      | DEX selector: `1` = Meteora, `2` = Raydium                                              |
 | `board`      | `string` | No       | **Optional.** Custom board title. Only include if user explicitly wants a custom board. |
-| `boardOwner` | `string` | No       | Board owner address (required if `board` set)                                           |
 | `token`      | `object` | Yes      | Token configuration (see below)                                                         |
 | `raydium`    | `object` | Yes\*    | Raydium-specific config (see below)                                                     |
 | `meteora`    | `object` | Yes\*    | Meteora-specific config (see below)                                                     |
@@ -116,7 +119,6 @@ import { CreateSolanaFlashInput } from 'schema/flash-token/solana/sdk';
 
 - `flashDex === 1` → `meteora` must be defined, `raydium` ignored
 - `flashDex === 2` → `raydium` must be defined, `meteora` ignored
-- `board` and `boardOwner` must both be defined or both omitted
 
 > **Board behavior:** `board` is **purely optional**. Only include it if the user explicitly provides a custom board name they created via the create-board skill. Omitting it means the token launches without any board affiliation. **Do not send `'based'` or any default string unless the user explicitly requests it.**
 
@@ -177,8 +179,8 @@ The `BASEDBID_API_KEY` environment variable is **required** when launching under
 
 **When is it needed?**
 
-- If `board` or `boardOwner` is set to a non-empty string (custom board), you must set `BASEDBID_API_KEY`
-- If both `board` and `boardOwner` are empty or omitted (default "based" board), no API key is needed
+- If `board` is set to a non-empty string (custom board), you must set `BASEDBID_API_KEY`
+- If `board` is empty or omitted, no API key is needed
 
 **Example `.env` for custom board launch:**
 
@@ -202,7 +204,7 @@ The SDK automatically includes the `x-api-key` header in BasedBid API requests a
 2. **Input Validation** - `SolanaFlashValidator.validateInput(args)` with Zod schema
 3. **Solana Wrapper Init** - Creates RPC connection (BasedBid proxy) and signer
 4. **Logo Upload** - Uploads logo to IPFS via `IpfsUpload.uploadImage()`
-5. **Metadata Preparation** - Builds metadata JSON with token info, social links. `board` and `boardOwner` are only included if the user explicitly provided them.
+5. **Metadata Preparation** - Builds metadata JSON with token info, social links. `board` is only included if the user explicitly provided it.
 6. **Metadata Upload** - Uploads metadata to IPFS via `IpfsUpload.uploadMetadata()`
 
 ### Transaction 1 (TX1)
@@ -334,7 +336,6 @@ console.log('TX2:', result.tx2Signature);
 const result = await createFlashTokenSolana({
   flashDex: 1,
   board: 'my-awesome-board',
-  boardOwner: 'your_wallet_address',
   token: {
     name: 'Meteora Flash',
     symbol: 'MFLASH',
@@ -357,14 +358,13 @@ const result = await createFlashTokenSolana({
 
 ## Error Handling
 
-| Error                                            | Cause                        | Fix                                                      |
-| ------------------------------------------------ | ---------------------------- | -------------------------------------------------------- |
-| `Invalid input arguments`                        | Zod schema validation failed | Check all required fields per chosen DEX                 |
+| Error                                            | Cause                        | Fix                                                   |
+| ------------------------------------------------ | ---------------------------- | ----------------------------------------------------- |
+| `Invalid input arguments`                        | Zod schema validation failed | Check all required fields per chosen DEX              |
 | `Raydium or Meteora parameters must be provided` | Missing DEX-specific config  | Add `raydium` or `meteora` object matching `flashDex` |
-| `board and boardOwner must both be defined`      | Only one of them provided    | Provide both or neither                                  |
-| `Failed to create flash token Transaction 1`     | API error for TX1            | Check API availability and network                       |
-| `Failed to create flash token Transaction 2`     | API error for TX2            | Verify TX1 succeeded and params are correct              |
-| `Transaction failed`                             | On-chain failure             | Check wallet has SOL, verify DEX-specific params         |
+| `Failed to create flash token Transaction 1`     | API error for TX1            | Check API availability and network                    |
+| `Failed to create flash token Transaction 2`     | API error for TX2            | Verify TX1 succeeded and params are correct           |
+| `Transaction failed`                             | On-chain failure             | Check wallet has SOL, verify DEX-specific params      |
 
 ## Key Differences from EVM Flash Token
 
@@ -374,7 +374,7 @@ const result = await createFlashTokenSolana({
 | Transaction type | ABI-encoded contract call  | Base64 compiled VersionedTransaction                           |
 | Signers          | Single wallet              | Wallet + mint keypair (+ position NFT keypair for Raydium TX2) |
 | DEX config       | `version` + `feeTier`      | `dex.version` + `dex.feeTier` + DEX-specific objects           |
-| Chain ID         | 1 / 56 / 8453 / 4663              | 5011 (devnet)                                                  |
+| Chain ID         | 1 / 56 / 8453 / 4663       | 5011 (devnet)                                                  |
 
 ## Key Differences from Solana LBP
 

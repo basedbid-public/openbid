@@ -66,12 +66,12 @@ BASEDBID_API_KEY=bb_live_xxxxxxxxxxxxxxxxxxxxxxxx
 
 ### Operations That Use Custom Boards
 
-| Operation                 | Board Field             | Notes                                         |
-| ------------------------- | ----------------------- | --------------------------------------------- |
-| EVM Create LBP            | `token.boardTitle`      | Empty = default "based" board                 |
-| EVM Create Flash Token    | `boardTitle`            | Empty = default "based" board                 |
-| Solana Create LBP         | `board`                 | Empty = default "based" board                 |
-| Solana Create Flash Token | `board` or `boardOwner` | Either non-empty triggers API key requirement |
+| Operation                 | Board Field        | Notes                         |
+| ------------------------- | ------------------ | ----------------------------- |
+| EVM Create LBP            | `token.boardTitle` | Empty = default "based" board |
+| EVM Create Flash Token    | `boardTitle`       | Empty = default "based" board |
+| Solana Create LBP         | `board`            | Empty = default "based" board |
+| Solana Create Flash Token | `board`            | Empty = default "based" board |
 
 ### Common Error: "Board API Key Required"
 
@@ -88,15 +88,17 @@ board api key required
 ### Supported Chains
 
 **EVM:**
-| Chain ID | Network |
-|----------|---------|
-| 1 | Ethereum Mainnet |
-| 56 | BNB Smart Chain |
-| 8453 | Base Mainnet |
-| 4663 | Robinhood Chain |
+
+| Chain ID | Network          |
+| -------- | ---------------- |
+| 1        | Ethereum Mainnet |
+| 56       | BNB Smart Chain  |
+| 8453     | Base Mainnet     |
+| 4663     | Robinhood Chain  |
 
 **Solana:**
-| Chain ID | Network |
-|----------|---------|
-| 5011 | Solana Devnet |
-| 501 | Solana Mainnet |
+
+| Chain ID | Network        |
+| -------- | -------------- |
+| 5011     | Solana Devnet  |
+| 501      | Solana Mainnet |

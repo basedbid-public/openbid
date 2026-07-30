@@ -3,19 +3,20 @@
   "package": "based",
   "chainId": 5011,
   "token": {
-    "name": "Flashy flash",
+    "name": "Dante TEST",
     "symbol": "FLASH",
-    "totalSupply": "1000000000",
-    "initialBuySupplyPercent": "0.1",
+    "totalSupply": "420420420",
+    "initialBuySupplyPercent": "0",
     "metadata": {
       "logo": "./assets/placeholder.png",
-      "twitter": "",
-      "telegram": "",
-      "website": "",
-      "discord": "",
-      "description": ""
+      "twitter": "https://x.com/RobinHubHB",
+      "telegram": "https://t.me/delusionalsbullswillwin",
+      "website": "https://www.based.bid/",
+      "discord": "https://discord.gg/robinhub",
+      "description": "RobinHub is a decentralized exchange on Solana that allows you to trade tokens with low fees and high liquidity."
     }
   },
+  "board": "Dante-90-Raw",
   "flashDex": 1,
   "fees": {
     "buyPoolCreator": 0,
@@ -40,7 +41,7 @@
     "virtualUsd": 0.01,
     "nativeSolPriceUsd": 150,
     "feeTierIndex": "1",
-    "hasHookDynamicFee": true,
+    "hasHookDynamicFee": false,
     "finalStartPrice": 0.05
   }
 }

@@ -57,7 +57,7 @@ export const createSolanaLbp = async (
     const solanaWrapper = new SolanaWrapper(env.SOLANA_PRIVATE_KEY);
     await solanaWrapper.init(data.chainId);
 
-    const { token, board, boardOwner, dex, fees } = data;
+    const { token, board, dex, fees } = data;
     const apiKey = board ? process.env.BASEDBID_API_KEY : undefined;
 
     let sale = data.sale;
@@ -92,7 +92,6 @@ export const createSolanaLbp = async (
       description: token.metadata.description,
       whitelist: sale.whitelistedAddresses,
       ...(board && { board }),
-      ...(boardOwner && { boardOwner }),
       seed,
     };
 
@@ -154,10 +153,10 @@ export const createSolanaLbp = async (
           },
         }),
         // Custom board launches: the server validates the board exists and
-        // derives the on-chain board seed from these fields. Previously they
-        // were only embedded in IPFS metadata, so the API silently launched
-        // on the default board instead.
-        ...(board && boardOwner && { board, boardOwner }),
+        // derives the on-chain board seed from this field. Previously it was
+        // only embedded in IPFS metadata, so the API silently launched on the
+        // default board instead.
+        ...(board && { board }),
       },
     };
 
