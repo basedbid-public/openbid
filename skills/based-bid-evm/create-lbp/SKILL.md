@@ -86,8 +86,8 @@ Generate this config, replacing the marked values with user input:
         "volatilityTrigger": "per_block"
       },
       "cooldownProtection": {
-        "cooldownDuration": "medium",
-        "penaltyFee": "medium"
+        "cooldownDuration": "5m",
+        "penaltyFee": "10%"
       },
       "buyLimits": {
         "protectPeriod": 600,
@@ -248,8 +248,8 @@ Limits how quickly the same wallet origin can trade again.
 ```typescript
 {
   cooldownProtection: {
-    cooldownDuration: CooldownDurationType.SHORT | 'MEDIUM' | 'LONG',
-    penaltyFee: PenaltyFeeType.LOW | 'MEDIUM' | 'HIGH'
+    cooldownDuration: CooldownDurationType.FIVE_MINUTES | '1s' | '10s' | '30s' | '1m' | '5m' | '15m' | '1h' | '1d' | '1w' | '1mo',
+    penaltyFee: PenaltyFeeType.TEN_PERCENT | '1%' | '5%' | '10%' | '20%' | '50%' | '100%'
   }
 }
 ```
@@ -410,8 +410,8 @@ const args: CreateLbpEvmSdk = {
         volatilityTrigger: VolatilityTriggerType.PER_BLOCK,
       },
       cooldownProtection: {
-        cooldownDuration: CooldownDurationType.MEDIUM,
-        penaltyFee: PenaltyFeeType.MEDIUM,
+        cooldownDuration: CooldownDurationType.FIVE_MINUTES,
+        penaltyFee: PenaltyFeeType.TEN_PERCENT,
       },
       buyLimits: {
         protectPeriod: 600,

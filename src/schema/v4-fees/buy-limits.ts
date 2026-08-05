@@ -55,5 +55,3 @@ export const v4BuyLimitsSchema = z.discriminatedUnion('isHookWhitelist', [
       path: ['maxBuyForWhitelisted'],
     }),
 ]);
-
-export type V4BuyLimitsInput = z.infer<typeof v4BuyLimitsSchema>;

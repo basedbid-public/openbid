@@ -39,8 +39,3 @@ export const solanaFeeDistributionApiPayloadSchema = z.object({
   rewardToken: z.string(),
   minTokenBalanceForDividends: z.string(),
 });
-
-export type SolanaFeeDistributionApiPayload = z.infer<
-  typeof solanaFeeDistributionApiPayloadSchema
->;
-export type SolanaCustomFee = z.infer<typeof solanaCustomFeeSchema>;

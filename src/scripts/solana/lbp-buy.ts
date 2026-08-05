@@ -5,7 +5,7 @@ import {
   resolveRunMode,
   SolanaApiResponse,
 } from '@interfaces';
-import { BuySolanaSdk, buySolanaSdkSchema } from '@schema';
+import { buySolanaApiSchema, BuySolanaSdk, buySolanaSdkSchema } from '@schema';
 import { BasedBidApi, LogHelper, SolanaValidator, SolanaWrapper } from '@utils';
 import 'dotenv/config';
 
@@ -33,7 +33,7 @@ export const solanaLbpBuy = async (
   const solanaWrapper = new SolanaWrapper(env.SOLANA_PRIVATE_KEY);
   await solanaWrapper.init(data.chainId);
 
-  const apiPayload = {
+  const apiPayloadResult = buySolanaApiSchema.safeParse({
     chainId: data.chainId,
     signer: solanaWrapper.publicKey,
     memeMint: data.address,
@@ -41,7 +41,15 @@ export const solanaLbpBuy = async (
     slippage: data.slippage,
     referrer: data.referrer,
     isSandboxMode: data.isSandboxMode,
-  };
+  });
+
+  if (!apiPayloadResult.success) {
+    throw new Error(
+      'Invalid Solana lbp-buy API payload: ' + apiPayloadResult.error.message,
+    );
+  }
+
+  const apiPayload = apiPayloadResult.data;
 
   if (printPayload) {
     LogHelper.printApiPayload('sol/lbp-buy', apiPayload);

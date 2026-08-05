@@ -201,7 +201,7 @@ The SDK automatically includes the `x-api-key` header in BasedBid API requests a
 ## Execution Flow
 
 1. **Environment Validation** - Validates `SOLANA_PRIVATE_KEY`
-2. **Input Validation** - `SolanaFlashValidator.validateInput(args)` with Zod schema
+2. **Input Validation** - `SolanaValidator.validate(createSolanaFlashInputSchema, args)` with Zod schema
 3. **Solana Wrapper Init** - Creates RPC connection (BasedBid proxy) and signer
 4. **Logo Upload** - Uploads logo to IPFS via `IpfsUpload.uploadImage()`
 5. **Metadata Preparation** - Builds metadata JSON with token info, social links. `board` is only included if the user explicitly provided it.

@@ -76,6 +76,8 @@ export const createEvmBoard = async (
     privacyMode: data.privacyMode,
     isPublicBoard: data.isPublicBoard,
     allowRequests: data.allowRequests,
+    flashLaunchFeePer: data.flashLaunchFeePer,
+    fees: data.fees,
   };
 
   let metadataUrl = 'https://ipfs.based.bid/ipfs/null';
@@ -95,23 +97,9 @@ export const createEvmBoard = async (
     account: account.address,
     chainId: data.chainId,
     title: data.title,
-    description: data.description,
+    metaUri: metadataUrl,
     flashLaunchFeePer: data.flashLaunchFeePer,
     fees: data.fees,
-    logoUrl,
-    bannerUrl,
-    metaUri: metadataUrl,
-    website: data.website,
-    telegram: data.telegram,
-    twitter: data.twitter,
-    gitbook: data.gitbook,
-    tiktok: data.tiktok,
-    youtube: data.youtube,
-    isAllowed: data.isAllowed,
-    apiPackageIndex: data.apiPackageIndex,
-    privacyMode: data.privacyMode,
-    isPublicBoard: data.isPublicBoard,
-    allowRequests: data.allowRequests,
   });
 
   if (!apiPayloadResult.success) {

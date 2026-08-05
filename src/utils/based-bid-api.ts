@@ -67,9 +67,9 @@ export class BasedBidApi {
         break;
       }
       console.log(
-        `Rate limited by basedbid API (429), retrying in ${RETRY_DELAYS_MS[attempt]! / 1000}s...`,
+        `Rate limited by basedbid API (429), retrying in ${RETRY_DELAYS_MS[attempt] / 1000}s...`,
       );
-      await new Promise((r) => setTimeout(r, RETRY_DELAYS_MS[attempt]!));
+      await new Promise((r) => setTimeout(r, RETRY_DELAYS_MS[attempt]));
     }
 
     if (!response.ok) {

@@ -19,3 +19,5 @@ export const sellEvmApiSchema = z.object({
   ),
   amount: z.number().min(0).describe('Amount to sell, in token units'),
 });
+
+export type SellEvmApi = z.infer<typeof sellEvmApiSchema>;

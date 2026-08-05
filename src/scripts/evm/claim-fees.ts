@@ -1,7 +1,11 @@
 import { CHAIN_NAME_CONFIG } from '@constants';
 import { ApiType } from '@enums';
 import { EvmApiResponse, OpenbidRunOptions, resolveRunMode } from '@interfaces';
-import { ClaimEvmFeesSdk, claimEvmFeesSdkSchema } from '@schema';
+import {
+  claimEvmFeesApiSchema,
+  ClaimEvmFeesSdk,
+  claimEvmFeesSdkSchema,
+} from '@schema';
 import {
   BasedBidApi,
   EvmValidator,
@@ -38,11 +42,21 @@ export const claimEvmFees = async (
     env.PRIVATE_KEY,
   );
 
+  const apiPayloadResult = claimEvmFeesApiSchema.safeParse({
+    address: data.address,
+    account: account.address,
+    target: data.target,
+    chainId: data.chainId,
+  });
+
+  if (!apiPayloadResult.success) {
+    throw new Error(
+      'Invalid EVM claim-fees API payload: ' + apiPayloadResult.error.message,
+    );
+  }
+
   const apiPayload = {
-    data: {
-      ...data,
-      account: account.address,
-    },
+    data: apiPayloadResult.data,
   };
 
   if (printPayload) {
