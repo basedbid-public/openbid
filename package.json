@@ -39,11 +39,9 @@
     "typescript-eslint": "8.66.0"
   },
   "dependencies": {
-    "@inquirer/prompts": "8.5.2",
     "@solana/kit": "7.0.0",
     "bs58": "6.0.0",
     "dotenv": "17.4.2",
-    "ethers": "6.17.0",
     "viem": "2.55.11",
     "zod": "4.4.3"
   },
