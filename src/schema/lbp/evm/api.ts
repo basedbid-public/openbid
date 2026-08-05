@@ -8,9 +8,12 @@ import {
   VolatilityTriggerType,
 } from '@enums';
 import {
+  evmAddressSchema,
   evmChainIdSchema,
+  evmRobinhoodLaunchOptionsSchema,
   metadataUrlSchema,
   packageIndexSchema,
+  refineRobinhoodLaunchOptions,
   rewardTokenDividendsSchema,
   saleTimeSchema,
   v4BuyLimitsSchema,
@@ -22,86 +25,100 @@ import { z } from 'zod';
  * `createLbp` from validated `evmLbpCreateSchema` (./sdk.ts) input - notably swaps the
  * sdk's `LaunchPackageType` enum for a numeric `packageIndex`, and the sdk's local
  * `metadata` (with a `logo` file path) for an uploaded `metadataUrl`.
+ *
+ * Optional Robinhood fields (`rwa`, `tokenOption` / flat cooldown+stock fields,
+ * `dex.baseToken`) select CREATE2 bytecode variants and ABI tails; omit for defaults.
  */
-export const evmLbpCreateApiSchema = z.object({
-  package: packageIndexSchema,
-  chainId: evmChainIdSchema,
-  token: z.object({
-    name: z.string().max(100, 'Token name must be less than 100 characters'),
-    symbol: z
-      .string()
-      .max(100, 'Token symbol must be less than 100 characters'),
-    totalSupply: z.number().min(1, 'Total supply must be greater than 0'),
-    initialBuyAmount: z.number().min(0),
-    metadataUrl: metadataUrlSchema,
-  }),
-  sale: z.object({
-    boardTitle: z
-      .string()
-      .describe(
-        'Custom board title; empty string means the default platform board',
-      ),
-    marketCap: z
-      .number()
-      .min(1, 'Market cap must be greater than 0')
-      .max(10000000, 'Market cap must be less than 10M'),
-    startTime: saleTimeSchema(),
-    maxAllocationPerUser: z.number(),
-    maxAllocationPerWhitelistedUser: z.number(),
-    delayTradeTime: z.number(),
-    whitelistedAddresses: z.array(
-      z.string().regex(/^0x[a-fA-F0-9]{40}$/, 'Invalid EVM address'),
-    ),
-    softCap: z
-      .object({
-        amount: z.number(),
-        endTime: saleTimeSchema(),
-      })
-      .optional(),
-  }),
-  dex: z.object({
-    version: z.enum(EvmDexType),
-    feeTier: z.number().min(1).max(10),
-  }),
-  fees: z.object({
-    buyPoolCreator: z.number().min(0).max(0.01),
-    sellPoolCreator: z.number().min(0).max(0.01),
-    buyReferral: z.number().min(0).max(0.01),
-    graduation: z.number().min(0).max(0.025),
-    v4: z
-      .object({
-        liquidity: z.number().min(0).max(10),
-        buyback: z.number().min(0).max(10),
-        reward: z.object({
-          token: z.enum(RewardTokenType),
-          amount: z.number(),
-          minTokenBalanceForDividends: rewardTokenDividendsSchema,
-        }),
-        customWallets: z.array(
-          z.object({
-            name: z.string(),
-            address: z
-              .string()
-              .regex(/^0x[a-fA-F0-9]{40}$/, 'Invalid EVM address'),
-            percent: z.number(),
-          }),
+export const evmLbpCreateApiSchema = z
+  .object({
+    package: packageIndexSchema,
+    chainId: evmChainIdSchema,
+    token: z.object({
+      name: z.string().max(100, 'Token name must be less than 100 characters'),
+      symbol: z
+        .string()
+        .max(100, 'Token symbol must be less than 100 characters'),
+      totalSupply: z.number().min(1, 'Total supply must be greater than 0'),
+      initialBuyAmount: z.number().min(0),
+      metadataUrl: metadataUrlSchema,
+    }),
+    sale: z.object({
+      boardTitle: z
+        .string()
+        .describe(
+          'Custom board title; empty string means the default platform board',
         ),
-        feeThreshold: z.number(),
-        tieredFeesEnabled: z.boolean().default(false),
-        dynamicFees: z.object({
-          hasHookDynamicFee: z.boolean(),
-          volatilityDecayPeriod: z.enum(VolatilityDecayPeriodType).optional(),
-          volatilityMultiplier: z.enum(VolatilityMultiplierType).optional(),
-          volatilityTrigger: z.enum(VolatilityTriggerType).optional(),
-        }),
-        cooldownProtection: z.object({
-          cooldownDuration: z.enum(CooldownDurationType),
-          penaltyFee: z.enum(PenaltyFeeType),
-        }),
-        buyLimits: v4BuyLimitsSchema,
-        mevProtectionEnabled: z.boolean(),
-      })
-      .optional(),
-  }),
-});
+      marketCap: z
+        .number()
+        .min(1, 'Market cap must be greater than 0')
+        .max(10000000, 'Market cap must be less than 10M'),
+      startTime: saleTimeSchema(),
+      maxAllocationPerUser: z.number(),
+      maxAllocationPerWhitelistedUser: z.number(),
+      delayTradeTime: z.number(),
+      whitelistedAddresses: z.array(
+        z.string().regex(/^0x[a-fA-F0-9]{40}$/, 'Invalid EVM address'),
+      ),
+      softCap: z
+        .object({
+          amount: z.number(),
+          endTime: saleTimeSchema(),
+        })
+        .optional(),
+    }),
+    dex: z.object({
+      version: z.enum(EvmDexType),
+      feeTier: z.number().min(1).max(10),
+      baseToken: evmAddressSchema
+        .optional()
+        .describe(
+          'Quote / raise token address; address(0) = native ETH path. Robinhood optional.',
+        ),
+    }),
+    fees: z.object({
+      buyPoolCreator: z.number().min(0).max(0.01),
+      sellPoolCreator: z.number().min(0).max(0.01),
+      buyReferral: z.number().min(0).max(0.01),
+      graduation: z.number().min(0).max(0.025),
+      v4: z
+        .object({
+          liquidity: z.number().min(0).max(10),
+          buyback: z.number().min(0).max(10),
+          reward: z.object({
+            token: z.enum(RewardTokenType),
+            amount: z.number(),
+            minTokenBalanceForDividends: rewardTokenDividendsSchema,
+          }),
+          rewardsPct: z.number().min(0).max(10).optional(),
+          walletThreshold: rewardTokenDividendsSchema.optional(),
+          customWallets: z.array(
+            z.object({
+              name: z.string(),
+              address: z
+                .string()
+                .regex(/^0x[a-fA-F0-9]{40}$/, 'Invalid EVM address'),
+              percent: z.number(),
+            }),
+          ),
+          feeThreshold: z.number(),
+          tieredFeesEnabled: z.boolean().default(false),
+          dynamicFees: z.object({
+            hasHookDynamicFee: z.boolean(),
+            volatilityDecayPeriod: z.enum(VolatilityDecayPeriodType).optional(),
+            volatilityMultiplier: z.enum(VolatilityMultiplierType).optional(),
+            volatilityTrigger: z.enum(VolatilityTriggerType).optional(),
+          }),
+          cooldownProtection: z.object({
+            cooldownDuration: z.enum(CooldownDurationType),
+            penaltyFee: z.enum(PenaltyFeeType),
+          }),
+          buyLimits: v4BuyLimitsSchema,
+          mevProtectionEnabled: z.boolean(),
+        })
+        .optional(),
+    }),
+    ...evmRobinhoodLaunchOptionsSchema.shape,
+  })
+  .superRefine(refineRobinhoodLaunchOptions);
+
 export type CreateLbpEvmApi = z.infer<typeof evmLbpCreateApiSchema>;

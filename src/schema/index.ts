@@ -21,6 +21,18 @@ export type {
   BoardSocials,
 } from './common/board-profile.schema';
 
+export {
+  resolveRwaConfigForApi,
+  resolveRwaRewardAsset,
+  rwaSchema,
+  rwaRewardAssetSchema,
+} from './common/rwa-token-option.schema';
+export type {
+  ResolvedRwaRewardAsset,
+  RwaConfig,
+  RwaRewardAsset,
+} from './common/rwa-token-option.schema';
+
 export { buyEvmSdkSchema } from './buy/evm/sdk';
 export type { BuyEvmSdk } from './buy/evm/sdk';
 

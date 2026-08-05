@@ -102,3 +102,55 @@ board api key required
 | -------- | -------------- |
 | 5011     | Solana Devnet  |
 | 501      | Solana Mainnet |
+
+---
+
+## Robinhood RWA reward stocks
+
+On **Robinhood Chain** (`chainId: 4663`), flash / LBP launches can pay holder rewards in tokenized stocks from [The Index](https://theindex.finance/#/docs). Pass a ticker (or company alias) in `rwa.rewardAssets`; the SDK maps it to the on-chain contract address before calling the API.
+
+### Available stocks
+
+| Ticker  | Company / alias examples                 |
+| ------- | ---------------------------------------- |
+| `AAPL`  | Apple                                    |
+| `AMD`   | AMD                                      |
+| `AMZN`  | Amazon                                   |
+| `COIN`  | Coinbase                                 |
+| `GOOGL` | Alphabet / Google (`google`, `alphabet`) |
+| `INTC`  | Intel                                    |
+| `META`  | Meta (`facebook`)                        |
+| `MSFT`  | Microsoft                                |
+| `MU`    | Micron                                   |
+| `NVDA`  | NVIDIA                                   |
+| `PLTR`  | Palantir                                 |
+| `SNDK`  | SanDisk                                  |
+| `SPCX`  | SpaceX                                   |
+| `TSLA`  | Tesla                                    |
+
+Source of truth in code: `src/enums/evm/rwa-stock.symbol.ts` (`RwaStockSymbol`, `RWA_STOCK_ADDRESSES`, `RWA_STOCK_NAME_ALIASES`).
+
+### Example config
+
+```json
+{
+  "chainId": 4663,
+  "fees": {
+    "v4": {
+      "liquidity": 1.5,
+      "buyback": 0,
+      "rewardsPct": 1.5,
+      "walletThreshold": 1
+    }
+  },
+  "rwa": {
+    "basketMode": "rotate",
+    "rewardAssets": [{ "stock": "AAPL" }, { "stock": "Tesla" }]
+  }
+}
+```
+
+- Prefer `stock` (`"AAPL"` or `"Apple"`). Raw `address` is also allowed for assets not in the table.
+- When `rwa` is set, `fees.v4.rewardsPct` and `fees.v4.walletThreshold` are required.
+- The SDK always prepends `0x000…000` to the rewards basket (native sentinel) if it is not already present.
+- For `basketMode` `all-at-once` / `all` with 2+ assets, each asset needs `weightBps` and they must sum to `10000`.

@@ -9,8 +9,11 @@ import {
   VolatilityTriggerType,
 } from '@enums';
 import {
+  evmAddressSchema,
   evmChainIdSchema,
+  evmRobinhoodLaunchOptionsSchema,
   metadataInputSchema,
+  refineRobinhoodLaunchOptions,
   saleTimeSchema,
   v4BuyLimitsSchema,
 } from '@schema/common';
@@ -112,6 +115,11 @@ export const evmLbpCreateSchema = z
       .object({
         version: z.enum(EvmDexType),
         feeTier: z.number(),
+        baseToken: evmAddressSchema
+          .optional()
+          .describe(
+            'Quote / raise token address; address(0) = native ETH path (Robinhood optional)',
+          ),
       })
       .refine(
         (data) => {
@@ -187,6 +195,25 @@ export const evmLbpCreateSchema = z
             })
             .describe(
               'Airdrop-style payouts to long-term holders, funded from trading fees',
+            ),
+          rewardsPct: z
+            .number()
+            .min(0)
+            .max(10)
+            .optional()
+            .describe(
+              'Robinhood RWA: % of fees routed to the rewards basket (required when rwa is set)',
+            ),
+          walletThreshold: z
+            .union([
+              z.literal(0.01),
+              z.literal(0.1),
+              z.literal(1),
+              z.literal(5),
+            ])
+            .optional()
+            .describe(
+              'Robinhood RWA: minimum token balance for reward eligibility (required when rwa is set)',
             ),
           customWallets: z
             .array(
@@ -295,6 +322,7 @@ export const evmLbpCreateSchema = z
         )
         .optional(),
     }),
+    ...evmRobinhoodLaunchOptionsSchema.shape,
   })
   .superRefine((data, ctx) => {
     if (!data.fees.v4) {
@@ -323,6 +351,35 @@ export const evmLbpCreateSchema = z
         path: ['fees', 'v4'],
         message:
           'liquidity + buyback + reward.amount + customWallets.amount sum must equal dex.feeTier',
+      });
+    }
+  })
+  .superRefine(refineRobinhoodLaunchOptions)
+  .superRefine((data, ctx) => {
+    if (!data.rwa) {
+      return;
+    }
+    const v4 = data.fees.v4;
+    if (!v4) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'fees.v4 is required when rwa is set',
+        path: ['fees', 'v4'],
+      });
+      return;
+    }
+    if (v4.rewardsPct === undefined) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'fees.v4.rewardsPct is required when rwa is set',
+        path: ['fees', 'v4', 'rewardsPct'],
+      });
+    }
+    if (v4.walletThreshold === undefined) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'fees.v4.walletThreshold is required when rwa is set',
+        path: ['fees', 'v4', 'walletThreshold'],
       });
     }
   });

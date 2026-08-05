@@ -4,6 +4,7 @@ export * from './board-profile.schema';
 export * from './evm-address.schema';
 export * from './metadata-url.schema';
 export * from './numeric-string.schema';
+export * from './rwa-token-option.schema';
 export * from './sdk-input/evm-chain-id.schema';
 export * from './sdk-input/metadata.schema';
 export * from './sdk-input/package-index.schema';

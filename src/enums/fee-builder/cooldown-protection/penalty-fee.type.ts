@@ -1,7 +1,8 @@
 export enum PenaltyFeeType {
-  VERY_SMALL = 'very_small',
-  SMALL = 'small',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  VERY_HIGH = 'very_high',
+  ONE_PERCENT = '1%',
+  FIVE_PERCENT = '5%',
+  TEN_PERCENT = '10%',
+  TWENTY_PERCENT = '20%',
+  FIFTY_PERCENT = '50%',
+  ONE_HUNDRED_PERCENT = '100%',
 }

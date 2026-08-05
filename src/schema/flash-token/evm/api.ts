@@ -10,7 +10,9 @@ import {
 import {
   evmAddressSchema,
   evmChainIdSchema,
+  evmRobinhoodLaunchOptionsSchema,
   metadataUrlSchema,
+  refineRobinhoodLaunchOptions,
   rewardTokenDividendsSchema,
   v4BuyLimitsSchema,
 } from '@schema/common';
@@ -24,6 +26,9 @@ export const distributionAmountUnitSchema = z.enum(['percent', 'usd']);
  * validated `createEvmFlashTokenSchema` (sdk.ts) input plus derived values (e.g. an
  * uploaded `metadataUrl` in place of the sdk's local `logo` path). Used to validate the
  * outgoing request before it's sent to the API.
+ *
+ * Optional Robinhood fields (`rwa`, `tokenOption` / flat cooldown+stock fields,
+ * `dex.baseToken`) select CREATE2 bytecode variants and ABI tails; omit for defaults.
  */
 export const evmFlashTokenCreateApiSchema = z
   .object({
@@ -68,6 +73,11 @@ export const evmFlashTokenCreateApiSchema = z
     dex: z.object({
       version: z.enum(EvmDexType),
       feeTier: z.number().min(1).max(10),
+      baseToken: evmAddressSchema
+        .optional()
+        .describe(
+          'Quote / raise token address; address(0) = native ETH path. Robinhood optional.',
+        ),
     }),
     fees: z
       .object({
@@ -84,6 +94,8 @@ export const evmFlashTokenCreateApiSchema = z
                   minTokenBalanceForDividends: rewardTokenDividendsSchema,
                 })
                 .optional(),
+              rewardsPct: z.number().min(0).max(10).optional(),
+              walletThreshold: rewardTokenDividendsSchema.optional(),
               customWallets: z.array(
                 z.object({
                   name: z.string(),
@@ -116,6 +128,7 @@ export const evmFlashTokenCreateApiSchema = z
         ]),
       })
       .optional(),
+    ...evmRobinhoodLaunchOptionsSchema.shape,
   })
   .refine(
     (data) => {
@@ -128,7 +141,8 @@ export const evmFlashTokenCreateApiSchema = z
         'distributionWallets and distributionAmounts must be the same length',
       path: ['distributionAmounts'],
     },
-  );
+  )
+  .superRefine(refineRobinhoodLaunchOptions);
 
 export type DistributionAmountUnit = z.infer<
   typeof distributionAmountUnitSchema

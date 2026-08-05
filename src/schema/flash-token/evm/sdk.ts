@@ -10,7 +10,9 @@ import {
 import {
   evmAddressSchema,
   evmChainIdSchema,
+  evmRobinhoodLaunchOptionsSchema,
   metadataInputSchema,
+  refineRobinhoodLaunchOptions,
   rewardTokenDividendsSchema,
   v4BuyLimitsSchema,
 } from '@schema/common';
@@ -137,6 +139,11 @@ export const createEvmFlashTokenSchema = z
           .describe(
             'DEX fee tier percent: must be 1 for V3, 1-10 for V4 (V4 enables Fee Builder)',
           ),
+        baseToken: evmAddressSchema
+          .optional()
+          .describe(
+            'Quote / raise token address; address(0) = native ETH path (Robinhood optional)',
+          ),
       })
       .refine(
         (data) => {
@@ -186,6 +193,19 @@ export const createEvmFlashTokenSchema = z
               .optional()
               .describe(
                 'Airdrop-style payouts to long-term holders, funded from trading fees',
+              ),
+            rewardsPct: z
+              .number()
+              .min(0)
+              .max(10)
+              .optional()
+              .describe(
+                'Robinhood RWA: % of fees routed to the rewards basket (required when rwa is set)',
+              ),
+            walletThreshold: rewardTokenDividendsSchema
+              .optional()
+              .describe(
+                'Robinhood RWA: minimum token balance for reward eligibility (required when rwa is set)',
               ),
             customWallets: z
               .array(
@@ -294,6 +314,7 @@ export const createEvmFlashTokenSchema = z
       })
       .optional()
       .describe('Fee configuration; omit for platform default fees'),
+    ...evmRobinhoodLaunchOptionsSchema.shape,
   })
   .refine(
     (data) => {
@@ -329,6 +350,35 @@ export const createEvmFlashTokenSchema = z
         'total of distributionAmounts must be less than initialBuySupplyPercent',
       path: ['distributionAmounts'],
     },
-  );
+  )
+  .superRefine(refineRobinhoodLaunchOptions)
+  .superRefine((data, ctx) => {
+    if (!data.rwa) {
+      return;
+    }
+    const v4 = data.fees?.v4;
+    if (!v4 || typeof v4 !== 'object') {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'fees.v4 is required when rwa is set',
+        path: ['fees', 'v4'],
+      });
+      return;
+    }
+    if (v4.rewardsPct === undefined) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'fees.v4.rewardsPct is required when rwa is set',
+        path: ['fees', 'v4', 'rewardsPct'],
+      });
+    }
+    if (v4.walletThreshold === undefined) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'fees.v4.walletThreshold is required when rwa is set',
+        path: ['fees', 'v4', 'walletThreshold'],
+      });
+    }
+  });
 
 export type CreateFlashTokenEvmSdk = z.infer<typeof createEvmFlashTokenSchema>;

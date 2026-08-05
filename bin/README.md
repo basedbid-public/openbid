@@ -140,8 +140,8 @@ The script generates a JSON config matching this structure:
         "volatilityTrigger": "per_block"
       },
       "cooldownProtection": {
-        "cooldownDuration": "medium",
-        "penaltyFee": "medium"
+        "cooldownDuration": "5m",
+        "penaltyFee": "10%"
       },
       "buyLimits": {
         "protectPeriod": 600,

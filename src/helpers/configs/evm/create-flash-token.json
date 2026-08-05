@@ -23,9 +23,11 @@
   "fees": {
     "v4": {
       "liquidity": 1.5,
-      "buyback": 1.5,
+      "buyback": 0,
       "customWallets": [],
       "feeThreshold": 0.1,
+      "rewardsPct": 1.5,
+      "walletThreshold": 1,
       "tieredFeesEnabled": false,
       "dynamicFees": {
         "hasHookDynamicFee": true,
@@ -34,8 +36,8 @@
         "volatilityTrigger": "per_block"
       },
       "cooldownProtection": {
-        "cooldownDuration": "medium",
-        "penaltyFee": "medium"
+        "cooldownDuration": "5m",
+        "penaltyFee": "10%"
       },
       "buyLimits": {
         "protectPeriod": 600,
@@ -44,5 +46,9 @@
       },
       "mevProtectionEnabled": true
     }
+  },
+  "rwa": {
+    "basketMode": "rotate",
+    "rewardAssets": [{ "stock": "AAPL" }, { "stock": "TSLA" }]
   }
 }

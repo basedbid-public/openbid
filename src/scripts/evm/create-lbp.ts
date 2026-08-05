@@ -6,7 +6,12 @@ import {
   OpenbidRunOptions,
   resolveRunMode,
 } from '@interfaces';
-import { CreateLbpEvmApi, CreateLbpEvmSdk, evmLbpCreateSchema } from '@schema';
+import {
+  CreateLbpEvmApi,
+  CreateLbpEvmSdk,
+  evmLbpCreateSchema,
+  resolveRwaConfigForApi,
+} from '@schema';
 import {
   BasedBidApi,
   EvmValidator,
@@ -106,6 +111,7 @@ export const createEvmLbp = async (
     dex: {
       version: data.dex.version,
       feeTier: data.dex.feeTier,
+      ...(data.dex.baseToken && { baseToken: data.dex.baseToken }),
     },
     fees: {
       buyPoolCreator: data.fees.buyPoolCreator,
@@ -114,6 +120,21 @@ export const createEvmLbp = async (
       graduation: data.fees.graduation,
       v4: data.fees.v4,
     },
+    ...(data.cooldownSeconds !== undefined && {
+      cooldownSeconds: data.cooldownSeconds,
+    }),
+    ...(data.hasCoolDownProtection !== undefined && {
+      hasCoolDownProtection: data.hasCoolDownProtection,
+    }),
+    ...(data.hasStockProtection !== undefined && {
+      hasStockProtection: data.hasStockProtection,
+    }),
+    ...(data.tradingStart !== undefined && {
+      tradingStart: data.tradingStart,
+    }),
+    ...(data.tradingEnd !== undefined && { tradingEnd: data.tradingEnd }),
+    ...(data.tokenOption && { tokenOption: data.tokenOption }),
+    ...(data.rwa && { rwa: resolveRwaConfigForApi(data.rwa) }),
   };
 
   if (printPayload) {
