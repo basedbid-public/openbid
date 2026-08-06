@@ -1,6 +1,5 @@
 import {
   boardFeePerLaunchPackageSchema,
-  boardProfileSchema,
   evmAddressSchema,
   evmChainIdSchema,
   flashLaunchFeePerSchema,
@@ -29,17 +28,9 @@ export const createEvmBoardApiSchema = z.object({
     .describe(
       'Board name/title, shown publicly and used as the board identifier (max 48 characters)',
     ),
-  description: z
-    .string()
-    .min(1, 'Description is required')
-    .max(1000, 'Description too long')
-    .describe('Public description shown on the board page'),
   flashLaunchFeePer: flashLaunchFeePerSchema,
   fees: boardFeePerLaunchPackageSchema,
-  logoUrl: metadataUrlSchema.describe('Uploaded logo image URL'),
-  bannerUrl: metadataUrlSchema.describe('Uploaded banner image URL'),
   metaUri: metadataUrlSchema.describe('Uploaded board metadata JSON URL'),
-  ...boardProfileSchema.shape,
 });
 
 export type CreateEvmBoardApi = z.infer<typeof createEvmBoardApiSchema>;

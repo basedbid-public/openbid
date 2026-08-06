@@ -21,14 +21,35 @@ export type {
   BoardSocials,
 } from './common/board-profile.schema';
 
+export {
+  resolveRwaConfigForApi,
+  resolveRwaRewardAsset,
+  rwaRewardAssetSchema,
+  rwaSchema,
+} from './common/rwa-token-option.schema';
+export type {
+  ResolvedRwaRewardAsset,
+  RwaConfig,
+  RwaRewardAsset,
+} from './common/rwa-token-option.schema';
+
 export { buyEvmSdkSchema } from './buy/evm/sdk';
 export type { BuyEvmSdk } from './buy/evm/sdk';
+
+export { buyEvmApiRequestSchema } from './buy/evm/api';
+export type { BuyEvmApiRequest } from './buy/evm/api';
 
 export { buySolanaSdkSchema } from './buy/solana/sdk';
 export type { BuySolanaSdk } from './buy/solana/sdk';
 
+export { buySolanaApiSchema } from './buy/solana/api';
+export type { BuySolanaApi } from './buy/solana/api';
+
 export { claimEvmFeesSdkSchema } from './claim-fees/evm/sdk';
 export type { ClaimEvmFeesSdk } from './claim-fees/evm/sdk';
+
+export { claimEvmFeesApiSchema } from './claim-fees/evm/api';
+export type { ClaimEvmFeesApi } from './claim-fees/evm/api';
 
 export { claimSolanaFlashTokenFeesRequestSchema } from './claim-fees/solana/flash-request';
 export type { ClaimSolanaFlashTokenFeesRequest } from './claim-fees/solana/flash-request';
@@ -72,6 +93,9 @@ export type { CreateSolanaLbpInput } from './lbp/solana/sdk-input';
 
 export { sellEvmSdkSchema } from './sell/evm/sdk';
 export type { SellEvmSdk } from './sell/evm/sdk';
+
+export { sellEvmApiSchema } from './sell/evm/api';
+export type { SellEvmApi } from './sell/evm/api';
 
 export { sellSolanaSdkSchema } from './sell/solana/sdk';
 export type { SellSolanaSdk } from './sell/solana/sdk';

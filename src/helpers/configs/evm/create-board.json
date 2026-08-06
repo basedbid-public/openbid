@@ -1,7 +1,7 @@
 {
   "isSandboxMode": true,
   "chainId": 8453,
-  "title": "Nettle",
+  "title": "Temporaryusqwe",
   "description": "Dante Sunday EVMMM",
   "logo": "./assets/placeholder.png",
   "banner": "./assets/placeholder_banner.png",
@@ -14,7 +14,36 @@
   "isAllowed": true,
   "apiPackageIndex": 0,
   "privacyMode": "public",
-  "isPublicBoard": true,
+  "isPublicBoard": false,
   "allowRequests": false,
-  "flashLaunchFeePer": "1"
+  "flashLaunchFeePer": "30",
+  "fees": [
+    {
+      "listingFee": "0.22",
+      "listingReferralFee": "0",
+      "buyFeePer": "0.75",
+      "sellFeePer": "0.75",
+      "finalizeFeePer": "1",
+      "tradingFeeAfterLaunchPer": "50",
+      "flashLaunchFeePer": "20"
+    },
+    {
+      "listingFee": "0.5",
+      "listingReferralFee": "0",
+      "buyFeePer": "0.75",
+      "sellFeePer": "0.75",
+      "finalizeFeePer": "1",
+      "tradingFeeAfterLaunchPer": "50",
+      "flashLaunchFeePer": "20"
+    },
+    {
+      "listingFee": "1",
+      "listingReferralFee": "0",
+      "buyFeePer": "0.75",
+      "sellFeePer": "0.75",
+      "finalizeFeePer": "1",
+      "tradingFeeAfterLaunchPer": "50",
+      "flashLaunchFeePer": "20"
+    }
+  ]
 }

@@ -91,8 +91,8 @@ The payload for the `args` parameter of the `createEvmFlashToken` should look so
         "volatilityTrigger": "per_block"
       },
       "cooldownProtection": {
-        "cooldownDuration": "medium",
-        "penaltyFee": "medium"
+        "cooldownDuration": "5m",
+        "penaltyFee": "10%"
       },
       "buyLimits": {
         "protectPeriod": 600,
@@ -213,8 +213,8 @@ npm run evm:create-flash-token
 
 | Parameter          | Type     | Description                                                               |
 | ------------------ | -------- | ------------------------------------------------------------------------- |
-| `cooldownDuration` | `string` | Cooldown duration: `"short"`, `"medium"`, or `"long"`                     |
-| `penaltyFee`       | `string` | Penalty fee for trading during cooldown: `"low"`, `"medium"`, or `"high"` |
+| `cooldownDuration` | `string` | Cooldown duration: `"1s"`, `"10s"`, `"30s"`, `"1m"`, `"5m"`, `"15m"`, `"1h"`, `"1d"`, `"1w"`, or `"1mo"` |
+| `penaltyFee`       | `string` | Penalty fee for trading during cooldown: `"1%"`, `"5%"`, `"10%"`, `"20%"`, `"50%"`, or `"100%"` |
 
 #### BuyLimits object
 

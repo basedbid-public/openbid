@@ -12,6 +12,7 @@ import {
   createEvmFlashTokenSchema,
   CreateFlashTokenEvmApi,
   CreateFlashTokenEvmSdk,
+  resolveRwaConfigForApi,
 } from '@schema';
 import {
   BasedBidApi,
@@ -24,7 +25,6 @@ import {
   normalizeByAbi,
   patchFlashLaunchApiArgs,
   patchRobinhoodFlashLaunchV4Args,
-  ROBINHOOD_CHAIN_ID,
   sendTransaction,
 } from '@utils';
 
@@ -49,15 +49,6 @@ export const createEvmFlashToken = async (
   if (validate) {
     console.log('Validation passed');
     return;
-  }
-
-  // Holder-reward dividend bytecode works on Base but reverts on Robinhood Chain
-  // (empty 0x revert from customFlashLaunchV4). Liquidity/buyback-only launches succeed.
-  if (data.chainId === ROBINHOOD_CHAIN_ID && data.fees?.v4?.reward) {
-    throw new Error(
-      'fees.v4.reward is not supported on Robinhood Chain (4663) yet. ' +
-        'Remove the reward block and route that share into liquidity/buyback instead.',
-    );
   }
 
   const { publicClient, walletClient, account, sponsored } = initEvmClients(
@@ -130,10 +121,26 @@ export const createEvmFlashToken = async (
     dex: {
       version: data.dex.version,
       feeTier: data.dex.feeTier,
+      ...(data.dex.baseToken && { baseToken: data.dex.baseToken }),
     },
     fees: {
       v4: data.fees?.v4,
     },
+    ...(data.cooldownSeconds !== undefined && {
+      cooldownSeconds: data.cooldownSeconds,
+    }),
+    ...(data.hasCoolDownProtection !== undefined && {
+      hasCoolDownProtection: data.hasCoolDownProtection,
+    }),
+    ...(data.hasStockProtection !== undefined && {
+      hasStockProtection: data.hasStockProtection,
+    }),
+    ...(data.tradingStart !== undefined && {
+      tradingStart: data.tradingStart,
+    }),
+    ...(data.tradingEnd !== undefined && { tradingEnd: data.tradingEnd }),
+    ...(data.tokenOption && { tokenOption: data.tokenOption }),
+    ...(data.rwa && { rwa: resolveRwaConfigForApi(data.rwa) }),
   };
 
   if (printPayload) {

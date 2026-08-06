@@ -7,67 +7,6 @@ export function printNextSteps(title: string, steps: string[]) {
   console.log('');
 }
 
-export function getBasedBidTokenUrl(
-  mintAddress: string,
-  isSandboxMode: boolean,
-) {
-  const baseUrl = isSandboxMode
-    ? 'https://testnet.based.bid'
-    : 'https://based.bid';
-  return `${baseUrl}/token/${mintAddress}`;
-}
-
-export function getBasedBidBoardUrl(
-  boardTitle: string,
-  isSandboxMode: boolean,
-) {
-  const baseUrl = isSandboxMode
-    ? 'https://testnet.based.bid'
-    : 'https://based.bid';
-  return `${baseUrl}/b/${encodeURIComponent(boardTitle.toLowerCase())}`;
-}
-
-export function printCreatedTokenSummary(params: {
-  addressLabel?: string;
-  mintAddress: string;
-  basedBidUrl: string;
-}) {
-  console.log('----------------------------------------');
-  console.log('SUCCESS: YOUR TOKEN IS CREATED');
-  console.log('----------------------------------------');
-  console.log(
-    `${params.addressLabel ?? 'This is your token contract address'}:`,
-  );
-  console.log(params.mintAddress);
-  console.log('');
-  console.log('This is your basedbid link:');
-  console.log(params.basedBidUrl);
-  console.log('----------------------------------------\n');
-}
-
-export function printCreatedBoardSummary(params: {
-  boardId: string;
-  boardTitle: string;
-  basedBidUrl: string;
-}) {
-  console.log('----------------------------------------');
-  console.log('SUCCESS: YOUR BOARD IS CREATED');
-  console.log('----------------------------------------');
-  console.log('This is your board id:');
-  console.log(params.boardId);
-  console.log('');
-  console.log('This is your board title:');
-  console.log(params.boardTitle);
-  console.log('');
-  console.log('This is your basedbid link:');
-  console.log(params.basedBidUrl);
-  console.log('----------------------------------------\n');
-}
-
-export function getOpenBidApiKey() {
-  return process.env.OPENBID_API_KEY ?? process.env.BOARD_API_KEY;
-}
-
 export function getSolanaApiFailureHint(errorBody: string) {
   const normalizedError = errorBody.toLowerCase();
 

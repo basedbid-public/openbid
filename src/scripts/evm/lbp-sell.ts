@@ -5,7 +5,7 @@ import {
   OpenbidRunOptions,
   resolveRunMode,
 } from '@interfaces';
-import { SellEvmSdk, sellEvmSdkSchema } from '@schema';
+import { sellEvmApiSchema, SellEvmSdk, sellEvmSdkSchema } from '@schema';
 import {
   BasedBidApi,
   EvmValidator,
@@ -43,14 +43,22 @@ export const evmLbpSell = async (
     env.PRIVATE_KEY,
   );
 
-  const apiPayload = {
+  const apiPayloadResult = sellEvmApiSchema.safeParse({
     chainId: data.chainId,
     address: data.address,
     account: account.address,
     slippage: data.slippage,
     referrer: data.referrer,
     amount: data.amount,
-  };
+  });
+
+  if (!apiPayloadResult.success) {
+    throw new Error(
+      'Invalid EVM lbp-sell API payload: ' + apiPayloadResult.error.message,
+    );
+  }
+
+  const apiPayload = apiPayloadResult.data;
 
   if (printPayload) {
     LogHelper.printApiPayload('lbp-sell-preview', apiPayload);

@@ -1,7 +1,7 @@
 import { CHAIN_NAME_CONFIG, CHAIN_SLUG_CONFIG } from '@constants';
 import { ApiType } from '@enums';
 import { EvmApiResponse, OpenbidRunOptions, resolveRunMode } from '@interfaces';
-import { BuyEvmSdk, buyEvmSdkSchema } from '@schema';
+import { buyEvmApiRequestSchema, BuyEvmSdk, buyEvmSdkSchema } from '@schema';
 import {
   BasedBidApi,
   EvmValidator,
@@ -38,17 +38,25 @@ export const evmLbpBuy = async (
     env.PRIVATE_KEY,
   );
 
-  const apiPayload = {
+  const apiPayloadResult = buyEvmApiRequestSchema.safeParse({
     chainId: data.chainId,
     address: data.address,
     account: account.address,
     slippage: data.slippage,
     referrer: data.referrer,
     amount: data.amount,
-  };
+  });
+
+  if (!apiPayloadResult.success) {
+    throw new Error(
+      'Invalid EVM lbp-buy API payload: ' + apiPayloadResult.error.message,
+    );
+  }
+
+  const apiPayload = apiPayloadResult.data;
 
   if (printPayload) {
-    LogHelper.printApiPayload('create-flash', apiPayload);
+    LogHelper.printApiPayload('lbp-buy-preview', apiPayload);
   }
 
   if (dryRun) {
