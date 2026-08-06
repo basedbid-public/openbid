@@ -40,8 +40,8 @@
     "marketingPercent": 0,
     "creatorPercent": 15,
     "customFees": [],
-    "collectQuoteThreshold": "0.1",
-    "collectBaseThreshold": "0.1",
+    "collectQuoteThreshold": "100000000",
+    "collectBaseThreshold": "100000000",
     "feeDistributionPayoutKind": "SOL",
     "minTokenBalanceForDividends": "0"
   }

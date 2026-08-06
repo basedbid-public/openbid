@@ -177,14 +177,20 @@ import { CreateSolanaLbpInput } from 'schema/lbp/solana/sdk-input';
 | `creatorPercent`                  | `number`  | No       | Creator allocation %                                 |
 | `marketingWalletAddress`          | `string`  | No       | Required if `marketingPercent > 0`                   |
 | `customFees`                      | `array`   | No       | Custom fee splits `{ percent, walletAddress, name }` |
-| `collectQuoteThreshold`           | `string`  | No       | Collection threshold                                 |
-| `collectBaseThreshold`            | `string`  | No       | Collection threshold                                 |
+| `collectQuoteThreshold`           | `string`  | No       | Collection threshold in atomic units (lamports), integer string |
+| `collectBaseThreshold`            | `string`  | No       | Collection threshold in atomic base-token units, integer string |
 | `feeDistributionPayoutKind`       | `string`  | No       | `'SOL'` or `'TOKEN'`                                 |
 | `feeDistributionPayoutCustomMint` | `string`  | No       | Custom payout mint address                           |
 | `rewardToken`                     | `string`  | No       | Reward token mint (required if `rewardPercent > 0`)  |
 | `minTokenBalanceForDividends`     | `string`  | No       | Min balance for dividends                            |
 
-**Validation:** `liquidityPercent + buybackPercent + rewardPercent + marketingPercent + creatorPercent + sum(customFees.percent)` must equal `50`.
+**Validation:** all `*Percent` values are percents with at most 2 decimal places, and
+`liquidityPercent + buybackPercent + rewardPercent + marketingPercent + creatorPercent + sum(customFees.percent)`
+must be at most `50` (the on-chain fee-distribution cap). `customFeePercent` is derived from
+`customFees` automatically; if you pass it explicitly it must equal `sum(customFees.percent)`.
+Custom fee wallets must be unique, and `collectQuoteThreshold` / `collectBaseThreshold` must be
+integer strings in atomic units (e.g. `'100000000'` = 0.1 SOL) — decimal values like `'0.1'` are
+rejected (the fee keeper would silently treat them as `0`).
 
 ## Configuration
 
@@ -340,18 +346,19 @@ await createLbpSolana({
     buyReferral: 0.005,
     graduation: 0.01,
     feeDistribution: true,
+    // Six buckets (incl. customFees) may total at most 50 — here: 10+5+10+10+5+10 = 50
     liquidityPercent: 10,
-    buybackPercent: 10,
+    buybackPercent: 5,
     rewardPercent: 10,
     marketingPercent: 10,
-    creatorPercent: 10,
+    creatorPercent: 5,
     marketingWalletAddress: 'marketing_wallet_address',
     customFees: [
       { percent: 5, walletAddress: 'kol_wallet', name: 'KOL Partner' },
       { percent: 5, walletAddress: 'team_wallet', name: 'Team' },
     ],
-    collectQuoteThreshold: '1000',
-    collectBaseThreshold: '1000',
+    collectQuoteThreshold: '100000000', // atomic units: 0.1 SOL in lamports
+    collectBaseThreshold: '100000000',
     rewardToken: 'reward_token_mint',
     minTokenBalanceForDividends: '100',
   },
@@ -368,7 +375,9 @@ await createLbpSolana({
 | `endTime is required when softCap is defined` | Missing `endTime` with `softCap`      | Add `endTime` or remove `softCap`            |
 | `marketingWalletAddress is required`          | `marketingPercent > 0` but no wallet  | Add `marketingWalletAddress`                 |
 | `rewardToken is required`                     | `rewardPercent > 0` but no token      | Add `rewardToken`                            |
-| `percentages must equal 50`                   | Fee percents don't sum to 50          | Adjust percentages                           |
+| `on-chain fee-distribution cap ... is 50%`    | Fee percents total more than 50       | Adjust percentages so the six buckets total ≤ 50 |
+| `customFeePercent ... must equal the sum`     | `customFeePercent` ≠ `sum(customFees)` | Omit `customFeePercent` (auto-derived) or fix it |
+| `Must be a non-negative integer string`       | Collect threshold has decimals        | Use atomic units, e.g. `'100000000'` for 0.1 SOL |
 | `Transaction failed`                          | On-chain failure                      | Check wallet has SOL for fees, verify params |
 
 ## Key Differences from EVM LBP
@@ -424,6 +433,6 @@ The script will prompt: `Do you want to proceed? (y/n):`
 3. **Use unique seeds** - The seed ensures metadata uniqueness
 4. **Sign in correct order** - Wallet first, then mint keypair
 5. **Consider soft cap carefully** - Set realistic goals and end times
-6. **Validate fee percentages** - Must sum to exactly 50%
+6. **Validate fee percentages** - The six buckets (incl. custom fees) may total at most 50%; validation now runs before any SOL is spent
 7. **Whitelist thoughtfully** - Add addresses before launch to prevent sniping
 8. **Use sandbox mode for testing** - Set `isSandboxMode: true` to test without real funds

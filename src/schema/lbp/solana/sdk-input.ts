@@ -7,6 +7,8 @@ import {
   solanaAddressSchema,
   solanaChainIdSchema,
   solanaDexFeeTierSchema,
+  solanaFeeBuilderFieldsSchema,
+  solanaFeeBuilderRules,
 } from '@schema/common';
 import { z } from 'zod';
 
@@ -117,9 +119,10 @@ export const createSolanaLbpInputSchema = z.object({
       .describe('DEX to launch on: Raydium or Meteora'),
     feeTier: solanaDexFeeTierSchema,
   }),
-  // Pool trading fees + fee distribution config. Mirrors the shape used for Solana
-  // Flash Tokens (schema/flash-token/solana/sdk.ts) - see that file for the fully
-  // documented version of the feeDistribution/*Percent/customFees fields.
+  // Pool trading fees + fee distribution config. The fee-distribution part is the
+  // shared Fee Builder schema (schema/common/solana-fee-builder.schema.ts, same as
+  // Solana Flash Tokens): 2-dp float percents, six buckets summing to <= 50
+  // (on-chain MAX_FEE_DISTRIBUTION_PER cap), conditional wallet/mint requirements.
   fees: z
     .object({
       buyPoolCreator: z
@@ -146,131 +149,10 @@ export const createSolanaLbpInputSchema = z.object({
         .max(0.025)
         .default(0)
         .describe('Fee (%) taken when the sale finalizes/graduates, max 2.5%'),
-      feeDistribution: z
-        .boolean()
-        .describe(
-          'Enable automatic fee distribution across liquidity/buyback/reward/marketing/creator/custom splits',
-        ),
-      dynamicFee: z
-        .boolean()
-        .default(false)
-        .describe('Enable fees that scale with recent price volatility'),
-      liquidityPercent: z
-        .number()
-        .min(0)
-        .max(50)
-        .describe('% of collected fees routed to strengthening liquidity'),
-      buybackPercent: z
-        .number()
-        .min(0)
-        .max(50)
-        .describe('% of collected fees routed to token buybacks'),
-      rewardPercent: z
-        .number()
-        .min(0)
-        .max(50)
-        .describe(
-          '% of collected fees routed to holder reward payouts (requires rewardToken)',
-        ),
-      marketingPercent: z
-        .number()
-        .min(0)
-        .max(50)
-        .describe(
-          '% of collected fees routed to the marketing wallet (requires marketingWalletAddress)',
-        ),
-      creatorPercent: z
-        .number()
-        .min(0)
-        .max(50)
-        .describe('% of collected fees routed to the token creator'),
-      marketingWalletAddress: solanaAddressSchema
-        .optional()
-        .describe(
-          'Wallet to receive marketing fees; required when marketingPercent > 0',
-        ),
-      customFees: z
-        .array(
-          z.object({
-            percent: z
-              .number()
-              .min(0)
-              .max(50)
-              .describe('% of collected fees routed to this wallet'),
-            walletAddress: solanaAddressSchema.describe(
-              'Wallet to receive this fee cut',
-            ),
-            name: z
-              .string()
-              .describe(
-                'Label for this payout, e.g. "marketing" or a KOL name',
-              ),
-          }),
-        )
-        .describe('Extra fixed fee splits to arbitrary wallets'),
-      collectQuoteThreshold: z
-        .string()
-        .describe(
-          'Accumulated SOL balance that triggers a fee distribution payout, as a numeric string',
-        ),
-      collectBaseThreshold: z
-        .string()
-        .describe(
-          'Accumulated base-token balance that triggers a fee distribution payout, as a numeric string',
-        ),
-      feeDistributionPayoutKind: z
-        .literal('SOL')
-        .default('SOL')
-        .describe(
-          'Currency fee payouts are made in; currently only "SOL" is supported',
-        ),
-      feeDistributionPayoutCustomMint: z
-        .string()
-        .optional()
-        .describe('Reserved for a future custom payout mint'),
-      rewardToken: solanaAddressSchema
-        .optional()
-        .describe(
-          'Token mint holder rewards are paid in; required when rewardPercent > 0',
-        ),
-      minTokenBalanceForDividends: z
-        .string()
-        .describe(
-          'Minimum token balance a holder needs to qualify for reward payouts, as a numeric string',
-        ),
     })
-    .optional()
-    .refine(
-      (data) => {
-        if (!data) {
-          return true;
-        }
-
-        if (data.marketingPercent > 0 && !data.marketingWalletAddress) {
-          return false;
-        }
-        return true;
-      },
-      {
-        message:
-          'marketingWalletAddress is required when marketingPercent is greater than 0',
-      },
-    )
-    .refine(
-      (data) => {
-        if (!data) {
-          return true;
-        }
-
-        if (data.rewardPercent > 0 && !data.rewardToken) {
-          return false;
-        }
-        return true;
-      },
-      {
-        message: 'rewardToken is required when rewardPercent is greater than 0',
-      },
-    ),
+    .extend(solanaFeeBuilderFieldsSchema.shape)
+    .superRefine(solanaFeeBuilderRules)
+    .optional(),
 });
 
 export type CreateSolanaLbpInput = z.infer<typeof createSolanaLbpInputSchema>;

@@ -7,6 +7,7 @@ export * from './ipfs-upload';
 export * from './log-helper';
 export * from './next-steps';
 export * from './normalize-abi';
+export * from './retry';
 export * from './seed-generator';
 export * from './send-transaction';
 export * from './solana-wrapper';

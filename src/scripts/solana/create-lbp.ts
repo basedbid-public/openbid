@@ -14,15 +14,17 @@ import {
   SolanaVanityUpdateData,
 } from '@interfaces';
 import {
+  buildSolanaFeeDistributionFields,
   CreateSolanaLbpInput,
   createSolanaLbpInputSchema,
-  solanaFeeDistributionApiPayloadSchema,
 } from '@schema';
 import {
   BasedBidApi,
   getLaunchPackageIndex,
   IpfsUpload,
   LogHelper,
+  printNextSteps,
+  retryAsync,
   SeedGenerator,
   SolanaValidator,
   SolanaWrapper,
@@ -59,6 +61,13 @@ export const createSolanaLbp = async (
 
     const { token, board, dex, fees } = data;
     const apiKey = board ? process.env.BASEDBID_API_KEY : undefined;
+
+    // Validate the full Fee Builder wire payload BEFORE any SOL is spent.
+    // Previously it was only validated after the pool tx was signed and paid
+    // for, and a fee failure then skipped confirm-launch entirely.
+    const feeDistributionFields = fees?.feeDistribution
+      ? buildSolanaFeeDistributionFields(fees)
+      : null;
 
     let sale = data.sale;
     if (!sale) {
@@ -186,7 +195,9 @@ export const createSolanaLbp = async (
       txCost,
     } = json;
 
-    console.log('\nStep 2 of 3: Creating the token pool on Solana devnet');
+    console.log(
+      `\nStep 2 of 3: Creating the token pool on ${SOLANA_CHAIN_NAME_CONFIG[args.chainId]}`,
+    );
     console.log(
       'This creates the token mint and pool transaction for your launch.',
     );
@@ -217,73 +228,10 @@ export const createSolanaLbp = async (
     console.log('\nStep 3 of 3: Registering the pool with basedbid');
     console.log('This makes the pool visible to basedbid services.');
 
-    if (!fees?.feeDistribution) {
-      await BasedBidApi.invokeApi(
-        ApiType.SDK,
-        'sol/confirm-launch',
-        {
-          chainId: args.chainId,
-          mintAddress: json.mintAddress,
-          signature,
-        },
-        'Failed to confirm launch',
-        args.isSandboxMode,
-        apiKey,
-      );
-      launchConfirmed = true;
-
-      const result = {
-        mintAddress: json.mintAddress,
-        signature,
-        metadataUrl: json.metadataUrl,
-      };
-
-      LogHelper.printResult({
-        ok: true,
-        type: 'pool',
-        network: SOLANA_CHAIN_NAME_CONFIG[args.chainId],
-        mintAddress: result.mintAddress,
-        signature: result.signature,
-        metadataUrl: result.metadataUrl,
-        basedBidUrl: `${BasedBidApi.platformApiUrl(args.isSandboxMode)}/${SOLANA_CHAIN_SLUG_CONFIG[args.chainId]}/token/${result.mintAddress}`,
-      });
-
-      return result;
-    }
-
-    const customFeePercent = fees.customFees.reduce(
-      (sum, fee) => sum + fee.percent,
-      0,
-    );
-    const feeDistributionPayload = {
-      chainId: args.chainId,
-      address: json.mintAddress,
-      ...fees,
-      customFeePercent,
-      marketingWalletAddress: fees.marketingWalletAddress ?? '',
-      feeDistributionPayoutCustomMint:
-        fees.feeDistributionPayoutCustomMint ?? '',
-      rewardToken: fees.rewardToken ?? '',
-    };
-
-    const solanaFeeDistributionValidated =
-      solanaFeeDistributionApiPayloadSchema.safeParse(feeDistributionPayload);
-    if (!solanaFeeDistributionValidated.success) {
-      throw new Error(
-        'Invalid fee distribution payload: ' +
-          solanaFeeDistributionValidated.error.message,
-      );
-    }
-
-    await BasedBidApi.invokeApi(
-      ApiType.PLATFORM,
-      'token/fee-distribution',
-      solanaFeeDistributionValidated.data,
-      'Failed to set fee distribution on Solana',
-      args.isSandboxMode,
-      apiKey,
-    );
-
+    // Confirm the launch BEFORE applying Fee Builder settings: the pool already
+    // exists on-chain at this point, and the previous order (fees first) meant a
+    // fee-builder failure skipped confirm-launch and released the vanity address
+    // of a live pool.
     await BasedBidApi.invokeApi(
       ApiType.SDK,
       'sol/confirm-launch',
@@ -298,10 +246,50 @@ export const createSolanaLbp = async (
     );
     launchConfirmed = true;
 
+    let feeDistributionApplied = false;
+    if (feeDistributionFields) {
+      // Fields were fully validated before launch; only chainId/address are added here.
+      const feeDistributionPayload = {
+        chainId: args.chainId,
+        address: json.mintAddress,
+        ...feeDistributionFields,
+      };
+
+      try {
+        await retryAsync(
+          () =>
+            BasedBidApi.invokeApi(
+              ApiType.PLATFORM,
+              'token/fee-distribution',
+              feeDistributionPayload,
+              'Failed to set fee distribution on Solana',
+              args.isSandboxMode,
+              apiKey,
+            ),
+          { label: 'Fee Builder setup' },
+        );
+        feeDistributionApplied = true;
+      } catch (feeError) {
+        // The pool is live and confirmed - a fee-builder failure must not fail
+        // the launch; surface recovery steps instead.
+        console.error(
+          '\nWARNING: Pool launched, but applying Fee Builder settings failed after retries.',
+        );
+        console.error(
+          feeError instanceof Error ? feeError.message : String(feeError),
+        );
+        printNextSteps('Recover Fee Builder Settings', [
+          `Pool ${json.mintAddress} launched successfully - do NOT relaunch.`,
+          'Re-apply the same fee settings from the token owner panel on based.bid.',
+        ]);
+      }
+    }
+
     const result = {
       mintAddress: json.mintAddress,
       signature,
       metadataUrl: json.metadataUrl,
+      ...(feeDistributionFields && { feeDistributionApplied }),
     };
 
     LogHelper.printResult({

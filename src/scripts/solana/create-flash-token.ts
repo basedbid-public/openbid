@@ -9,17 +9,19 @@ import {
   SolanaVanityUpdateData,
 } from '@interfaces';
 import {
+  buildSolanaFeeDistributionFields,
   CreateSolanaFlashInput,
   createSolanaFlashInputSchema,
   CreateSolanaFlashTx1Api,
   CreateSolanaFlashTx2Api,
-  solanaFeeDistributionApiPayloadSchema,
 } from '@schema';
 import { KeyPairSigner } from '@solana/kit';
 import {
   BasedBidApi,
   IpfsUpload,
   LogHelper,
+  printNextSteps,
+  retryAsync,
   SolanaValidator,
   SolanaWrapper,
 } from '@utils';
@@ -56,6 +58,13 @@ export const createSolanaFlashToken = async (
     await solanaWrapper.init(data.chainId);
 
     const { token, raydium, meteora, board, fees, flashDex } = data;
+
+    // Validate the full Fee Builder wire payload BEFORE any SOL is spent.
+    // Previously it was only validated at step 4, after tx1/tx2 were signed and
+    // paid for, so a bad fee config launched the token and then lost its fees.
+    const feeDistributionFields = fees?.feeDistribution
+      ? buildSolanaFeeDistributionFields(fees)
+      : null;
 
     const skipConfirmation = process.env.SKIP_TX_CONFIRMATION === 'true';
 
@@ -282,7 +291,7 @@ export const createSolanaFlashToken = async (
     }
 
     console.log(
-      `\nStep 3 of ${fees?.feeDistribution ? '4' : '3'}: Confirming the launch with basedbid`,
+      `\nStep 3 of ${feeDistributionFields ? '4' : '3'}: Confirming the launch with basedbid`,
     );
     console.log('This makes the token visible to basedbid services.');
 
@@ -299,36 +308,45 @@ export const createSolanaFlashToken = async (
     );
     launchConfirmed = true;
 
-    if (fees?.feeDistribution) {
+    let feeDistributionApplied = false;
+    if (feeDistributionFields) {
       console.log('\nStep 4 of 4: Applying Fee Builder settings');
       console.log('This routes post-launch fees using basedbid Fee Builder.');
 
+      // Fields were fully validated before tx1; only chainId/address are added here.
       const feeDistributionPayload = {
         chainId: args.chainId,
         address: tx1Response.mintAddress,
-        ...fees,
-        marketingWalletAddress: fees.marketingWalletAddress ?? '',
-        feeDistributionPayoutCustomMint:
-          fees.feeDistributionPayoutCustomMint ?? '',
-        rewardToken: fees.rewardToken ?? '',
+        ...feeDistributionFields,
       };
 
-      const solanaFeeDistributionValidated =
-        solanaFeeDistributionApiPayloadSchema.safeParse(feeDistributionPayload);
-      if (!solanaFeeDistributionValidated.success) {
-        throw new Error(
-          'Invalid fee distribution payload: ' +
-            solanaFeeDistributionValidated.error.message,
+      try {
+        await retryAsync(
+          () =>
+            BasedBidApi.invokeApi(
+              ApiType.PLATFORM,
+              'token/fee-distribution',
+              feeDistributionPayload,
+              'Failed to set fee distribution on Solana Flash Token',
+              args.isSandboxMode,
+            ),
+          { label: 'Fee Builder setup' },
         );
+        feeDistributionApplied = true;
+      } catch (feeError) {
+        // The token is live and confirmed - a fee-builder failure must not fail
+        // the launch (or worse, trigger vanity release); surface recovery steps.
+        console.error(
+          '\nWARNING: Token launched, but applying Fee Builder settings failed after retries.',
+        );
+        console.error(
+          feeError instanceof Error ? feeError.message : String(feeError),
+        );
+        printNextSteps('Recover Fee Builder Settings', [
+          `Token mint ${tx1Response.mintAddress} launched successfully - do NOT relaunch.`,
+          'Re-apply the same fee settings from the token owner panel on based.bid.',
+        ]);
       }
-
-      await BasedBidApi.invokeApi(
-        ApiType.PLATFORM,
-        'token/fee-distribution',
-        solanaFeeDistributionValidated.data,
-        'Failed to set fee distribution on Solana Flash Token',
-        args.isSandboxMode,
-      );
     }
 
     const result = {
@@ -338,6 +356,7 @@ export const createSolanaFlashToken = async (
       metadataUrl,
       meteoraTokenAccountSeed: tx1Response.meteoraTokenAccountSeed,
       positionNftMintAddress: tx1Response.positionNftMintAddress,
+      ...(feeDistributionFields && { feeDistributionApplied }),
     };
 
     LogHelper.printResult({

@@ -13,3 +13,4 @@ export * from './slippage.schema';
 export * from './solana-address.schema';
 export * from './solana-decimals.schema';
 export * from './solana-dex-fee-tier.schema';
+export * from './solana-fee-builder.schema';

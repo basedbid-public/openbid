@@ -56,8 +56,16 @@ export type { CreateLbpEvmApi } from './lbp/evm/api';
 export { evmLbpCreateSchema } from './lbp/evm/sdk';
 export type { CreateLbpEvmSdk } from './lbp/evm/sdk';
 
-export { solanaFeeDistributionApiPayloadSchema } from './lbp/solana/fee-distribution';
-export type { SolanaFeeDistributionApiPayload } from './lbp/solana/fee-distribution';
+export {
+  buildSolanaFeeDistributionFields,
+  solanaFeeDistributionApiPayloadSchema,
+  solanaFeeDistributionFieldsSchema,
+} from './lbp/solana/fee-distribution';
+export type {
+  SolanaFeeDistributionApiPayload,
+  SolanaFeeDistributionFields,
+  SolanaFeeDistributionSource,
+} from './lbp/solana/fee-distribution';
 
 export { createSolanaLbpInputSchema } from './lbp/solana/sdk-input';
 export type { CreateSolanaLbpInput } from './lbp/solana/sdk-input';

@@ -2,8 +2,8 @@ import { SolanaFlashDexType } from '@enums';
 import {
   metadataInputSchema,
   numberStringSchema,
-  solanaAddressSchema,
   solanaChainIdSchema,
+  solanaFeeBuilderSdkSchema,
 } from '@schema/common';
 import { z } from 'zod';
 
@@ -90,150 +90,14 @@ export const createSolanaFlashInputSchema = z
       })
       .optional()
       .describe('Required when flashDex is METEORA; ignored otherwise'),
-    // Fee distribution config. All *Percent fields should sum to 100 when feeDistribution
-    // is enabled; marketingWalletAddress/rewardToken are conditionally required (see the
-    // .refine calls below) whenever their corresponding percent is > 0.
-    fees: z
-      .object({
-        feeDistribution: z
-          .boolean()
-          .describe(
-            'Enable automatic fee distribution across liquidity/buyback/reward/marketing/creator/custom splits',
-          ),
-        dynamicFee: z
-          .boolean()
-          .default(false)
-          .describe('Enable fees that scale with recent price volatility'),
-        liquidityPercent: z
-          .number()
-          .min(0)
-          .max(50)
-          .describe('% of collected fees routed to strengthening liquidity'),
-        buybackPercent: z
-          .number()
-          .min(0)
-          .max(50)
-          .describe('% of collected fees routed to token buybacks'),
-        rewardPercent: z
-          .number()
-          .min(0)
-          .max(50)
-          .describe(
-            '% of collected fees routed to holder reward payouts (requires rewardToken)',
-          ),
-        marketingPercent: z
-          .number()
-          .min(0)
-          .max(50)
-          .describe(
-            '% of collected fees routed to the marketing wallet (requires marketingWalletAddress)',
-          ),
-        creatorPercent: z
-          .number()
-          .min(0)
-          .max(50)
-          .describe('% of collected fees routed to the token creator'),
-        customFeePercent: z
-          .number()
-          .min(0)
-          .max(50)
-          .describe(
-            '% of collected fees routed to custom wallets listed in customFees',
-          ),
-        marketingWalletAddress: solanaAddressSchema
-          .optional()
-          .describe(
-            'Wallet to receive marketing fees; required when marketingPercent > 0',
-          ),
-        customFees: z
-          .array(
-            z.object({
-              percent: z
-                .number()
-                .min(0)
-                .max(50)
-                .describe('% of collected fees routed to this wallet'),
-              walletAddress: solanaAddressSchema.describe(
-                'Wallet to receive this fee cut',
-              ),
-              name: z
-                .string()
-                .describe(
-                  'Label for this payout, e.g. "marketing" or a KOL name',
-                ),
-            }),
-          )
-          .describe(
-            'Extra fixed fee splits to arbitrary wallets, summing to customFeePercent',
-          ),
-        collectQuoteThreshold: z
-          .string()
-          .describe(
-            'Accumulated quote-token (SOL) balance that triggers a fee distribution payout, as a numeric string',
-          ),
-        collectBaseThreshold: z
-          .string()
-          .describe(
-            'Accumulated base-token balance that triggers a fee distribution payout, as a numeric string',
-          ),
-        feeDistributionPayoutKind: z
-          .literal('SOL')
-          .default('SOL')
-          .describe(
-            'Currency fee payouts are made in; currently only "SOL" is supported',
-          ),
-        feeDistributionPayoutCustomMint: z
-          .string()
-          .default('')
-          .describe(
-            'Reserved for a future custom payout mint; leave as the default empty string',
-          ),
-        rewardToken: solanaAddressSchema
-          .optional()
-          .describe(
-            'Token mint holder rewards are paid in; required when rewardPercent > 0',
-          ),
-        minTokenBalanceForDividends: z
-          .string()
-          .describe(
-            'Minimum token balance a holder needs to qualify for reward payouts, as a numeric string',
-          ),
-      })
+    // Fee distribution config - shared Fee Builder schema (see
+    // schema/common/solana-fee-builder.schema.ts). Percents are 2-dp floats and the
+    // six buckets must sum to <= 50 (on-chain MAX_FEE_DISTRIBUTION_PER cap);
+    // marketingWalletAddress/rewardToken are required whenever their percent is > 0.
+    fees: solanaFeeBuilderSdkSchema
       .optional()
       .describe(
         'Fee distribution config; omit to launch without automatic fee splitting',
-      )
-      .refine(
-        (data) => {
-          if (!data) {
-            return true;
-          }
-
-          if (data.marketingPercent > 0 && !data.marketingWalletAddress) {
-            return false;
-          }
-          return true;
-        },
-        {
-          message:
-            'marketingWalletAddress is required when marketingPercent is greater than 0',
-        },
-      )
-      .refine(
-        (data) => {
-          if (!data) {
-            return true;
-          }
-
-          if (data.rewardPercent > 0 && !data.rewardToken) {
-            return false;
-          }
-          return true;
-        },
-        {
-          message:
-            'rewardToken is required when rewardPercent is greater than 0',
-        },
       ),
   })
   .refine(
