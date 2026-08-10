@@ -11,7 +11,7 @@ export const v4BuyLimitsSchema = z.discriminatedUnion('isHookWhitelist', [
     protectPeriod: z
       .number()
       .min(0)
-      .max(3600)
+      .max(Number.MAX_SAFE_INTEGER)
       .describe('Protected window after launch, in seconds (0-3600)'),
     maxBuyPerOrigin: z
       .number()
@@ -29,8 +29,10 @@ export const v4BuyLimitsSchema = z.discriminatedUnion('isHookWhitelist', [
       protectPeriod: z
         .number()
         .min(0)
-        .max(3600)
-        .describe('Protected window after launch, in seconds (0-3600)'),
+        .max(Number.MAX_SAFE_INTEGER)
+        .describe(
+          'Protected window after launch, in seconds (0-Number.MAX_SAFE_INTEGER)',
+        ),
       maxBuyPerOrigin: z
         .number()
         .min(0)
