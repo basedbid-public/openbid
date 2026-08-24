@@ -101,3 +101,9 @@ export { sellSolanaSdkSchema } from './sell/solana/sdk';
 export type { SellSolanaSdk } from './sell/solana/sdk';
 
 export type { SellSolanaApi } from './sell/solana/api';
+
+export { updateEvmHookSdkSchema } from './update-hook/evm/sdk';
+export type { UpdateEvmHookSdk, UpdateHookFeesV4 } from './update-hook/evm/sdk';
+
+export { updateEvmHookApiSchema } from './update-hook/evm/api';
+export type { UpdateEvmHookApi } from './update-hook/evm/api';

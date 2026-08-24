@@ -4,3 +4,4 @@ export * from './create-flash-token';
 export * from './create-lbp';
 export * from './lbp-buy';
 export * from './lbp-sell';
+export * from './update-hook';

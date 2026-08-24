@@ -1,0 +1,17 @@
+{
+  "isSandboxMode": false,
+  "chainId": 4663,
+  "tokenAddress": "0x70694c64B8a062B7a5D08Efd6971179745663b1d",
+  "fees": {
+    "v4": {
+      "liquidity": 2,
+      "buyback": 1,
+      "rewardsPct": 1,
+      "mevProtectionEnabled": false
+    }
+  },
+  "rwa": {
+    "basketMode": "rotate",
+    "rewardAssets": [{ "stock": "GOOGL" }, { "stock": "AMZN" }]
+  }
+}

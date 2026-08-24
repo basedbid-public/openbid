@@ -30,6 +30,7 @@ import {
   CreateSolanaLbpInput,
   SellEvmSdk,
   SellSolanaSdk,
+  UpdateEvmHookSdk,
 } from '@schema';
 
 import {
@@ -39,6 +40,7 @@ import {
   createEvmLbp,
   evmLbpBuy,
   evmLbpSell,
+  updateEvmHook,
 } from '@scripts/evm';
 import {
   claimSolanaFlashFees,
@@ -124,6 +126,8 @@ async function run() {
       return await evmLbpSell(config as SellEvmSdk, runOptions);
     case 'evm-claim-fees':
       return await claimEvmFees(config as ClaimEvmFeesSdk, runOptions);
+    case 'evm-update-hook':
+      return await updateEvmHook(config as UpdateEvmHookSdk, runOptions);
     case 'solana-create-lbp':
       return await createSolanaLbp(config as CreateSolanaLbpInput, runOptions);
     case 'solana-create-board':
@@ -154,7 +158,7 @@ async function run() {
       console.error(`\nUnknown operation: ${operation}`);
       console.error(
         '\nAvailable operations:',
-        '\n  EVM: evm-create-lbp, evm-create-flash-token, evm-create-board, evm-lbp-buy, evm-lbp-sell, evm-claim-fees',
+        '\n  EVM: evm-create-lbp, evm-create-flash-token, evm-create-board, evm-lbp-buy, evm-lbp-sell, evm-claim-fees, evm-update-hook',
         '\n  Solana: solana-create-lbp, solana-create-flash-token, solana-create-board, solana-lbp-buy, solana-lbp-sell, solana-claim-lbp-fees, solana-claim-flash-fees',
       );
       process.exit(1);
