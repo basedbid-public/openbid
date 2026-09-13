@@ -128,11 +128,7 @@
         "-r",
         "tsconfig-paths/register"
       ],
-      "args": [
-        "evm-lbp-sell",
-        "./src/helpers/configs/evm/lbp-sell.json",
-        "--dry-run"
-      ],
+      "args": ["evm-lbp-sell", "./src/helpers/configs/evm/lbp-sell.json"],
       "cwd": "${workspaceFolder}",
       "envFile": "${workspaceFolder}/.env",
       "console": "integratedTerminal"
