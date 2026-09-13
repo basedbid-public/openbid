@@ -1,12 +1,6 @@
 import { evmAddressSchema, evmChainIdSchema } from '@schema/common';
 import { z } from 'zod';
 
-/**
- * API-WIRE schema for the based.bid `/lbp-sell-preview` request. Unlike buy, `account`
- * (the seller's wallet) is required as an explicit caller-supplied field rather than
- * always auto-derived - `sellEvmSdkSchema` (./sdk.ts) extends this directly rather than
- * duplicating the fields.
- */
 export const sellEvmApiSchema = z.object({
   chainId: evmChainIdSchema,
   address: evmAddressSchema.describe('Token contract address being sold'),
