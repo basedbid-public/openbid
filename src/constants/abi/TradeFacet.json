@@ -12,11 +12,6 @@
         "type": "address"
       },
       {
-        "internalType": "bytes32",
-        "name": "signature",
-        "type": "bytes32"
-      },
-      {
         "internalType": "bytes32[]",
         "name": "proof",
         "type": "bytes32[]"
@@ -319,11 +314,6 @@
         "internalType": "uint256",
         "name": "amount",
         "type": "uint256"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "signature",
-        "type": "bytes32"
       },
       {
         "internalType": "uint256",
